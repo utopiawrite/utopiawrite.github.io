@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watchlist 財報研究筆記</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--dim:#8b949e;--mid:#dde4eb;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;--blue:#60a5fa}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+button,input,select,textarea{font-family:inherit}
+
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#161b22,#21262d);border-bottom:1px solid var(--border);padding:20px 16px 0}
+.header-sub{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.header-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.header-title{font-family:'DM Serif Display',serif;font-size:24px;color:#f0f6fc}
+.header-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn-sm{padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--mid);font-size:11px;cursor:pointer;letter-spacing:.5px;white-space:nowrap}
+.btn-sm:hover{color:#fff;border-color:var(--mid)}
+.ticker-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:0}
+.ticker-tab{padding:8px 14px;border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:.5px;background:transparent;color:var(--dim);border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+.ticker-tab.active{color:#fff;border-bottom-color:currentColor}
+
+/* ── Company bar ── */
+.company-bar{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.company-name{font-size:16px;font-weight:800;color:#fff}
+.company-theme{font-size:11px;letter-spacing:1px;margin-top:2px}
+.view-tabs{display:flex;gap:6px}
+.view-tab{padding:5px 14px;border:1px solid rgba(255,255,255,.2);border-radius:4px;background:transparent;color:rgba(255,255,255,.6);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;transition:.15s}
+.view-tab.active{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.55)}
+
+/* ── Layout ── */
+.content{padding:16px 16px 48px;max-width:860px;margin:0 auto}
+.section{margin-bottom:20px}
+
+/* ── Section cards with left accent border ── */
+.sec-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:20px;overflow:hidden}
+.sec-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 4px}
+.sec-title{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700}
+.sec-body{padding:10px 16px 14px}
+.sec-foot{display:flex;justify-content:flex-end;padding:0 16px 12px}
+
+/* ── Plain cards (used inside basic-face read view) ── */
+.card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px}
+.card-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;color:var(--dim)}
+.risk-card{background:#150d0d;border:1px solid #3a1a1a;border-radius:6px;padding:12px;margin-bottom:8px}
+.info-card{background:#0a1520;border:1px solid #1a3050;border-radius:6px;padding:12px;margin-bottom:8px}
+
+/* ── Read mode text ── */
+.thesis-text{font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.data-row{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--border);padding:8px 0;font-size:13px;gap:16px}
+.data-row:last-child{border-bottom:none}
+.data-label{color:var(--dim);flex-shrink:0;font-size:12px}
+.data-val{color:var(--text);text-align:right;line-height:1.4}
+.risk-text{font-size:13px;color:#fca5a5;line-height:1.7;white-space:pre-wrap}
+.comp-text{font-size:13px;color:#93c5fd;line-height:1.7;white-space:pre-wrap}
+.watch-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.watch-item:last-child{border-bottom:none}
+.watch-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+.watch-text{font-size:13px;color:var(--text);line-height:1.5}
+
+/* ── Inline fields (label: [input] on same row) ── */
+.ifield{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--border)}
+.ifield:last-of-type{border-bottom:none}
+.ilabel{font-size:12px;color:var(--dim);flex-shrink:0;width:84px;letter-spacing:.2px}
+.iinput{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-size:13px;width:110px}
+.iinput:focus{outline:none;border-color:#58a6ff;box-shadow:0 0 0 2px rgba(88,166,255,.1)}
+
+/* ── Form elements (used in edit mode & add form) ── */
+.form-label{font-size:11px;color:var(--dim);margin-bottom:4px;letter-spacing:.3px}
+.form-input,.form-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:8px 10px;color:var(--text);font-size:13px;line-height:1.5}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:#58a6ff;box-shadow:0 0 0 2px rgba(88,166,255,.1)}
+.form-textarea{resize:vertical;line-height:1.65}
+.form-row{display:flex;gap:10px;margin-bottom:10px}
+.form-row > .form-field{flex:1;min-width:0}
+.form-field{margin-bottom:10px}
+
+/* ── Buttons ── */
+.btn-main{padding:9px 18px;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.btn-main:hover{filter:brightness(1.15)}
+.btn-save{padding:7px 18px;border:none;border-radius:5px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:.15s}
+.btn-save:hover{filter:brightness(1.15)}
+.btn-soft{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--mid);font-size:12px;cursor:pointer;white-space:nowrap;transition:.15s}
+.btn-soft:hover{border-color:var(--mid);color:#fff}
+.btn-edit{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--dim);font-size:11px;cursor:pointer;letter-spacing:.3px;transition:.15s}
+.btn-edit:hover{color:#fff;border-color:var(--mid)}
+.btn-danger{border-color:#5c2424 !important;color:#fca5a5 !important}
+.btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.btn-icon{background:none;border:none;cursor:pointer;color:#484f58;padding:3px 6px;font-size:12px;line-height:1;transition:.15s}
+.btn-icon:hover{color:var(--mid)}
+
+/* ── Assign comfort ── */
+.assign-group{display:flex;gap:6px;margin-top:6px}
+.assign-opt{flex:1;padding:8px 6px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:.15s;letter-spacing:.3px}
+.assign-opt:hover{filter:brightness(1.3)}
+.assign-opt.sel-ok  {background:#0d2e1a;border-color:#4ade80;color:#4ade80}
+.assign-opt.sel-warn{background:#2a2200;border-color:#fbbf24;color:#fbbf24}
+.assign-opt.sel-no  {background:#2a0d0d;border-color:#f87171;color:#f87171}
+.assign-desc-bar{padding:8px 12px;border-radius:5px;font-size:12px;line-height:1.6;border:1px solid;margin-top:8px}
+
+/* ── IVP hint ── */
+.ivp-row{display:flex;align-items:center;gap:8px}
+.ivp-hint{font-size:11px;white-space:nowrap;flex-shrink:0}
+
+/* ── Entry cards ── */
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.entry-date{font-size:12px;font-weight:700;letter-spacing:.3px}
+.entry-note{font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap}
+.empty-msg{text-align:center;color:var(--dim);font-size:13px;padding:32px 0}
+.history-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin:20px 0 10px}
+
+/* ── Scoring ── */
+.score-summary{display:flex;justify-content:space-between;align-items:flex-end}
+.score-num{font-family:'DM Serif Display',serif;font-size:48px;font-weight:700;line-height:1}
+.score-verdict{font-size:11px;font-weight:700;letter-spacing:1px;margin-top:4px}
+.score-meta{font-size:11px;color:var(--dim);margin-top:2px}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface2);gap:10px}
+.score-row:last-child{border-bottom:none}
+.score-key{font-size:12px;font-weight:700;color:var(--text)}
+.score-desc{font-size:10px;color:var(--dim);margin-top:2px;line-height:1.4}
+.score-opts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0}
+.score-opt{padding:4px 9px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap;line-height:1.4}
+.score-opt:hover{filter:brightness(1.5)}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid #8a7234;color:var(--yellow);font-size:13px;padding:10px 20px;border-radius:8px;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Misc ── */
+.hint-text{font-size:11px;color:var(--dim);margin-top:6px;line-height:1.5}
+.divider{height:1px;background:var(--border);margin:4px 0 14px}
+
+@media(max-width:680px){
+  .form-row{flex-direction:column}
+  .company-bar{flex-direction:column;align-items:flex-start;gap:8px}
+  .view-tabs{width:100%}
+  .header-top{flex-direction:column;align-items:flex-start}
+  .assign-group{flex-direction:column}
+  .score-opts{justify-content:flex-start}
+  .ticker-tab{font-size:12px;padding:7px 10px}
+  .ifield{flex-wrap:wrap}
+  .iinput{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-sub">Watchlist</div>
+  <div class="header-top">
+    <div class="header-title">財報研究筆記</div>
+    <div class="header-actions">
+      <button class="btn-sm" onclick="openAddStock()">+ 新增標的</button>
+      <button class="btn-sm" onclick="exportBackup()">↓ 備份</button>
+      <label class="btn-sm" style="cursor:pointer">↑ 匯入<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
+    </div>
+  </div>
+  <div class="ticker-tabs" id="tickerTabs"></div>
+</div>
+
+<div id="companyBar" class="company-bar"></div>
+<div class="content" id="mainContent"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Color palette for new stocks ──
+const COLOR_PALETTE=[
+  {color:"#1a5a4a",accent:"#2dd4bf"},
+  {color:"#4a1a6b",accent:"#e879f9"},
+  {color:"#1a4a6b",accent:"#38bdf8"},
+  {color:"#6b4a1a",accent:"#fbbf24"},
+  {color:"#6b1a2a",accent:"#f87171"},
+  {color:"#1e3a6b",accent:"#60a5fa"},
+  {color:"#5b1a6b",accent:"#c084fc"},
+  {color:"#6b3a1a",accent:"#fb923c"},
+  {color:"#1a6b3c",accent:"#4ade80"},
+  {color:"#3a1a6b",accent:"#a78bfa"},
+];
+
+const BUILTIN_STOCKS={
+  AMAT:{priority:1,name:"Applied Materials",theme:"半導體設備",color:"#1a5a4a",accent:"#2dd4bf",
+    baseline:{revenue:"283.7億美元",growth:"+4% FY25；Q2 FY26指引 +9%",guidance:"設備業務 2026 成長目標 >20%",nextEarnings:"5/15",risk:"中國營收佔比29%，出口管制風險。設備支出具週期性。",competitors:"LRCX、KLAC、ASML，各佔不同製程節點，基本不重疊，競爭力道低"},
+    thesis:"半導體設備層是整個AI供應鏈受益度最高的一層。不管GPU、自製晶片或記憶體誰贏，晶圓廠都需要材料工程設備。GAA、HBM、先進封裝三個快速成長節點AMAT都有主導地位。",
+    watchList:["中國營收佔比趨勢","GAA相關設備訂單能見度","Advanced Packaging業務季度成長","AGS售後服務年化收入成長率"],
+    bos:{total:4.0,scores:{eps:1,fcf:1,roic:1,debt:1,margin:1,div:1,auth:-1,sci:-1,key:0,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"財務體質最接近傳統價值投資標準的成長股。主要真實風險是中國出口管制。",scoringDate:""}},
+  ANET:{priority:2,name:"Arista Networks",theme:"AI叢集網路",color:"#4a1a6b",accent:"#e879f9",
+    baseline:{revenue:"90億美元",growth:"+29%",guidance:"2026 AI網路營收目標上調至 $3.25B",nextEarnings:"5/6",risk:"估值偏高。Cisco/Juniper反攻。Meta/Microsoft客戶集中度。",competitors:"Cisco、HPE+Juniper、NVIDIA InfiniBand。真正追蹤的是InfiniBand vs Open Ethernet標準之爭。"},
+    thesis:"AI叢集需要高頻寬網路，ANET是不管哪家GPU贏都繞不過的基礎設施。財務結構乾淨，零負債、現金豐沛、毛利率穩定。",
+    watchList:["AI網路營收季度金額","遞延營收趨勢","800G產品出貨量與佔比","Meta/Microsoft以外的新客戶多元化"],
+    bos:{total:3.0,scores:{eps:1,fcf:1,roic:1,debt:1,margin:1,div:0,auth:0,sci:-1,key:-1,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"七檔中財務體質最接近強力候選門檻的公司。主要扣分是無股息、科技風險與關鍵人物依賴。",scoringDate:""}},
+  GEV:{priority:3,name:"GE Vernova",theme:"AI電力基礎設施",color:"#1a4a6b",accent:"#38bdf8",
+    baseline:{revenue:"99.7億美元",growth:"+12%",guidance:"Equipment backlog $76B，+67%",nextEarnings:"4/23",risk:"Wind部門持續虧損。關稅曝險。",competitors:"Siemens Energy、三菱Power。燃氣輪機寡頭結構，競爭力道低。"},
+    thesis:"AI資料中心電力需求是核心驅動力。Power部門積壓訂單強，Wind業務是拖累，觀察重組完成進度。",
+    watchList:["Gas Power積壓訂單GW數","Wind部門虧損收斂軌跡","Electrification EBITDA Margin","Free Cash Flow季度金額"],
+    bos:{total:2.5,scores:{eps:.5,fcf:1,roic:1,debt:1,margin:.5,div:.5,auth:-1,sci:-1,key:0,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"工業股中財務基礎紮實。扣分主因是能源政策監管與Wind部門虧損。",scoringDate:""}},
+  MRVL:{priority:4,name:"Marvell Technology",theme:"AI Custom Silicon",color:"#1a6b3c",accent:"#4ade80",
+    baseline:{revenue:"20.75億美元",growth:"+37%",guidance:"Data Center revenue +78%",nextEarnings:"3/4",risk:"客戶集中度風險（Google/Amazon）",competitors:"AVGO、雲端客戶自製晶片。客戶內製化是長期壓力。"},
+    thesis:"Custom Silicon已進入量產，取得多個design win。收購Celestial AI加速interconnect技術藍圖。",
+    watchList:["Custom Silicon design win公告數量","Data Center營收佔比","Operating Margin擴張趨勢","新增hyperscaler數量"],
+    bos:{total:1.0,scores:{eps:.5,fcf:.5,roic:.5,debt:.5,margin:.5,div:.5,auth:0,sci:-1,key:-1,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"低分主要來自半導體週期性與AI崛起前財報波動。重點是AI業務佔比是否持續擴大。",scoringDate:""}},
+  MU:{priority:5,name:"Micron Technology",theme:"HBM高頻寬記憶體",color:"#6b4a1a",accent:"#fbbf24",
+    baseline:{revenue:"136.4億美元",growth:"+56.8%",guidance:"Q2 FY26指引 $183–191億",nextEarnings:"3/25",risk:"記憶體週期性強。中國禁令風險。Samsung/SK Hynix競爭。",competitors:"Samsung、SK Hynix。HBM直接競爭，競爭力道高。"},
+    thesis:"AI訓練需要大量HBM，Micron是NVIDIA核心供應商之一。HBM帶來更高毛利與多年供應協議。",
+    watchList:["HBM營收佔比","Data Center DRAM vs Consumer DRAM比例","毛利率趨勢","中國銷售禁令進展"],
+    bos:{total:0.5,scores:{eps:0,fcf:.5,roic:.5,debt:.5,margin:.5,div:.5,auth:-1,sci:-1,key:0,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"記憶體產業週期性讓分數失真。真正重點是HBM毛利與AI記憶體佔比是否提升。",scoringDate:""}},
+  GLW:{priority:6,name:"Corning",theme:"光纖基礎設施",color:"#6b3a1a",accent:"#fb923c",
+    baseline:{revenue:"44.1億美元",growth:"+13%",guidance:"Core EPS $2.52，+29% FY25",nextEarnings:"4/29",risk:"成長速度低於其他標的。關稅對原材料有衝擊。",competitors:"Prysmian、中國廠商。中低端壓價，高規格資料中心光纜仍有門檻。"},
+    thesis:"Springboard計劃推動成長，穩健compounder，不是高速爆發故事。",
+    watchList:["Optical Connectivity部門營收","Springboard年化銷售額進度","Core EPS軌跡","AI資料中心光纖訂單量"],
+    bos:{total:2.0,scores:{eps:.5,fcf:1,roic:.5,debt:.5,margin:.5,div:1,auth:-1,sci:-1,key:0,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"財務結構最接近傳統價值股。最大問題不是財務健康，而是成長速度可能較慢。",scoringDate:""}},
+  CRDO:{priority:7,name:"Credo Technology",theme:"AI高速連接",color:"#1e3a6b",accent:"#60a5fa",
+    baseline:{revenue:"1.7億美元",growth:"+126% FY25",guidance:"FY26 guidance >$800M",nextEarnings:"6月",risk:"稀土原材料依賴中國。產品線集中。",competitors:"Astera Labs。技術路線轉變風險比競爭對手威脅更大。"},
+    thesis:"AI connectivity高速成長，主力為retimer與AEC cable。SerDes IP stack構成護城河。",
+    watchList:["單一客戶集中度","AEC產品季度環比成長","100G per lane採用率","Gross Margin趨勢"],
+    bos:{total:0.5,scores:{eps:0,fcf:.5,roic:.5,debt:1,margin:.5,div:0,auth:0,sci:-1,key:-1,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"上市歷史短，參考價值有限。重點看營收加速度、gross margin擴張與客戶集中度。",scoringDate:""}},
+  COHR:{priority:8,name:"Coherent Corp",theme:"AI光學收發器",color:"#5b1a6b",accent:"#c084fc",
+    baseline:{revenue:"15.8億美元",growth:"+19%",guidance:"AI datacenter revenue +61% FY25",nextEarnings:"11月",risk:"GAAP虧損來自攤銷，負債偏重。中國光學廠商競爭。",competitors:"Lumentum、中國光學廠商。中低端壓價明顯，競爭力道高。"},
+    thesis:"1.6T transceiver開始出貨，AI datacenter成長快。最大風險是II-VI合併遺留的負債結構。",
+    watchList:["1.6T transceiver出貨爬坡","Debt削減進度","Non-GAAP vs GAAP EPS差距","Networking segment佔比"],
+    bos:{total:-1.0,scores:{eps:0,fcf:.5,roic:0,debt:0,margin:.5,div:0,auth:0,sci:-1,key:-1,moat_intangible:0,moat_switching:0,moat_network:0,moat_cost:0},commentary:"低分有真實警訊：負債、ROIC、GAAP虧損。列入觀察，每季確認debt reduction與margin改善。",scoringDate:""}}
+};
+
+const SCORING_CRITERIA=[
+  // 損益表
+  {key:"eps",   label:"E — EPS 每股盈餘",   desc:"10年穩定或持續上升",        isRisk:false,isMoat:false,max:1, group:"income"},
+  {key:"margin",label:"N — 淨利率",          desc:">20%最佳，觀察10年穩定度",  isRisk:false,isMoat:false,max:1, group:"income"},
+  // 現金流量表
+  {key:"fcf",   label:"F — FCF 自由現金流",  desc:"10年為正且穩定",            isRisk:false,isMoat:false,max:1, group:"cashflow"},
+  {key:"div",   label:"D — 股息",            desc:"每年支付，逐年成長更佳",    isRisk:false,isMoat:false,max:1, group:"cashflow"},
+  // 資產負債表
+  {key:"roic",  label:"R — ROIC 資本回報率", desc:"持續>10%，理想>15%",        isRisk:false,isMoat:false,max:1, group:"balance"},
+  {key:"debt",  label:"I — IOU 負債比 D/E",  desc:"D/E<0.5佳，無負債加分",     isRisk:false,isMoat:false,max:1, group:"balance"},
+  // 護城河
+  {key:"moat",  label:"E — 護城河",          desc:"",                          isRisk:false,isMoat:true, max:4, group:"moat"},
+  // 扣分
+  {key:"auth",  label:"A — 政策風險",        desc:"業務核心受政府監管或批准。如 PLTR、MO、UNH", isRisk:true,isMoat:false,max:0,group:"risk"},
+  {key:"sci",   label:"S — 科技風險",        desc:"需持續大量研發才能維持競爭力，隨時可能被新技術取代", isRisk:true,isMoat:false,max:0,group:"risk"},
+  {key:"key",   label:"K — 關鍵人物風險",    desc:"高度依賴特定 CEO 或創辦人，此人離開會動搖市場信心。如 TSLA", isRisk:true,isMoat:false,max:0,group:"risk"}
+];
+const SCORE_OPTIONS={eps:[0,.5,1],fcf:[0,.5,1],roic:[0,.5,1],debt:[0,.5,1],margin:[0,.5,1],div:[0,.5,1],auth:[0,-1],sci:[0,-1],key:[0,-1]};
+
+const MOAT_TYPES=[
+  {key:"無形資產",  scoreId:"moat_intangible", desc:"消費者因信任、名氣或專利，願意支付更高溢價。",  examples:"如 AAPL、NKE、KO"},
+  {key:"轉換成本",  scoreId:"moat_switching",  desc:"客戶轉向競爭對手的代價（時間、金錢、習慣）太高。", examples:"如 MSFT、CRM、ADBE"},
+  {key:"網路效應",  scoreId:"moat_network",    desc:"每增加一個用戶，都會增加現有用戶的使用價值。",    examples:"如 META、V、MA"},
+  {key:"成本優勢",  scoreId:"moat_cost",       desc:"憑藉規模或獨家資源，能以市場最低成本營運。",     examples:"如 AMZN、TSM、WMT"},
+];
+
+const ASSIGN_CFG={
+  ok: {bg:"#0d2416",border:"#1a4a2a",color:"#4ade80",text:"接到不慌，願意長期持有等反彈。Covered call 可以慢慢賣。"},
+  warn:{bg:"#1f1a00",border:"#4a3a0a",color:"#fbbf24",text:"接到有點不爽，但還能操作 covered call 等回來。Strike 要設保守一點。"},
+  no:  {bg:"#250808",border:"#5c2020",color:"#fca5a5",text:"只看 premium，strike 一定要設得夠遠。接到會亂，乾脆避免。至少設在現價 -15% 以下。"}
+};
+
+const EDIT_ICON=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+
+const LS={
+  entries:"wl_entries_v3",
+  stockEval:"wl_stockeval_v3",
+  sellPut:"wl_sellput_v3",
+  custom:"wl_custom_v3",
+  overrides:"wl_overrides_v3",
+  hidden:"wl_hidden_v3"
+};
+
+// ── State ──
+let activeTicker="AMAT", activeView="log", prevView="log";
+let userEntries={}, stockEval={}, sellPutEval={};
+let customStocks={}, stockOverrides={}, hiddenStocks=[];
+
+// ── Helpers ──
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+function val(id){return(document.getElementById(id)?.value||"").trim()}
+function tval(id){return document.getElementById(id)?.value||""}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function getStocks(){
+  const out=clone(BUILTIN_STOCKS);
+  Object.keys(stockOverrides).forEach(t=>{if(out[t])out[t]={...out[t],...stockOverrides[t]}});
+  Object.keys(customStocks).forEach(t=>{out[t]=customStocks[t]});
+  hiddenStocks.forEach(t=>delete out[t]);
+  return out;
+}
+function stock(t){t=t||activeTicker;return getStocks()[t]}
+function loadState(){
+  try{userEntries=JSON.parse(localStorage.getItem(LS.entries)||"{}")}catch{}
+  try{stockEval=JSON.parse(localStorage.getItem(LS.stockEval)||"{}")}catch{}
+  try{sellPutEval=JSON.parse(localStorage.getItem(LS.sellPut)||"{}")}catch{}
+  try{customStocks=JSON.parse(localStorage.getItem(LS.custom)||"{}")}catch{}
+  try{stockOverrides=JSON.parse(localStorage.getItem(LS.overrides)||"{}")}catch{}
+  try{hiddenStocks=JSON.parse(localStorage.getItem(LS.hidden)||"[]")}catch{}
+  if(!stock(activeTicker)) activeTicker=Object.keys(getStocks())[0]||"AMAT";
+}
+
+// ── Render ──
+function render(){renderTabs();renderCompanyBar();renderContent()}
+
+function renderTabs(){
+  const stocks=getStocks();
+  document.getElementById("tickerTabs").innerHTML=
+    Object.keys(stocks)
+      .sort((a,b)=>(stocks[a].priority||99)-(stocks[b].priority||99)||a.localeCompare(b))
+      .map(t=>{
+        const s=stocks[t],active=t===activeTicker;
+        return `<button class="ticker-tab${active?" active":""}" style="${active?`background:${s.color};color:#fff;border-bottom-color:${s.accent}`:""}" onclick="switchTicker('${esc(t)}')">${esc(t)}</button>`;
+      }).join("");
+}
+
+function renderCompanyBar(){
+  if(activeView==="add"){
+    document.getElementById("companyBar").style.background="#1a3a2a";
+    document.getElementById("companyBar").innerHTML=`<div><div class="company-name">新增觀察標的</div></div>`;
+    return;
+  }
+  const s=stock();
+  document.getElementById("companyBar").style.background=s.color;
+  document.getElementById("companyBar").innerHTML=`
+    <div>
+      <div class="company-name">${esc(s.name)}</div>
+      <div class="company-theme" style="color:${s.accent}">${esc(s.theme)}</div>
+    </div>
+    <div class="view-tabs">
+      <button class="view-tab${activeView==="log"?" active":""}" style="${activeView==="log"?`border-color:${s.accent}`:""}" onclick="switchView('log')">紀錄</button>
+      <button class="view-tab${activeView==="bos"?" active":""}" style="${activeView==="bos"?`border-color:${s.accent}`:""}" onclick="switchView('bos')">公司健診</button>
+    </div>`;
+}
+
+function renderContent(){
+  const s=stock();
+  let html="";
+  if(activeView==="log") html=renderLog(s);
+  if(activeView==="bos") html=renderScoring(s);
+  if(activeView==="add") html=renderAddStock();
+  document.getElementById("mainContent").innerHTML=html;
+}
+
+// ── Basic face read/edit ──
+function renderBasicReadView(s){
+  const rows=[
+    ["本季營收",s.baseline?.revenue||"—"],
+    ["同期成長%",s.baseline?.growth||"—"],
+    ["下季業績指引",s.baseline?.guidance||s.baseline?.keyMetric||"—"],
+    ["下次財報日",s.baseline?.nextEarnings||"—"]
+  ];
+  return `
+    <div class="sec-card">
+      <div class="sec-head">
+        <span class="sec-title" style="color:${s.accent}">基本面</span>
+        <button class="btn-edit" onclick="startBasicEdit()">編輯</button>
+      </div>
+      <div class="sec-body">
+        <div class="card" style="border-color:${s.color}44">
+          <div class="card-label">投資論點</div>
+          <div class="thesis-text">${esc(s.thesis||"")}</div>
+        </div>
+        <div class="card">
+          ${rows.map(([l,v])=>`<div class="data-row"><span class="data-label">${l}</span><span class="data-val">${esc(v)}</span></div>`).join("")}
+        </div>
+        ${s.baseline?.risk?`<div class="risk-card"><div class="card-label" style="color:#f87171">主要風險</div><div class="risk-text">${esc(s.baseline.risk)}</div></div>`:""}
+        ${s.baseline?.competitors?`<div class="info-card"><div class="card-label" style="color:#60a5fa">競爭對手</div><div class="comp-text">${esc(s.baseline.competitors)}</div></div>`:""}
+        ${(s.watchList||[]).length?`<div class="card"><div class="card-label">每季財報追蹤清單</div>${(s.watchList||[]).map((item,i)=>`<div class="watch-item"><div class="watch-num" style="background:${s.color}">${i+1}</div><div class="watch-text">${esc(item)}</div></div>`).join("")}</div>`:""}
+      </div>
+    </div>`;
+}
+
+function renderBasicEditForm(s){
+  return `
+    <div class="sec-card">
+      <div class="sec-head">
+        <span class="sec-title" style="color:${s.accent}">基本面</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn-edit" style="color:${s.accent};border-color:${s.accent}66" onclick="saveBasicFace()">儲存</button>
+          <button class="btn-edit" onclick="cancelBasicEdit()">取消</button>
+        </div>
+      </div>
+      <div class="sec-body">
+        <div class="form-row">
+          <div class="form-field">
+            <div class="form-label">公司名稱</div>
+            <input class="form-input" id="editName" value="${esc(s.name||"")}">
+          </div>
+          <div class="form-field">
+            <div class="form-label">產業類別</div>
+            <input class="form-input" id="editTheme" value="${esc(s.theme||"")}">
+          </div>
+          <div class="form-field" style="max-width:80px">
+            <div class="form-label">排序</div>
+            <input class="form-input" id="editPriority" value="${esc(s.priority||99)}">
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="form-label">投資論點</div>
+          <textarea class="form-textarea" id="editThesis" rows="4">${esc(s.thesis||"")}</textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <div class="form-label">本季營收</div>
+            <input class="form-input" id="editRevenue" value="${esc(s.baseline?.revenue||"")}">
+          </div>
+          <div class="form-field">
+            <div class="form-label">同期成長%</div>
+            <input class="form-input" id="editGrowth" value="${esc(s.baseline?.growth||"")}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <div class="form-label">下季業績指引</div>
+            <input class="form-input" id="editGuidance" value="${esc(s.baseline?.guidance||s.baseline?.keyMetric||"")}">
+          </div>
+          <div class="form-field">
+            <div class="form-label">下次財報日</div>
+            <input class="form-input" id="editNextEarnings" value="${esc(s.baseline?.nextEarnings||"")}">
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="form-label">主要風險</div>
+          <textarea class="form-textarea" id="editRisk" rows="3">${esc(s.baseline?.risk||"")}</textarea>
+        </div>
+        <div class="form-field">
+          <div class="form-label">競爭對手</div>
+          <textarea class="form-textarea" id="editCompetitors" rows="3">${esc(s.baseline?.competitors||"")}</textarea>
+        </div>
+        <div class="form-field">
+          <div class="form-label">每季財報追蹤清單（一行一項）</div>
+          <textarea class="form-textarea" id="editWatchList" rows="5">${esc((s.watchList||[]).join("\n"))}</textarea>
+        </div>
+      </div>
+    </div>`;
+}
+
+function startBasicEdit(){
+  const sec=document.getElementById("basicSection");
+  if(sec) sec.innerHTML=renderBasicEditForm(stock());
+}
+function cancelBasicEdit(){
+  const sec=document.getElementById("basicSection");
+  if(sec) sec.innerHTML=renderBasicReadView(stock());
+}
+function saveBasicFace(){
+  const old=stock();
+  const edited={...old,
+    name:val("editName")||old.name,
+    theme:val("editTheme")||old.theme,
+    priority:Number(val("editPriority"))||old.priority||99,
+    thesis:tval("editThesis"),
+    baseline:{...(old.baseline||{}),
+      revenue:val("editRevenue"),growth:val("editGrowth"),
+      guidance:val("editGuidance"),nextEarnings:val("editNextEarnings"),
+      risk:tval("editRisk"),competitors:tval("editCompetitors")
+    },
+    watchList:tval("editWatchList").split("\n").map(x=>x.trim()).filter(Boolean)
+  };
+  if(customStocks[activeTicker]){customStocks[activeTicker]=edited;save(LS.custom,customStocks)}
+  else{stockOverrides[activeTicker]=edited;save(LS.overrides,stockOverrides)}
+  const sec=document.getElementById("basicSection");
+  if(sec) sec.innerHTML=renderBasicReadView(stock());
+  // Re-render tabs in case name/theme/priority changed
+  renderTabs();renderCompanyBar();
+  showToast("基本面已儲存");
+}
+
+// ── Log page ──
+function renderLog(s){
+  const se=stockEval[activeTicker]||{};
+  const sp=sellPutEval[activeTicker]||{};
+  const ac=ASSIGN_CFG[sp.assignComfort||"warn"]||ASSIGN_CFG.warn;
+  const ivpV=Number(sp.ivp||0);
+  const ivpCol=ivpV>=50?"#4ade80":ivpV>=30?"#fbbf24":ivpV>0?"#f87171":"var(--dim)";
+  const ivpHint=ivpV>=50?"IV 偏高，賣 put 有利":ivpV>=30?"IV 中等":ivpV>0?"IV 偏低，premium 薄":"";
+  const cur=sp.assignComfort||"warn";
+
+  return `
+  <!-- 基本面 -->
+  <div id="basicSection">${renderBasicReadView(s)}</div>
+
+  <!-- 現股評估 -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <span class="sec-title" style="color:${s.accent}">現股評估</span>
+    </div>
+    <div class="sec-body">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+        <div class="ifield" style="border:none;padding:0"><span class="ilabel">目前股價</span><input class="iinput" id="seCurrentPrice" value="${esc(se.currentPrice||"")}"></div>
+        <div class="ifield" style="border:none;padding:0"><span class="ilabel">支撐價</span><input class="iinput" id="seIdealBuy" value="${esc(se.idealBuy||"")}"></div>
+        <div class="ifield" style="border:none;padding:0"><span class="ilabel">壓力價</span><input class="iinput" id="seMaxBuy" value="${esc(se.maxBuy||"")}"></div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="form-label">筆記</div>
+        <textarea class="form-textarea" id="seNote" rows="3">${esc(se.note||"")}</textarea>
+      </div>
+    </div>
+    <div class="sec-foot">
+      <button class="btn-save" style="background:${s.color}" onclick="saveStockEval()">儲存</button>
+    </div>
+  </div>
+
+  <!-- Sell Put 評估 -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <span class="sec-title" style="color:${s.accent}">Sell Put 評估</span>
+    </div>
+    <div class="sec-body">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+        <div class="ifield" style="border:none;padding:0"><span class="ilabel">Put Strike</span><input class="iinput" id="spStrike" value="${esc(sp.strike||"")}"></div>
+        <div class="ifield" style="border:none;padding:0">
+          <span class="ilabel">IVP %</span>
+          <input class="iinput" id="spIvp" value="${esc(sp.ivp||"")}" oninput="updateIvpHint(this.value)">
+          <span id="ivpHint" style="font-size:11px;color:${ivpCol};white-space:nowrap;margin-left:4px">${esc(ivpHint)}</span>
+        </div>
+        <div class="ifield" style="border:none;padding:0">
+          <span class="ilabel">Assign</span>
+          <div class="assign-group" id="assignGroup" data-selected="${esc(cur)}" style="margin-top:0">
+            ${["ok","warn","no"].map(k=>`<button class="assign-opt${cur===k?" sel-"+k:""}" onclick="selectAssign('${k}')">${k==="ok"?"可接":k==="warn"?"謹慎":"不接"}</button>`).join("")}
+          </div>
+        </div>
+      </div>
+      <div class="assign-desc-bar" id="assignDescBar" style="background:${ac.bg};border-color:${ac.border};color:${ac.color};margin-top:10px">${esc(ac.text)}</div>
+      <div style="margin-top:12px">
+        <div class="form-label">筆記</div>
+        <textarea class="form-textarea" id="spNote" rows="3">${esc(sp.note||"")}</textarea>
+      </div>
+    </div>
+    <div class="sec-foot">
+      <button class="btn-save" style="background:${s.color}" onclick="saveSellPutEval()">儲存</button>
+    </div>
+  </div>
+
+  <!-- 日常觀察 -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <span class="sec-title" style="color:${s.accent}">日常觀察</span>
+    </div>
+    <div class="sec-body">
+      <textarea class="form-textarea" id="newEntry" rows="5" placeholder="財報觀察、消息面想法、持倉變化…"></textarea>
+    </div>
+    <div class="sec-foot">
+      <button class="btn-save" style="background:${s.color}" onclick="saveEntry()">記錄</button>
+    </div>
+    <div id="logHistory" style="padding:0 16px 16px">${renderHistoryHtml(s)}</div>
+  </div>`;
+}
+
+function renderHistoryHtml(s){
+  const entries=userEntries[activeTicker]||[];
+  const historyLabel=`<div style="border-top:1px solid var(--border);margin-bottom:12px;padding-top:12px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)">歷史記錄</div>`;
+  if(!entries.length) return historyLabel+`<div class="empty-msg">尚無記錄</div>`;
+  return historyLabel+[...entries].reverse().map((e,ri)=>{
+    const idx=entries.length-1-ri;
+    return entryCardHtml(e,idx,s);
+  }).join("");
+}
+
+function entryCardHtml(e,idx,s){
+  return `<div class="entry-card" id="entryCard_${idx}">
+    <div class="entry-head">
+      <span class="entry-date" style="color:${s.accent}">${esc(e.date)}${e.updatedAt?` <span style="color:var(--dim);font-weight:400">（修改於 ${esc(e.updatedAt)}）</span>`:""}</span>
+      <div>
+        <button class="btn-icon" onclick="editEntry(${idx})" title="修改">${EDIT_ICON}</button>
+        <button class="btn-icon" onclick="deleteEntry(${idx})" title="刪除">✕</button>
+      </div>
+    </div>
+    <div class="entry-note">${esc(e.note)}</div>
+  </div>`;
+}
+
+// ── Entry actions ──
+function saveEntry(){
+  const note=document.getElementById("newEntry")?.value||"";
+  if(!note.trim()){showToast("請填寫內容");return}
+  if(!userEntries[activeTicker]) userEntries[activeTicker]=[];
+  userEntries[activeTicker].push({note:note.trim(),date:new Date().toLocaleDateString("zh-TW")});
+  save(LS.entries,userEntries);
+  document.getElementById("newEntry").value="";
+  const histEl=document.getElementById("logHistory");
+  if(histEl) histEl.innerHTML=renderHistoryHtml(stock());
+  showToast("記錄已儲存");
+}
+
+function editEntry(idx){
+  const e=(userEntries[activeTicker]||[])[idx];
+  if(!e) return;
+  const s=stock();
+  const card=document.getElementById(`entryCard_${idx}`);
+  if(!card) return;
+  card.innerHTML=`
+    <textarea class="form-textarea" id="editNote_${idx}" rows="5">${esc(e.note)}</textarea>
+    <div class="btn-row">
+      <button class="btn-main" style="background:${s.color};flex:1" onclick="updateEntry(${idx})">儲存</button>
+      <button class="btn-soft" onclick="cancelEditEntry(${idx})">取消</button>
+    </div>`;
+}
+
+function cancelEditEntry(idx){
+  const e=(userEntries[activeTicker]||[])[idx];
+  if(!e) return;
+  const card=document.getElementById(`entryCard_${idx}`);
+  if(card) card.outerHTML=entryCardHtml(e,idx,stock());
+}
+
+function updateEntry(idx){
+  const old=(userEntries[activeTicker]||[])[idx];
+  if(!old) return;
+  const note=document.getElementById(`editNote_${idx}`)?.value||"";
+  if(!note.trim()){showToast("請填寫內容");return}
+  userEntries[activeTicker][idx]={note:note.trim(),date:old.date,updatedAt:new Date().toLocaleDateString("zh-TW")};
+  save(LS.entries,userEntries);
+  const histEl=document.getElementById("logHistory");
+  if(histEl) histEl.innerHTML=renderHistoryHtml(stock());
+  showToast("記錄已修改");
+}
+
+function deleteEntry(idx){
+  if(!confirm("確定刪除這筆記錄？")) return;
+  userEntries[activeTicker].splice(idx,1);
+  save(LS.entries,userEntries);
+  const histEl=document.getElementById("logHistory");
+  if(histEl) histEl.innerHTML=renderHistoryHtml(stock());
+  showToast("記錄已刪除");
+}
+
+// ── Stock/SellPut eval saves ──
+function saveStockEval(){
+  stockEval[activeTicker]={
+    currentPrice:val("seCurrentPrice"),
+    idealBuy:val("seIdealBuy"),
+    maxBuy:val("seMaxBuy"),
+    note:tval("seNote")
+  };
+  save(LS.stockEval,stockEval);
+  showToast("現股評估已儲存");
+}
+
+function saveSellPutEval(){
+  const grp=document.getElementById("assignGroup");
+  const assignComfort=grp?.dataset.selected||"warn";
+  sellPutEval[activeTicker]={
+    strike:val("spStrike"),
+    ivp:val("spIvp"),
+    assignComfort,
+    note:tval("spNote")
+  };
+  save(LS.sellPut,sellPutEval);
+  showToast("Sell Put 已儲存");
+}
+
+function selectAssign(key){
+  ["ok","warn","no"].forEach(k=>{
+    document.querySelectorAll(".assign-opt").forEach(btn=>{
+      if(btn.textContent.trim()===(k==="ok"?"可接":k==="warn"?"謹慎":"不接")){
+        btn.className="assign-opt"+(k===key?" sel-"+k:"");
+      }
+    });
+  });
+  const grp=document.getElementById("assignGroup");
+  if(grp) grp.dataset.selected=key;
+  const bar=document.getElementById("assignDescBar");
+  const ac=ASSIGN_CFG[key]||ASSIGN_CFG.warn;
+  if(bar){bar.style.background=ac.bg;bar.style.borderColor=ac.border;bar.style.color=ac.color;bar.textContent=ac.text;}
+}
+
+function updateIvpHint(v){
+  const n=Number(v);
+  const col=n>=50?"#4ade80":n>=30?"#fbbf24":n>0?"#f87171":"var(--dim)";
+  const hint=n>=50?"IV 偏高，賣 put 有利":n>=30?"IV 中等":n>0?"IV 偏低，premium 薄":"";
+  const el=document.getElementById("ivpHint");
+  if(el){el.textContent=hint;el.style.color=col;}
+}
+
+// ── Scoring page ──
+function scoreColor(v,isRisk,isMoat,max){
+  if(isRisk) return v===0?"#4ade80":v===-.5?"#fbbf24":"#f87171";
+  if(isMoat) return v===4?"#4ade80":v===3?"#86efac":v===2?"#c9a84c":v===1?"#fbbf24":"#8b949e";
+  return v>=max?"#4ade80":v>0?"#fbbf24":"#8b949e";
+}
+
+function renderScoring(s){
+  const bos=s.bos||{total:0,scores:{},commentary:"",scoringDate:""};
+
+  // Calculate financial sub-score (6 items max)
+  const finKeys=["eps","fcf","roic","debt","margin","div"];
+  const finScore=finKeys.reduce((a,k)=>a+(Number(bos.scores?.[k])||0),0);
+  const riskScore=["auth","sci","key"].reduce((a,k)=>a+(Number(bos.scores?.[k])||0),0);
+  const total=Number(bos.total||0);
+
+  // Reminder logic — exactly one condition fires
+  let reminder=null;
+  if(finScore>=5&&total>=8)       reminder={text:"財務體質紮實，值得深入研究",col:"#4ade80"};
+  else if(finScore>=5&&total<8)   reminder={text:"財務強但護城河有限，留意競爭壓力",col:"#4ade80"};
+  else if(finScore>=3&&total>=7)  reminder={text:"護城河撐起總分，財務面仍需持續追蹤",col:"#fbbf24"};
+  else if(finScore>=3&&total<7)   reminder={text:"財務與競爭優勢都偏弱，需要特別理由才值得繼續看",col:"#fbbf24"};
+  else                             reminder={text:"高風險，須謹慎評估，勿因消息面而衝動，除非有強烈個人理由",col:"#f87171"};
+
+  function scoreRow(c){
+    const v=bos.scores?.[c.key]??0;
+    const opts=(SCORE_OPTIONS[c.key]||[0]).map(opt=>{
+      const sel=Number(v)===opt;
+      const oc=scoreColor(opt,c.isRisk,c.isMoat,c.max);
+      return `<button class="score-opt" style="${sel?`border-color:${oc};color:${oc};background:${oc}22`:""}" onclick="updateScoringItem('${c.key}',${opt})">${opt>0?"+"+opt:opt}</button>`;
+    }).join("");
+    return `<div class="score-row">
+      <div><div class="score-key">${c.label}</div>${c.desc?`<div class="score-desc">${c.desc}</div>`:""}</div>
+      <div class="score-opts">${opts}</div>
+    </div>`;
+  }
+
+  const groupDef=[
+    {id:"income",   indicators:"E (EPS)、N (淨利率)",        sub:"這段期間公司有沒有賺錢", label:"損益表"},
+    {id:"cashflow", indicators:"F (FCF)、D (股息)",          sub:"口袋剩多少錢",           label:"現金流量表"},
+    {id:"balance",  indicators:"R (ROIC)、I (負債比 D/E)",  sub:"錢怎麼用的",             label:"資產負債表"},
+  ];
+
+  const financialCards=groupDef.map(g=>{
+    const items=SCORING_CRITERIA.filter(c=>c.group===g.id);
+    return `<div class="sec-card">
+      <div class="sec-head">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:700;color:#e6edf3">${g.sub}</span>
+          <span style="font-size:11px;color:#444c56">|</span>
+          <span style="font-size:11px;color:var(--dim)">${g.indicators}</span>
+          <span style="font-size:11px;color:#444c56">|</span>
+          <span style="font-size:11px;color:var(--dim)">${g.label}</span>
+        </div>
+      </div>
+      <div class="sec-body">${items.map(scoreRow).join("")}</div>
+    </div>`;
+  }).join("");
+
+  // Moat: each type gets 0/1, total = sum
+  const moatScores=MOAT_TYPES.map(t=>Number(bos.scores?.[t.scoreId]??0));
+  const moatTotal=moatScores.reduce((a,b)=>a+b,0);
+  const moatRows=MOAT_TYPES.map((t,i)=>{
+    const v=moatScores[i];
+    const opts=[0,1].map(opt=>{
+      const sel=v===opt;
+      const oc=opt===1?"#4ade80":"#8b949e";
+      const unselStyle="border-color:var(--border);color:var(--dim)";
+      const selStyle=`border-color:${oc};color:${oc};background:${oc}22`;
+      return `<button class="score-opt" style="${sel?selStyle:unselStyle}" onclick="updateScoringItem('${t.scoreId}',${opt})">${opt===1?"+1":"0"}</button>`;
+    }).join("");
+    return `<div class="score-row">
+      <div>
+        <div class="score-key">${t.key}</div>
+        <div class="score-desc">${t.desc}</div>
+        <div style="font-size:11px;color:#4a7a9b;margin-top:2px">${t.examples}</div>
+      </div>
+      <div class="score-opts">${opts}</div>
+    </div>`;
+  }).join("");
+
+  const riskRows=SCORING_CRITERIA.filter(c=>c.group==="risk").map(scoreRow).join("");
+
+  return `
+  <div class="sec-card">
+    <div class="sec-head">
+      <span class="sec-title" style="color:${s.accent}">公司健診</span>
+      <span style="font-size:11px;color:var(--dim)">最高 10 分</span>
+    </div>
+    <div class="sec-body">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <span style="font-size:12px;color:var(--dim)">評分日期</span>
+          <input class="iinput" id="scoringDate" value="${esc(bos.scoringDate||"")}" placeholder="2025/Q2" style="width:110px">
+          <button class="btn-save" style="background:${s.color}" onclick="saveScoringDate()">儲存</button>
+        </div>
+        <div style="text-align:right">
+          <div class="score-num" style="color:${reminder.col}">${total.toFixed(1)}</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">財務 ${finScore.toFixed(1)} / 6</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:10px 12px;border-radius:6px;border:1px solid;background:${reminder.col}18;border-color:${reminder.col}44;font-size:12px;color:${reminder.col};line-height:1.5">${esc(reminder.text)}</div>
+    </div>
+  </div>
+  ${financialCards}
+  <div class="sec-card">
+    <div class="sec-head">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;font-weight:700;color:#e6edf3">護城河</span>
+        <span style="font-size:11px;color:#444c56">|</span>
+        <span style="font-size:11px;color:var(--dim)">主觀判斷，依個人理解評分，無法判斷或看不懂就選 0</span>
+        <span style="font-size:11px;color:#444c56">|</span>
+        <span style="font-size:11px;color:var(--dim)">小計 ${moatTotal} / 4</span>
+      </div>
+    </div>
+    <div class="sec-body">${moatRows}</div>
+  </div>
+  <div class="sec-card">
+    <div class="sec-head">
+      <span class="sec-title">扣分項目</span>
+      <span style="font-size:11px;color:var(--dim)">有則 -1，無則 0</span>
+    </div>
+    <div class="sec-body">${riskRows}</div>
+  </div>
+  <div class="sec-card">
+    <div class="sec-head"><span class="sec-title" style="color:${s.accent}">評分解讀</span></div>
+    <div class="sec-body">
+      <textarea class="form-textarea" id="scoringCommentary" rows="4">${esc(bos.commentary||"")}</textarea>
+    </div>
+    <div class="sec-foot">
+      <button class="btn-save" style="background:${s.color}" onclick="saveScoringCommentary()">儲存</button>
+    </div>
+  </div>`;
+}
+
+function updateScoringItem(key,rawVal){
+  const v=Number(rawVal);
+  const s=stock();
+  const bos=clone(s.bos||{total:0,scores:{},commentary:"",scoringDate:""});
+  if(!bos.scores) bos.scores={};
+  bos.scores[key]=v;
+  // Total = sum of all financial/risk keys + sum of 4 moat sub-keys
+  const financialKeys=["eps","fcf","roic","debt","margin","div","auth","sci","key"];
+  const moatKeys=["moat_intangible","moat_switching","moat_network","moat_cost"];
+  bos.total=financialKeys.reduce((a,k)=>a+(Number(bos.scores[k])||0),0)
+           +moatKeys.reduce((a,k)=>a+(Number(bos.scores[k])||0),0);
+  saveBos(bos);
+  render();
+  showToast("評分已更新");
+}
+
+function saveScoringDate(){
+  const s=stock();
+  const bos=clone(s.bos||{total:0,scores:{},commentary:"",scoringDate:""});
+  bos.scoringDate=val("scoringDate");
+  saveBos(bos);
+  showToast("評分日期已儲存");
+}
+
+function saveScoringCommentary(){
+  const s=stock();
+  const bos=clone(s.bos||{total:0,scores:{},commentary:"",scoringDate:""});
+  bos.commentary=tval("scoringCommentary");
+  saveBos(bos);
+  showToast("評分解讀已儲存");
+}
+
+function saveBos(bos){
+  if(customStocks[activeTicker]){customStocks[activeTicker].bos=bos;save(LS.custom,customStocks)}
+  else{if(!stockOverrides[activeTicker]) stockOverrides[activeTicker]=clone(stock());stockOverrides[activeTicker].bos=bos;save(LS.overrides,stockOverrides)}
+}
+
+// ── Add stock ──
+function renderAddStock(){
+  return `
+  <div class="card">
+    <div class="card-label" style="color:var(--green)">新增觀察標的</div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">股票代號</div>
+        <input class="form-input" id="newTicker" placeholder="TSM">
+      </div>
+      <div class="form-field">
+        <div class="form-label">公司名稱</div>
+        <input class="form-input" id="newName" placeholder="Taiwan Semiconductor">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <div class="form-label">產業類別</div>
+        <input class="form-input" id="newTheme" placeholder="AI Foundry">
+      </div>
+      <div class="form-field" style="max-width:80px">
+        <div class="form-label">排序</div>
+        <input class="form-input" id="newPriority" value="99">
+      </div>
+    </div>
+    <div class="form-field">
+      <div class="form-label">投資論點（可之後補充）</div>
+      <textarea class="form-textarea" id="newThesis" rows="3"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn-main" style="background:#1a5a4a;flex:1" onclick="createCustomStock()">新增</button>
+      <button class="btn-soft" onclick="switchView('log')">取消</button>
+    </div>
+  </div>`;
+}
+
+function createCustomStock(){
+  const ticker=val("newTicker").toUpperCase();
+  if(!ticker){showToast("請填入股票代號");return}
+  if(getStocks()[ticker]){showToast("這個代號已存在");return}
+  const idx=Object.keys(customStocks).length%COLOR_PALETTE.length;
+  const {color,accent}=COLOR_PALETTE[idx];
+  customStocks[ticker]={
+    priority:Number(val("newPriority"))||99,
+    name:val("newName")||ticker,
+    theme:val("newTheme")||"自訂標的",
+    color,accent,
+    baseline:{revenue:"",growth:"",guidance:"",nextEarnings:"",risk:"",competitors:""},
+    thesis:tval("newThesis"),
+    watchList:["下次財報營收與成長率","毛利率 / 營業利潤率趨勢","管理層 guidance 變化","價格是否進入可接受區間"],
+    bos:{total:0,scores:{eps:0,fcf:0,roic:0,debt:0,moat:0,margin:0,div:0,auth:0,sci:0,key:0},commentary:"",scoringDate:""},
+    custom:true
+  };
+  save(LS.custom,customStocks);
+  activeTicker=ticker; activeView="log";
+  render(); showToast("標的已新增");
+}
+
+function deleteStock(){
+  if(!confirm(`移除 ${activeTicker}？資料可從備份還原。`)) return;
+  if(customStocks[activeTicker]){delete customStocks[activeTicker];save(LS.custom,customStocks)}
+  else{hiddenStocks.push(activeTicker);save(LS.hidden,hiddenStocks)}
+  delete stockOverrides[activeTicker]; save(LS.overrides,stockOverrides);
+  activeTicker=Object.keys(getStocks())[0]||"";
+  activeView="log"; render(); showToast("標的已移除");
+}
+
+// ── Navigation ──
+function switchTicker(t){prevView="log";activeTicker=t;activeView="log";render()}
+function switchView(v){prevView=activeView;activeView=v;render()}
+function openAddStock(){prevView=activeView;activeView="add";render()}
+
+// ── Backup ──
+function exportBackup(){
+  const data={version:3,exportedAt:new Date().toISOString(),entries:userEntries,stockEval,sellPutEval,customStocks,stockOverrides,hiddenStocks};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url; a.download=`watchlist-backup-${new Date().toLocaleDateString("zh-TW").replace(/\//g,"-")}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importBackup(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.entries){userEntries=d.entries;save(LS.entries,userEntries)}
+      if(d.stockEval){stockEval=d.stockEval;save(LS.stockEval,stockEval)}
+      if(d.sellPutEval){sellPutEval=d.sellPutEval;save(LS.sellPut,sellPutEval)}
+      if(d.customStocks){customStocks=d.customStocks;save(LS.custom,customStocks)}
+      if(d.stockOverrides){stockOverrides=d.stockOverrides;save(LS.overrides,stockOverrides)}
+      if(d.hiddenStocks){hiddenStocks=d.hiddenStocks;save(LS.hidden,hiddenStocks)}
+      render(); showToast("備份匯入成功");
+    }catch{showToast("檔案格式錯誤")}
+  };
+  reader.readAsText(file); e.target.value="";
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+loadState(); render();
+</script>
+</body>
+</html>
