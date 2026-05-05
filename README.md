@@ -1,8 +1,6 @@
-# LEAP Call 出場決策工具
+# AI投資理財工具
 
-這是一個純瀏覽器工具，幫助記錄和分析 LEAP Call 倉位的出場時機。
-
-👉 [開啟工具](https://utopiawrite.github.io/leap.html)
+這裡都是純瀏覽器工具，幫助記錄和分析倉位。
 
 ## 使用說明
 
