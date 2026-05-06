@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utopiawrite · 工具集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f3ef;
+      --surface: #ffffff;
+      --border: #e0ddd7;
+      --border-hover: #b8b4ac;
+      --text: #1a1916;
+      --muted: #8a8780;
+      --faint: #c5c2bb;
+      --gold: #a07828;
+      --blue: #2d6a96;
+      --tag-gold-bg: #fdf6e8;
+      --tag-blue-bg: #eef4fa;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans TC', 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── header ── */
+    header {
+      padding: 5.5rem 0 3rem;
+    }
+
+    .wordmark {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 2.8rem;
+    }
+
+    /* ── cards ── */
+    .tools {
+      display: grid;
+      gap: 1rem;
+      padding-bottom: 5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.8rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .card-body { flex: 1; min-width: 0; }
+
+    .card-tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      padding: 0.2em 0.6em;
+      margin-bottom: 0.7rem;
+      font-weight: 400;
+    }
+
+    .card--leap .card-tag {
+      background: var(--tag-gold-bg);
+      color: var(--gold);
+    }
+
+    .card--capex .card-tag {
+      background: var(--tag-blue-bg);
+      color: var(--blue);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.45rem;
+      line-height: 1.4;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .card-arrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 1rem;
+      color: var(--faint);
+      transition: color 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .card:hover .card-arrow {
+      color: var(--muted);
+      transform: translateX(3px);
+    }
+
+    /* ── footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.6rem 0;
+    }
+
+    .footer-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      color: var(--faint);
+    }
+
+    /* ── animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header             { animation: fadeUp 0.5s ease both; }
+    .divider           { animation: fadeUp 0.5s 0.1s ease both; }
+    .card:nth-child(1) { animation: fadeUp 0.5s 0.18s ease both; }
+    .card:nth-child(2) { animation: fadeUp 0.5s 0.28s ease both; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="wordmark">utopiawrite</div>
+      <div class="tagline">個人工具集 · 資料存於本地瀏覽器</div>
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="tools">
+
+      <a class="card card--leap" href="leap.html">
+        <div class="card-body">
+          <div class="card-tag">選擇權 · IBKR</div>
+          <div class="card-title">LEAP Call 出場決策工具</div>
+          <div class="card-desc">記錄並分析 LEAP Call 倉位的出場時機。支援備份與匯入，資料不上傳。</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a class="card card--capex" href="hyperscaler_capex_beneficiaries.html">
+        <div class="card-body">
+          <div class="card-tag">研究 · AI 基礎建設</div>
+          <div class="card-title">超大規模雲端商 Capex 受益股追蹤</div>
+          <div class="card-desc">追蹤 Google、Meta、Amazon、Microsoft 的 AI 基礎建設採購合約，涵蓋客製 ASIC、光纖、AEC 電纜、核電、GPU 雲端等類別。</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <footer>
+      <div class="footer-text">utopiawrite.github.io</div>
+    </footer>
+
+  </div>
+</body>
+</html>

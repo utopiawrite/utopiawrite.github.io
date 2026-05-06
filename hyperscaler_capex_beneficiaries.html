@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyperscaler Capex 受益美股清單</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: #f5f5f3;
+    color: #1a1a18;
+    padding: 2rem 1rem;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+    color: #1a1a18;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #6b6b66;
+    margin-bottom: 2rem;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b6b66;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 1.2rem 0 0.5rem;
+    border-bottom: 0.5px solid #d3d1c7;
+    margin-bottom: 0;
+  }
+  .section-title.speculative { margin-top: 2rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 0.5px solid #d3d1c7;
+    margin-top: 0;
+  }
+  th {
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+    color: #6b6b66;
+    padding: 8px 12px;
+    border-bottom: 0.5px solid #d3d1c7;
+    background: #f1efe8;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 0.5px solid #e8e6df;
+    vertical-align: top;
+    color: #1a1a18;
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf8; }
+  .ticker {
+    font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    background: #f1efe8;
+    border: 0.5px solid #d3d1c7;
+    border-radius: 4px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    color: #1a1a18;
+    display: inline-block;
+  }
+  .company-name {
+    font-size: 11px;
+    color: #6b6b66;
+    margin-top: 3px;
+  }
+  .buyer-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin: 2px 2px 2px 0;
+    background: #f1efe8;
+    border: 0.5px solid #d3d1c7;
+    color: #5f5e5a;
+  }
+  .contract-strong {
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .note {
+    font-size: 11px;
+    color: #6b6b66;
+    margin-top: 2px;
+  }
+  .contract-block { margin-bottom: 6px; }
+  .contract-block:last-child { margin-bottom: 0; }
+  .footer-note {
+    margin-top: 1.5rem;
+    padding: 12px 14px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 0.5px solid #d3d1c7;
+    font-size: 12px;
+    color: #6b6b66;
+    line-height: 1.7;
+  }
+  .footer-note strong { color: #1a1a18; font-weight: 500; }
+  .generated {
+    margin-top: 1rem;
+    font-size: 11px;
+    color: #b4b2a9;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Hyperscaler Capex 受益美股清單</h1>
+  <p class="subtitle">Google、Amazon、Nvidia、Meta 資本支出流向追蹤（截至 2026 年 5 月）</p>
+
+  <div class="section-title">✓ 已確認合約或公開財報揭露</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:16%">代碼 / 公司</th>
+        <th style="width:17%">類別</th>
+        <th style="width:27%">合約買方</th>
+        <th style="width:40%">合約期限</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ticker">AVGO</span><div class="company-name">Broadcom</div></td>
+        <td>客製 ASIC / 網路晶片</td>
+        <td><span class="buyer-tag">Google</span><span class="buyer-tag">Meta</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">Google TPU：至 2031</div>
+            <div class="note">8-K 正式揭露，含網路元件 Supply Assurance Agreement</div>
+          </div>
+          <div class="contract-block">
+            <div class="contract-strong">Meta MTIA：至 2029</div>
+            <div class="note">2026/4/14 宣布，初期 1GW，後擴至多 GW</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">MRVL</span><div class="company-name">Marvell Technology</div></td>
+        <td>客製 ASIC / 光學 DSP</td>
+        <td><span class="buyer-tag">Amazon AWS</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">AWS：5 年（2024–2029 約）</div>
+            <div class="note">涵蓋 AI 晶片、光學 DSP、PCIe retimer、乙太網路 silicon</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">GLW</span><div class="company-name">Corning</div></td>
+        <td>光纖電纜</td>
+        <td><span class="buyer-tag">Meta</span><span class="buyer-tag">Google</span><span class="buyer-tag">Amazon</span><span class="buyer-tag">Microsoft</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">Meta：至 2030（金額最高 $60 億）</div>
+            <div class="note">2026/1/27 正式簽約，光纖 + 電纜 + 連接方案</div>
+          </div>
+          <div class="contract-block">
+            <div class="note">其他 hyperscaler 洽談中，尚未簽約</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">CRDO</span><div class="company-name">Credo Technology</div></td>
+        <td>主動電氣電纜 AEC</td>
+        <td><span class="buyer-tag">Amazon</span><span class="buyer-tag">Microsoft</span><span class="buyer-tag">Meta</span><span class="buyer-tag">xAI</span><div class="note" style="margin-top:4px;">4 家各佔 &gt;10% 營收，第 5 家已開始貢獻</div></td>
+        <td>
+          <div class="note">無公開合約期限</div>
+          <div class="note">由財報揭露客戶集中度確認；Amazon 約佔 64%</div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">VST</span><div class="company-name">Vistra Corp</div></td>
+        <td>核電 / 電力</td>
+        <td><span class="buyer-tag">Meta</span><span class="buyer-tag">Amazon AWS</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">Meta：20 年 PPA（2026–2046）</div>
+            <div class="note">2,600+ MW，Perry / Davis-Besse / Beaver Valley 核電廠</div>
+          </div>
+          <div class="contract-block">
+            <div class="contract-strong">AWS：Comanche Peak，~3,800 MW</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">CEG</span><div class="company-name">Constellation Energy</div></td>
+        <td>核電 / 電力</td>
+        <td><span class="buyer-tag">Microsoft</span><span class="buyer-tag">Meta</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">Microsoft：20 年（2024 簽，約至 2044）</div>
+            <div class="note">重啟三哩島 TMI Unit 1（Crane Clean Energy Center）</div>
+          </div>
+          <div class="contract-block">
+            <div class="contract-strong">Meta：20 年（2025 簽）</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">CRWV</span><div class="company-name">CoreWeave</div></td>
+        <td>第三方 GPU 雲端</td>
+        <td><span class="buyer-tag">Microsoft</span><span class="buyer-tag">Meta</span><span class="buyer-tag">OpenAI</span></td>
+        <td>
+          <div class="contract-block"><div class="contract-strong">Microsoft：至 2030（約 $100 億）</div></div>
+          <div class="contract-block"><div class="contract-strong">Meta：至 2031（$142 億）</div></div>
+          <div class="contract-block">
+            <div class="contract-strong">Meta 擴充：至 2032（$210 億）</div>
+            <div class="note">2026/3/31 簽訂，現有框架下新增訂單</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">NBIS</span><div class="company-name">Nebius Group</div></td>
+        <td>第三方 GPU 雲端</td>
+        <td><span class="buyer-tag">Microsoft</span><span class="buyer-tag">Meta</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">Microsoft：5 年（2025 起，約 $174–194 億）</div>
+            <div class="note">新澤西 Vineland 300MW 數據中心</div>
+          </div>
+          <div class="contract-block">
+            <div class="contract-strong">Meta：多年（2026 起，$70 億）</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">IREN</span><div class="company-name">IREN Limited</div></td>
+        <td>第三方 GPU 雲端</td>
+        <td><span class="buyer-tag">Microsoft</span></td>
+        <td>
+          <div class="contract-block">
+            <div class="contract-strong">5 年（2025/11 簽，$97 億）</div>
+            <div class="note">NVIDIA GB300 GPU 雲端服務；85% EBITDA margin</div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><span class="ticker">CLS</span><div class="company-name">Celestica</div></td>
+        <td>EMS 代工 / TPU 組裝</td>
+        <td><span class="buyer-tag">Google</span></td>
+        <td>
+          <div class="note">無公開合約期限</div>
+          <div class="note">Goldman Sachs 確認為 Google TPU 機架級解決方案首要供應商</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title speculative">〜 分析師 / 業界在傳，但未有公開簽約</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:16%">代碼 / 公司</th>
+        <th style="width:17%">類別</th>
+        <th style="width:27%">傳言買方</th>
+        <th style="width:40%">資料來源性質</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="ticker">NVDA</span><div class="company-name">Nvidia</div></td>
+        <td>GPU / AI 加速器</td>
+        <td><span class="buyer-tag">Google</span><span class="buyer-tag">Amazon</span><span class="buyer-tag">Meta</span><span class="buyer-tag">Microsoft</span></td>
+        <td>各家財報揭露採購 GPU，但金額未拆分；估計佔 90% AI 加速器市場，無單一已公告合約</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">ANET</span><div class="company-name">Arista Networks</div></td>
+        <td>雲端 Ethernet 交換機</td>
+        <td><span class="buyer-tag">Meta</span><span class="buyer-tag">Microsoft</span><span class="buyer-tag">Google</span><span class="buyer-tag">Amazon</span></td>
+        <td>財報提及 hyperscaler 客戶，無合約期限；估佔 hyperscale 市場 45%，2026E 年收約 $100 億</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">MU</span><div class="company-name">Micron Technology</div></td>
+        <td>HBM / DRAM 記憶體</td>
+        <td><span class="buyer-tag">所有主要 hyperscaler</span></td>
+        <td>供應鏈推斷，無獨立合約揭露；Nvidia GPU 必需零件，需求間接確認</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">ALAB</span><div class="company-name">Astera Labs</div></td>
+        <td>PCIe retimer / 連接方案</td>
+        <td><span class="buyer-tag">Amazon</span><span class="buyer-tag">Google</span><span class="buyer-tag">Meta</span></td>
+        <td>財報揭露 hyperscaler 客戶成長，無點名；Aries PCIe 6 retimer 為業界唯一量產商</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">COHR</span><div class="company-name">Coherent Corp</div></td>
+        <td>光學收發器</td>
+        <td><span class="buyer-tag">Google</span><span class="buyer-tag">Amazon</span><span class="buyer-tag">Meta</span></td>
+        <td>業界分析與財報推斷；約 25% 光學收發器市佔，FY2025 年收 $58 億，+23%</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">LITE</span><div class="company-name">Lumentum</div></td>
+        <td>光學元件 EML</td>
+        <td><span class="buyer-tag">Google</span><span class="buyer-tag">Amazon</span><span class="buyer-tag">Meta</span></td>
+        <td>業界分析；唯一大量出貨 200G/lane EML 的廠商，1.6T 關鍵元件</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">VRT</span><div class="company-name">Vertiv</div></td>
+        <td>散熱 / 電力管理</td>
+        <td><span class="buyer-tag">Meta</span><span class="buyer-tag">Amazon</span><span class="buyer-tag">Google</span></td>
+        <td>業界供應鏈分析；數據中心散熱龍頭，無公開 hyperscaler 長約</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">ETN</span><div class="company-name">Eaton Corp</div></td>
+        <td>UPS / 電氣設備</td>
+        <td><span class="buyer-tag">多家 hyperscaler</span></td>
+        <td>業界分析，管理層財報暗示；數據中心佔營收 20%，年增 30%+，無具體客戶揭露</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">DELL</span><div class="company-name">Dell Technologies</div></td>
+        <td>伺服器 OEM</td>
+        <td><span class="buyer-tag">多家 hyperscaler</span></td>
+        <td>財報揭露伺服器出貨量，無個別合約；伺服器 OEM 第一名，Blackwell 出貨量強勁</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">SMCI</span><div class="company-name">Super Micro Computer</div></td>
+        <td>GPU 伺服器組裝</td>
+        <td><span class="buyer-tag">多家 hyperscaler</span></td>
+        <td>業界供應鏈分析；Nvidia GPU 伺服器主要整合商，無公開長約</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">EQIX</span><div class="company-name">Equinix</div></td>
+        <td>數據中心 REIT</td>
+        <td><span class="buyer-tag">多家 hyperscaler</span></td>
+        <td>租約關係，非資本支出直接受益；互聯互通市場龍頭</td>
+      </tr>
+      <tr>
+        <td><span class="ticker">DLR</span><div class="company-name">Digital Realty</div></td>
+        <td>數據中心 REIT</td>
+        <td><span class="buyer-tag">Amazon</span><span class="buyer-tag">Google</span><span class="buyer-tag">Microsoft</span></td>
+        <td>租約關係，非資本支出直接受益；300+ 全球數據中心</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer-note">
+    <strong>注：</strong>
+    Nvidia（NVDA）雖是最大受益者，但各家 hyperscaler 均未公開與其簽訂獨立採購合約，係透過財報揭露 GPU 支出總額推算。
+    MRVL 與 Google 的客製推論晶片目前仍在洽談，尚未簽約。
+    上市公司 Oklo（OKLO）有 Meta 核電合約，但仍為前收入階段，未列入主表。
+  </div>
+
+  <div class="footer-note" style="margin-top: 0.75rem; background: #faeeda; border-color: #f0c070;">
+    <strong style="color: #854f0b;">免責聲明：</strong>
+    <span style="color: #854f0b;">請 AI 找的資料，自己留看用，正確性自行確認，不構成投資建議。</span>
+  </div>
+
+  <div class="generated">整理截至 2026 年 5 月</div>
+
+</div>
+</body>
+</html>

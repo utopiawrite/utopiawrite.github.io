@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEAP Call 出場決策工具</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0d10; --surface: #13151a; --surface2: #1a1d24; --border: #2a2d36;
+  --gold: #c9a84c; --gold-dim: #8a7234; --gold-glow: rgba(201,168,76,0.10);
+  --text: #e8e4da; --text-dim: #7a7870; --text-mid: #b0ac9f;
+  --green: #4caf82; --green-dim: rgba(76,175,130,0.15);
+  --red: #e05c5c; --red-dim: rgba(224,92,92,0.15);
+  --amber: #e0974a; --amber-dim: rgba(224,151,74,0.15);
+  --blue: #5b9bd5; --blue-dim: rgba(91,155,213,0.15);
+  --radius: 10px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 24px 16px 80px; }
+
+/* Header */
+.header { max-width: 860px; margin: 0 auto 28px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+.header-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.header h1 { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--gold); letter-spacing: 0.02em; }
+.header-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; }
+.header-actions { display: flex; gap: 8px; }
+.btn-header { padding: 6px 14px; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.btn-header:hover, .btn-header:active { border-color: var(--gold-dim); color: var(--gold); }
+
+.sec-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+.pos-section { max-width: 860px; margin: 0 auto 24px; }
+
+/* Position grid: 2 columns on mobile */
+.pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+.pos-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; transition: border-color 0.18s; position: relative; }
+.pos-card:hover, .pos-card:active { border-color: var(--gold-dim); }
+.pos-card.active { border-color: var(--gold); background: var(--gold-glow); }
+.pos-card .del-btn { position: absolute; top: 6px; right: 8px; font-size: 11px; color: var(--text-dim); cursor: pointer; opacity: 0; transition: opacity 0.15s; background: none; border: none; padding: 4px; }
+.pos-card:hover .del-btn { opacity: 1; }
+/* Always show del button on touch devices */
+@media (hover: none) { .pos-card .del-btn { opacity: 0.5; } }
+.pos-card .del-btn:hover, .pos-card .del-btn:active { color: var(--red); opacity: 1; }
+.pos-ticker { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--gold); line-height: 1; margin-bottom: 3px; }
+.pos-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-bottom: 8px; }
+.pos-pnl { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+.pos-pnl.up { color: var(--green); } .pos-pnl.dn { color: var(--red); }
+.pos-add { background: transparent; border: 1px dashed var(--border); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.18s; min-height: 88px; }
+.pos-add:hover, .pos-add:active { border-color: var(--gold-dim); }
+.pos-add span { font-size: 22px; color: var(--text-dim); line-height: 1; }
+
+.card { max-width: 860px; margin: 0 auto 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.card-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.card-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--gold); background: var(--gold-glow); border: 1px solid var(--gold-dim); border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+.card-tag.danger-tag { color: var(--red); background: var(--red-dim); border-color: rgba(224,92,92,0.4); }
+.card-tag.green { color: var(--green); background: var(--green-dim); border-color: rgba(76,175,130,0.4); }
+.card-tag.blue { color: var(--blue); background: var(--blue-dim); border-color: rgba(91,155,213,0.4); }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.card-dte { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+.card-body { padding: 16px 18px; }
+
+/* Metrics: 2 columns on mobile, 3 on tablet, 6 on desktop */
+.metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.metric-cell { background: var(--surface); padding: 12px 14px; }
+.metric-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+.metric-val { font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1; color: var(--text); }
+.metric-val.up { color: var(--green); } .metric-val.dn { color: var(--red); } .metric-val.gold { color: var(--gold); }
+
+.bias-card { border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid transparent; }
+.bias-card.warn { background: var(--amber-dim); border-color: rgba(224,151,74,0.35); }
+.bias-card.ok { background: var(--green-dim); border-color: rgba(76,175,130,0.35); }
+.bias-card.danger { background: var(--red-dim); border-color: rgba(224,92,92,0.35); }
+.bias-card.neutral { background: var(--surface2); border-color: var(--border); }
+.bias-tag { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-bottom: 7px; }
+.bias-tag.warn { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(224,151,74,0.4); }
+.bias-tag.ok { background: var(--green-dim); color: var(--green); border: 1px solid rgba(76,175,130,0.4); }
+.bias-tag.danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(224,92,92,0.4); }
+.bias-tag.neutral { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
+.bias-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+
+.time-bar-wrap { margin-top: 16px; }
+.time-bar-labels { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-bottom: 6px; letter-spacing: 0.06em; }
+.time-bar-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.time-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+/* Form: 1 column on mobile */
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-group label { font-size: 11px; font-weight: 500; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
+.input-group input { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 11px 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; outline: none; transition: border-color 0.15s; width: 100%; -webkit-appearance: none; }
+.input-group input:focus { border-color: var(--gold-dim); }
+.input-group input::placeholder { color: var(--text-dim); }
+.dte-hint { font-family: 'DM Mono', monospace; font-size: 11px; min-height: 16px; margin-top: 3px; }
+
+.roll-result { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 14px; }
+.roll-row { display: flex; justify-content: space-between; align-items: baseline; padding: 11px 14px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
+.roll-row:last-child { border-bottom: none; background: var(--gold-glow); }
+.roll-key { font-size: 12px; color: var(--text-dim); }
+.roll-val { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); }
+.roll-val.free { color: var(--green); } .roll-val.cost { color: var(--red); }
+
+.btn-primary { padding: 13px 22px; background: var(--gold); color: #0c0d10; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.03em; transition: opacity 0.15s; width: 100%; }
+.btn-primary:hover, .btn-primary:active { opacity: 0.85; }
+.btn-secondary { padding: 13px 18px; background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.15s; flex: 1; }
+.btn-secondary:hover, .btn-secondary:active { border-color: var(--text-mid); color: var(--text); }
+.form-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface2); border: 1px solid var(--gold-dim); color: var(--gold); font-size: 13px; padding: 10px 22px; border-radius: 8px; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; z-index: 999; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.hidden { display: none !important; }
+
+/* Tablet: 2-column form, 3-column metrics */
+@media (min-width: 480px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .metrics-row { grid-template-columns: repeat(3, 1fr); }
+  .btn-primary { width: auto; }
+}
+
+/* Desktop: original 3-column form, 6-column metrics */
+@media (min-width: 700px) {
+  body { padding: 32px 20px 80px; }
+  .header-top { margin-bottom: 0; }
+  .header { display: flex; align-items: baseline; gap: 16px; }
+  .header-actions { margin-left: auto; }
+  .form-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .form-grid.form-grid-2 { grid-template-columns: 1fr 1fr; }
+  .metrics-row { grid-template-columns: repeat(6, 1fr); }
+  .metric-val { font-size: 24px; }
+  .card-body { padding: 20px 22px; }
+  .card-header { padding: 14px 22px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>LEAP Call 出場決策</h1>
+    <span class="header-date" id="todayLabel"></span>
+  </div>
+  <div class="header-actions">
+    <button class="btn-header" onclick="backupData()">↓ 備份</button>
+    <label class="btn-header">↑ 匯入備份<input type="file" accept=".json" onchange="restoreData(event)" style="display:none"></label>
+  </div>
+</div>
+
+<div class="pos-section">
+  <div class="sec-label">倉位總覽</div>
+  <div class="pos-grid" id="posGrid"></div>
+</div>
+
+<div id="detailPanel" class="hidden">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-tag" id="d-badge">截圖倉位</span>
+        <span class="card-title" id="d-title"></span>
+      </div>
+      <span class="card-dte" id="d-dte"></span>
+    </div>
+    <button id="updateBtn" onclick="openEdit()" style="display:block;width:100%;padding:12px 18px;background:rgba(224,92,92,0.08);border:none;border-bottom:1px solid rgba(224,92,92,0.25);color:#e05c5c;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;cursor:pointer;text-align:left;transition:background 0.15s">
+      ⚠ &nbsp;點此輸入今日最新數據（標的現價、合約現價）
+    </button>
+    <div class="metrics-row" id="metricsRow"></div>
+    <div class="card-body">
+      <div class="sec-label">偏誤警示</div>
+      <div id="biasesArea"></div>
+      <div class="time-bar-wrap">
+        <div class="time-bar-labels"><span>時間充裕度</span><span id="dteBarLabel"></span></div>
+        <div class="time-bar-track"><div class="time-bar-fill" id="dteBar"></div></div>
+      </div>
+      <div style="height:20px"></div>
+      <div class="sec-label">操作建議</div>
+      <div id="recArea"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-tag">ROLL UP AND OUT</span>
+        <span class="card-title">換倉試算</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="form-grid form-grid-2">
+        <div class="input-group">
+          <label>新 Strike（行使價）</label>
+          <input type="number" id="ns" placeholder="e.g. 350" oninput="calcRoll()">
+        </div>
+        <div class="input-group">
+          <label>新 Call 合約現價（每股）</label>
+          <input type="number" id="np" placeholder="e.g. 90" step="0.01" oninput="calcRoll()">
+        </div>
+      </div>
+      <div id="rollResult" class="hidden"></div>
+    </div>
+  </div>
+</div>
+
+<div id="formPanel" class="hidden">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <span class="card-tag blue" id="formBadge">NEW</span>
+        <span class="card-title" id="formTitle">新增倉位</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="edit-hint" style="display:none;background:rgba(201,168,76,0.08);border:1px solid var(--gold-dim);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--gold)">
+        ✎ &nbsp;灰色欄位為固定資料，只需更新以下三項：<strong>標的現價、合約現價、IV</strong>
+      </div>
+      <div class="form-grid">
+        <div class="input-group"><label>Ticker</label><input type="text" id="m-ticker" placeholder="e.g. COST" autocapitalize="characters"></div>
+        <div class="input-group"><label>Strike（行使價）</label><input type="number" id="m-strike" placeholder="e.g. 600" inputmode="decimal"></div>
+        <div class="input-group"><label>標的現價</label><input type="number" id="m-underlying" placeholder="e.g. 580" step="0.01" inputmode="decimal"></div>
+        <div class="input-group"><label>合約現價（Mark，每股）</label><input type="number" id="m-mark" placeholder="e.g. 55" step="0.01" inputmode="decimal"></div>
+        <div class="input-group"><label>合約成本（買入時 Premium，每股）</label><input type="number" id="m-cost" placeholder="e.g. 80" step="0.01" inputmode="decimal"></div>
+        <div class="input-group">
+          <label>到期日</label>
+          <input type="date" id="m-expiry" oninput="updateDteHint()">
+          <div class="dte-hint" id="dteHint"></div>
+        </div>
+        <div class="input-group"><label>備註（選填）</label><input type="text" id="m-note" placeholder="e.g. 看好 AI 需求長期"></div>
+        <div class="input-group">
+          <label>IV 隱含波動率（選填，%）</label>
+          <input type="number" id="m-iv" placeholder="e.g. 38（不填預設 30%）" step="0.1" min="1" max="200" inputmode="decimal">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="saveBtn" onclick="savePosition()">儲存倉位</button>
+        <button class="btn-secondary" onclick="cancelForm()">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+document.getElementById('todayLabel').textContent =
+  TODAY.toLocaleDateString('zh-TW', {year:'numeric',month:'long',day:'numeric'});
+
+function calcDTE(s) {
+  if (!s) return null;
+  const d = new Date(s); d.setHours(0,0,0,0);
+  return Math.max(0, Math.round((d - TODAY) / 86400000));
+}
+function fmtExpiry(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  return ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getMonth()]
+    + ` ${d.getDate()} '${String(d.getFullYear()).slice(-2)}`;
+}
+
+const PRESET_EXP = '2028-01-21';
+const DEFAULTS = [
+  {id:'p-tsm',  ticker:'TSM',  strike:290, expiry:PRESET_EXP, underlying:385.36, mark:147.25, cost:77.01, note:'', preset:true},
+  {id:'p-amzn', ticker:'AMZN', strike:210, expiry:PRESET_EXP, underlying:256.61, mark:82.63,  cost:66.19, note:'', preset:true},
+  {id:'p-nvda', ticker:'NVDA', strike:175, expiry:PRESET_EXP, underlying:201.17, mark:64.95,  cost:59.97, note:'', preset:true},
+  {id:'p-aapl', ticker:'AAPL', strike:250, expiry:PRESET_EXP, underlying:273.50, mark:61.96,  cost:60.21, note:'', preset:true},
+  {id:'p-jpm',  ticker:'JPM',  strike:320, expiry:PRESET_EXP, underlying:314.20, mark:46.02,  cost:52.51, note:'', preset:true},
+  {id:'p-v',    ticker:'V',    strike:330, expiry:PRESET_EXP, underlying:307.15, mark:39.65,  cost:52.11, note:'', preset:true},
+];
+
+const PRESET_IDS = new Set(DEFAULTS.map(d => d.id));
+
+let all = [], current = null, editingId = null;
+const pnlPct    = p => (p.mark - p.cost) / p.cost * 100;
+const intrinsic = p => Math.max(0, p.underlying - p.strike);
+const timeVal   = p => Math.max(0, p.mark - intrinsic(p));
+const itmPct    = p => (p.underlying - p.strike) / p.strike * 100;
+const getDTE    = p => calcDTE(p.expiry) ?? 0;
+
+function backupData() {
+  const custom  = all.filter(p => !PRESET_IDS.has(p.id));
+  const deleted = JSON.parse(localStorage.getItem('leap_deleted_presets') || '[]');
+  const payload = { version: 1, exportedAt: new Date().toISOString(), positions: custom, deletedPresets: deleted };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `LEAP_backup_${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('備份已下載');
+}
+
+function restoreData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      if (!payload.positions) throw new Error('格式錯誤');
+      localStorage.setItem('leap_positions', JSON.stringify(payload.positions));
+      if (payload.deletedPresets) {
+        localStorage.setItem('leap_deleted_presets', JSON.stringify(payload.deletedPresets));
+      }
+      loadData();
+      showToast(`還原成功，載入 ${payload.positions.length} 張倉位`);
+    } catch(err) {
+      showToast('還原失敗：檔案格式不正確');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function loadData() {
+  const custom  = JSON.parse(localStorage.getItem('leap_positions') || '[]');
+  const deleted = JSON.parse(localStorage.getItem('leap_deleted_presets') || '[]');
+  const customIds = new Set(custom.map(p => p.id));
+  all = [
+    ...DEFAULTS.filter(p => !deleted.includes(p.id) && !customIds.has(p.id)),
+    ...custom
+  ];
+  renderGrid();
+}
+
+function saveData() {
+  localStorage.setItem('leap_positions', JSON.stringify(all.filter(p => !PRESET_IDS.has(p.id))));
+}
+
+function renderGrid() {
+  document.getElementById('posGrid').innerHTML = all.map(p => {
+    const pct = pnlPct(p), dte = getDTE(p), cls = pct >= 0 ? 'up' : 'dn';
+    return `<div class="pos-card${current?.id===p.id?' active':''}" onclick="selectPos('${p.id}')" id="pc-${p.id}">
+      <button class="del-btn" onclick="delPos(event,'${p.id}')">✕</button>
+      <div class="pos-ticker">${p.ticker}</div>
+      <div class="pos-sub">${p.strike}C · ${dte}d</div>
+      <div class="pos-pnl ${cls}">${pct>=0?'+':''}${pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('') + `<div class="pos-add" onclick="openAdd()"><span>+</span></div>`;
+}
+
+function selectPos(id) {
+  current = all.find(p => p.id === id);
+  if (!current) return;
+  renderGrid();
+  renderDetail(current);
+  document.getElementById('detailPanel').classList.remove('hidden');
+  document.getElementById('formPanel').classList.add('hidden');
+  document.getElementById('ns').value = '';
+  document.getElementById('np').value = '';
+  document.getElementById('rollResult').classList.add('hidden');
+  // 手機：點選後自動捲到分析面板
+  setTimeout(() => document.getElementById('detailPanel').scrollIntoView({behavior:'smooth', block:'start'}), 50);
+}
+
+function renderDetail(p) {
+  const pct = pnlPct(p), tv = timeVal(p), itm = itmPct(p), dte = getDTE(p);
+  document.getElementById('d-title').textContent = `${p.ticker}  ${fmtExpiry(p.expiry)}  ${p.strike} Call`;
+  document.getElementById('d-dte').textContent = `${dte} 天到期`;
+  const badge = document.getElementById('d-badge');
+  if (p.updatedAt) {
+    const d = new Date(p.updatedAt);
+    badge.textContent = `更新於 ${d.getMonth()+1}/${d.getDate()}`;
+    badge.className = 'card-tag green';
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const updateBtn = document.getElementById('updateBtn');
+  if (updateBtn) {
+    updateBtn.innerHTML = p.updatedAt
+      ? '⚠ &nbsp;點此輸入今日最新數據（標的現價、合約現價）'
+      : '⚠ &nbsp;數據未更新 — 點此輸入今日最新數據（標的現價、合約現價）';
+  }
+
+  function estimateDelta(itmPct, dte, ivPct) {
+    const iv = (ivPct || 30) / 100;
+    const x = itmPct / 100;
+    const t = Math.sqrt(dte / 365);
+    const z = x / (iv * t + 0.001);
+    return Math.min(0.99, Math.max(0.01, 0.5 + 0.5 * Math.tanh(1.2 * z)));
+  }
+  const delta = estimateDelta(itm, dte, p.iv);
+  const ivUsed = p.iv || 30;
+  const deltaSignal = delta > 0.85
+    ? { text: `趨近持股，考慮 Roll（IV ${ivUsed}%）`, color: 'var(--amber)' }
+    : delta > 0.65
+    ? { text: `槓桿適中（IV ${ivUsed}%）`, color: 'var(--green)' }
+    : delta > 0.40
+    ? { text: `仍有槓桿空間（IV ${ivUsed}%）`, color: 'var(--green)' }
+    : { text: `高槓桿，高風險（IV ${ivUsed}%）`, color: 'var(--red)' };
+
+  const annualizedTV = p.underlying > 0 && dte > 0
+    ? (tv / p.underlying) * (365 / dte) * 100
+    : 0;
+
+  const tvRatio = p.mark > 0 ? tv / p.mark : 0;
+  const tvSignal = tvRatio > 0.35
+    ? { text: '豐厚，持有划算', color: 'var(--green)' }
+    : tvRatio > 0.20
+    ? { text: '尚可，繼續觀察', color: 'var(--amber)' }
+    : tvRatio > 0.08
+    ? { text: '偏低，Theta 加速', color: '#e0974a' }
+    : { text: '極低，接近純內含價值', color: 'var(--text-dim)' };
+
+  const breakeven = p.strike + p.cost;
+  const pC = pct>=0?'up':'dn';
+  const iC = itm >= 0 ? 'up' : 'dn';
+  const itmOrBE = itm >= 0
+    ? { label:'ITM 幅度',   val:`+${itm.toFixed(1)}%`,      cls:iC,  sub:null }
+    : { label:'損益平衡價', val:`$${breakeven.toFixed(2)}`, cls:'dn', sub:{ text:`現價 $${p.underlying}，需再漲 ${((breakeven - p.underlying)/p.underlying*100).toFixed(1)}%`, color:'var(--red)' } };
+
+  document.getElementById('metricsRow').innerHTML = [
+    {label:'損益 %',      val:`${pct>=0?'+':''}${pct.toFixed(1)}%`,                                   cls:pC,     sub:null},
+    {label:'每張損益 $',  val:`${(p.mark-p.cost)*100>=0?'+':''}${((p.mark-p.cost)*100).toFixed(0)}`,  cls:pC,     sub:null},
+    {label:'Delta（估）', val:delta.toFixed(2),                                                        cls:'',     sub:deltaSignal},
+    {label:'時間價值',    val:tv.toFixed(2),                                                           cls:'gold', sub:tvSignal},
+    itmOrBE,
+    {label:'剩餘天數',    val:dte,                                                                     cls:'',     sub:null},
+  ].map(m=>`<div class="metric-cell"><div class="metric-label">${m.label}</div><div class="metric-val ${m.cls}">${m.val}</div>${m.sub ? `<div style="font-size:10px;font-weight:500;margin-top:5px;color:${m.sub.color}">${m.sub.text}</div>` : ''}</div>`).join('');
+
+  renderBiases(p, pct, tv, itm, dte);
+  renderRec(p, pct, itm, dte);
+}
+
+function renderBiases(p, pct, tv, itm, dte) {
+  let html = '';
+  const fly      = pct > 20 && dte > 300 && tv > 10;
+  const deepITM  = itm > 15 && pct > 60;
+  const stop     = pct < -30 && dte > 250;
+  const small    = pct > 0 && pct < 40 && dte > 180 && dte < 450;
+
+  if (fly) {
+    const tvPct = (tv / p.mark * 100).toFixed(0);
+    if (deepITM) {
+      html += bc('warn','賣飛偏誤',
+        `看到獲利 ${pct.toFixed(1)}% 時，直覺是「鎖住就好」而直接平倉。但這裡有一個更重要的結構問題：`
+        + `<br><br>`
+        + `這張 Call 已深度 ITM（+${itm.toFixed(1)}%），Delta 趨近 1，行為越來越像直接持股。`
+        + `但你付出的 Premium 裡面還有時間價值每股 ${tv.toFixed(2)}（佔 Mark 的 ${tvPct}%），這部分每天在流失，而且你沒有收到股息。`
+        + `換句話說，你現在承擔的風險結構和持股類似，但成本更高，時間還在侵蝕你。`
+        + `<br><br>`
+        + `如果你真的長期看漲這支股票，更有效率的做法不是直接賣掉，而是 Roll Up and Out：`
+        + `<br>① 賣掉現在這張，鎖定 +${pct.toFixed(1)}% 獲利`
+        + `<br>② 用回收資金買一張 Strike 更高、到期更遠的新 Call`
+        + `<br><br>`
+        + `這樣你繼續保有上漲部位，同時把已實現獲利先落袋、重設時間軸給 Theta 更多緩衝、用更少資金繼續參與同樣股數的漲幅。`
+      );
+    } else {
+      html += bc('warn','賣飛偏誤',
+        `看到獲利 ${pct.toFixed(1)}% 時，直覺反應是「鎖住就好」而直接平倉。但時間價值還剩每股 ${tv.toFixed(2)}（佔 Mark 的 ${tvPct}%），直接平倉等於免費送給對手方。這種情況值得思考的問題是：繼續持有、Roll Up and Out、還是現在出場，哪個對你最有利？`
+      );
+    }
+  }
+  if (stop) {
+    const be = p.cost + p.strike, need = ((be - p.underlying) / p.underlying * 100).toFixed(1);
+    html += bc('warn','停損過早偏誤（COST 情境）',`帳面虧損 ${Math.abs(pct).toFixed(1)}% 很容易讓人「看不下去」而衝動停損。損益平衡只需要標的漲 ${need}%（到 ${be.toFixed(0)}），在 ${dte} 天的時間軸內這是可能發生的。`);
+  }
+  if (small) {
+    html += bc('warn','小賺就跑偏誤（ANET 情境）',`虧損撐過來、終於看到正數 +${pct.toFixed(1)}%，這種解脫感最容易讓人馬上賣出。剛翻正往往是標的開始發動的訊號，不是出場點。`);
+  }
+  if (!fly && !stop && !small) {
+    html += bc('neutral','無明顯偏誤風險','目前倉位不在典型偏誤觸發範圍內。按下方操作建議操作即可。');
+  }
+
+  if (dte < 180) {
+    html += bc('danger','⏰ Theta 加速期',`剩餘 ${dte} 天，已進入 Theta 衰減的拋物線加速段。不論目前損益如何，都應優先評估 Roll 或出場，而不是繼續被動持有。`);
+  }
+
+  const peakPct = p.peakPct || pct;
+  if (peakPct > 40 && pct < peakPct - 20) {
+    const drawdown = (peakPct - pct).toFixed(1);
+    html += bc('danger',`📉 獲利回吐警示`,`這張倉位曾達到 +${peakPct.toFixed(1)}% 的高峰，目前回落 ${drawdown}%（現在 +${pct.toFixed(1)}%）。若不採取行動，可能從賣飛偏誤演變成遺憾。建議評估是否 Roll 或鎖定部分獲利。`);
+  }
+  document.getElementById('biasesArea').innerHTML = html;
+  const barC = dte > 365 ? '#4caf82' : dte > 180 ? '#e0974a' : '#e05c5c';
+  document.getElementById('dteBar').style.cssText = `width:${Math.min(100,(dte/730)*100).toFixed(1)}%;background:${barC}`;
+  document.getElementById('dteBarLabel').textContent = `${dte} 天剩餘`;
+}
+
+function bc(type, tag, text) {
+  return `<div class="bias-card ${type}"><div class="bias-tag ${type}">${tag}</div><div class="bias-text" style="white-space:normal">${text}</div></div>`;
+}
+
+function renderRec(p, pct, itm, dte) {
+  let t, tag, text;
+  if (pct > 80 && itm > 20)        { t='ok';      tag='考慮 Roll Up and Out'; text='獲利超過 80% 且深度 ITM。建議賣出換一張 Strike 更高、到期更遠的新 Call，近乎免費繼續持有上漲部位，同時把大部分獲利落袋。'; }
+  else if (pct > 40)                { t='ok';      tag='繼續持有';             text='獲利良好，時間充裕，Theta 侵蝕仍低。可以開始對這張 Call 賣出近月短 Call 攤平成本（Poor Man\'s Covered Call）。'; }
+  else if (pct > 0 && pct <= 40)   { t='warn';    tag='謹慎出場，等方向確認'; text='__CHECKLIST__'; }
+  else if (pct < 0 && itm < 0)     { t='warn';    tag='持有或停損？';          text='__HOLD_CHECKLIST__'; }
+  else if (pct < -40 && dte < 200) { t='danger';  tag='停損時機評估';         text='虧損嚴重且時間有限，Theta 加速侵蝕。建議設最後底線（例如再觀察 30 天），若標的無改善訊號則認賠出場。'; }
+  else                              { t='neutral'; tag='持續觀察';             text='目前無緊急出場訊號。繼續追蹤標的走勢和時間價值消耗速度。'; }
+
+  if (text === '__CHECKLIST__') {
+    document.getElementById('recArea').innerHTML = renderChecklist(p, dte);
+  } else if (text === '__HOLD_CHECKLIST__') {
+    document.getElementById('recArea').innerHTML = renderHoldChecklist(p, pct, dte);
+  } else {
+    document.getElementById('recArea').innerHTML = bc(t, tag, text);
+  }
+}
+
+const CHECKLIST_ITEMS = [
+  { id:'cl1', label:'價格突破', desc:'股價突破近期整理區間，且目前位於 50MA / 200MA 之上' },
+  { id:'cl2', label:'成交量配合', desc:'突破時成交量明顯放大，回測時縮量，代表籌碼穩定、不是虛假突破' },
+  { id:'cl3', label:'催化劑存在', desc:'近期有法說會、財報、新品發表或產業題材，短期有理由讓資金流入' },
+  { id:'cl4', label:'大盤方向配合', desc:'大盤指數處於上升或盤整趨勢，個股才有機會跟著發動' },
+  { id:'cl5', label:'時間充裕', desc:'DTE 還夠長，不是「快到期隨便賣」的心態在驅動決定' },
+];
+
+function renderChecklist(p, dte) {
+  const iv = p.iv || 30;
+  const itm = itmPct(p);
+  const delta = Math.min(0.99, Math.max(0.01, 0.5 + 0.5 * Math.tanh(1.2 * (itm/100) / ((iv/100) * Math.sqrt(dte/365) + 0.001))));
+  let deltaColor, deltaText;
+  if (delta > 0.7) {
+    deltaColor = 'var(--red)';
+    deltaText  = `Delta ${delta.toFixed(2)}：這張 Call 有 ${(delta*100).toFixed(0)}% 的機率到期有價值。現在賣出，是放棄剩餘 ${dte} 天裡大部分的潛在獲利。`;
+  } else if (delta >= 0.5) {
+    deltaColor = 'var(--amber)';
+    deltaText  = `Delta ${delta.toFixed(2)}：到期有價值的機率約 ${(delta*100).toFixed(0)}%。出場與持有都有依據，需結合下方訊號判斷。`;
+  } else {
+    deltaColor = 'var(--text-dim)';
+    deltaText  = `Delta ${delta.toFixed(2)}：市場認為到期 ITM 機率不到一半。若下方訊號也不支持，出場相對合理。`;
+  }
+
+  const deltaRow = `<div style="padding:12px 0;border-bottom:1px solid rgba(224,151,74,0.15)">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px">Delta 自動評估</div>
+    <div style="font-size:13px;color:${deltaColor};line-height:1.6">${deltaText}</div>
+  </div>`;
+
+  const items = CHECKLIST_ITEMS.map(item => `
+    <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(224,151,74,0.15);cursor:pointer" onclick="updateChecklistScore()">
+      <input type="checkbox" id="${item.id}" style="width:18px;height:18px;margin-top:2px;accent-color:var(--amber);flex-shrink:0;cursor:pointer">
+      <span>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${item.label}</span>
+        <span style="font-size:12px;color:var(--text-dim);display:block;margin-top:2px;line-height:1.5">${item.desc}</span>
+      </span>
+    </label>`).join('');
+
+  return `<div class="bias-card warn">
+    <div class="bias-tag warn">出場前最後確認</div>
+    <div class="bias-text" style="margin-bottom:14px">你已考慮出場？先過這關。以下是確認你不是在「小賺就跑」或「賣在起漲點」的阻力測試。訊號勾越多，越不應該現在出場。</div>
+    ${deltaRow}
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--amber);margin:12px 0 4px">主升段訊號確認</div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;line-height:1.6">勾越多，代表排除了黑天鵝以外的不確定因素，大環境支持標的繼續看漲。訊號越齊全，越可能是在起漲點賣掉，越不應該出場。</div>
+    <div id="checklistItems">${items}</div>
+    <div style="margin-top:14px;padding-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div id="checklistScore" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-dim)">0 / 5 項確認</div>
+      <div id="checklistVerdict" style="font-size:12px;font-weight:600"></div>
+    </div>
+  </div>`;
+}
+
+function updateChecklistScore() {
+  setTimeout(() => {
+    const total = CHECKLIST_ITEMS.length;
+    const checked = CHECKLIST_ITEMS.filter(item => {
+      const el = document.getElementById(item.id);
+      return el && el.checked;
+    }).length;
+    const scoreEl = document.getElementById('checklistScore');
+    const verdictEl = document.getElementById('checklistVerdict');
+    if (!scoreEl) return;
+    scoreEl.textContent = `${checked} / ${total} 項確認`;
+    if (checked === total) {
+      verdictEl.textContent = '看漲環境齊備，繼續持有有機會賺更多';
+      verdictEl.style.color = 'var(--green)';
+    } else if (checked >= 3) {
+      verdictEl.textContent = '部分訊號成立，繼續觀察，不宜現在出場';
+      verdictEl.style.color = 'var(--amber)';
+    } else {
+      verdictEl.textContent = '訊號不明，但也不代表應該現在賣';
+      verdictEl.style.color = 'var(--amber)';
+    }
+  }, 0);
+}
+
+function renderHoldChecklist(p, pct, dte) {
+  const loss     = Math.abs((p.mark - p.cost) * 100).toFixed(0);
+  const recover  = (p.mark * 100).toFixed(0);
+
+  const dteStatus = dte > 180
+    ? { label:`DTE ${dte} 天，時間充裕`, color:'var(--green)' }
+    : dte > 90
+    ? { label:`DTE ${dte} 天，Theta 開始加速`, color:'var(--amber)' }
+    : { label:`DTE ${dte} 天，Theta 急速衰減`, color:'var(--red)' };
+
+  const manualItems = [
+    { id:'hc1', label:'近期財報方向正面', desc:'最近兩季 EPS 符合或超過預期，且公司展望未下修' },
+    { id:'hc2', label:'52 週高點接近或超過 Strike', desc:'輸入 52 週高點後由下方自動判斷（請先填入）' },
+    { id:'hc3', label:'標的位於 200MA 之上', desc:'股價目前在 200 日均線之上，長期趨勢未破壞' },
+    { id:'hc4', label:'沒其他地方可放了', desc:`現在停損虧損 $${loss}，但可回收 $${recover}，收回的錢還沒想到可以轉放何處` },
+  ];
+
+  const items = manualItems.map(item => `
+    <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid rgba(224,151,74,0.15);cursor:pointer" onclick="updateHoldScore()">
+      <input type="checkbox" id="${item.id}" style="width:18px;height:18px;margin-top:2px;accent-color:var(--amber);flex-shrink:0;cursor:pointer">
+      <span>
+        <span style="font-size:13px;font-weight:600;color:var(--text)">${item.label}</span>
+        <span style="font-size:12px;color:var(--text-dim);display:block;margin-top:2px;line-height:1.5">${item.desc}</span>
+      </span>
+    </label>`).join('');
+
+  const w52Row = `<div style="padding:10px 0;border-bottom:1px solid rgba(224,151,74,0.15)">
+    <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">52 週高點（輸入查詢）</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <input type="number" id="hc-w52" placeholder="e.g. 320" step="0.01" inputmode="decimal" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;width:160px;-webkit-appearance:none" oninput="updateHoldScore()">
+      <span id="hc-w52-result" style="font-size:12px;color:var(--text-dim)"></span>
+    </div>
+  </div>`;
+
+  return `<div class="bias-card warn">
+    <div class="bias-tag warn">停損前最後確認</div>
+    <div class="bias-text" style="margin-bottom:14px">你已考慮停損？先過這關。勾越多，代表看漲的理由仍然成立，停損可能是情緒決定而非理性判斷。</div>
+    <div style="padding:10px 0 10px;border-bottom:1px solid rgba(224,151,74,0.15)">
+      <span style="font-size:13px;font-weight:600;color:var(--text)">剩餘天數</span>
+      <span style="font-size:12px;font-weight:500;color:${dteStatus.color};margin-left:10px">${dteStatus.label}</span>
+    </div>
+    ${w52Row}
+    ${items}
+    <div style="margin-top:14px;padding-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div id="holdScore" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-dim)">0 / 4 項確認</div>
+      <div id="holdVerdict" style="font-size:12px;font-weight:600"></div>
+    </div>
+  </div>`;
+}
+
+function updateHoldScore() {
+  setTimeout(() => {
+    const w52Input = parseFloat(document.getElementById('hc-w52')?.value);
+    const w52Result = document.getElementById('hc-w52-result');
+    const hc2 = document.getElementById('hc2');
+    if (!isNaN(w52Input) && current && w52Result && hc2) {
+      const diff = ((w52Input - current.strike) / current.strike * 100).toFixed(1);
+      if (w52Input > current.strike) {
+        w52Result.textContent = `✓ 高點 ${w52Input} 已超過 Strike ${current.strike}`;
+        w52Result.style.color = 'var(--green)';
+        hc2.checked = true;
+      } else if ((current.strike - w52Input) / current.strike < 0.10) {
+        w52Result.textContent = `△ 高點距 Strike 差 ${Math.abs(diff)}%，需要創新高`;
+        w52Result.style.color = 'var(--amber)';
+        hc2.checked = true;
+      } else {
+        w52Result.textContent = `✗ 高點距 Strike 差 ${Math.abs(diff)}%，需要大幅超越歷史高點`;
+        w52Result.style.color = 'var(--red)';
+        hc2.checked = false;
+      }
+    }
+    const ids = ['hc1','hc2','hc3','hc4'];
+    const checked = ids.filter(id => document.getElementById(id)?.checked).length;
+    const scoreEl  = document.getElementById('holdScore');
+    const verdict  = document.getElementById('holdVerdict');
+    if (!scoreEl) return;
+    scoreEl.textContent = `${checked} / 4 項確認`;
+    if (checked >= 4) {
+      verdict.textContent = '看漲理由充分，繼續持有等待反彈';
+      verdict.style.color = 'var(--green)';
+    } else if (checked >= 2) {
+      verdict.textContent = '部分條件成立，繼續觀察，不宜現在停損';
+      verdict.style.color = 'var(--amber)';
+    } else {
+      verdict.textContent = '支撐理由薄弱，認真考慮是否停損';
+      verdict.style.color = 'var(--red)';
+    }
+  }, 0);
+}
+
+function calcRoll() {
+  if (!current) return;
+  const ns = parseFloat(document.getElementById('ns').value);
+  const np = parseFloat(document.getElementById('np').value);
+  const el = document.getElementById('rollResult');
+  if (isNaN(ns) || isNaN(np)) { el.classList.add('hidden'); return; }
+  const proceeds     = current.mark * 100;
+  const newCost      = np * 100;
+  const originalCost = current.cost * 100;
+  const directProfit = proceeds - originalCost;
+  const cashKept     = proceeds - newCost;
+  const dist = ((ns - current.underlying) / current.underlying * 100).toFixed(1);
+  el.classList.remove('hidden');
+
+  const netCost = newCost - directProfit;
+  const costRecoveryPct = (cashKept / originalCost * 100);
+  const isFreeTrade = cashKept >= originalCost;
+  const freeTradeRow = isFreeTrade
+    ? `<div class="roll-row" style="background:rgba(201,168,76,0.12);border-color:rgba(201,168,76,0.3)">
+        <span class="roll-key" style="color:var(--gold);font-weight:600">🏆 Free Trade 無本倉位</span>
+        <span class="roll-val" style="color:var(--gold)">已回收原始本金 ${costRecoveryPct.toFixed(0)}%</span>
+       </div>`
+    : `<div class="roll-row"><span class="roll-key">原始本金回收比例</span><span class="roll-val ${costRecoveryPct >= 50 ? 'free' : 'cost'}">${costRecoveryPct.toFixed(0)}%${costRecoveryPct >= 50 ? '（過半）' : ''}</span></div>`;
+
+  const summary = netCost <= 0
+    ? `賣出 ${current.ticker} ${current.strike} Call 可回收獲利 <strong style="color:var(--green)">$${directProfit.toFixed(0)}</strong>，買入新的 ${ns} Call 花費 $${newCost.toFixed(0)}，獲利已足夠支付，等於以成本 <strong style="color:var(--green)">$0（額外收入 $${Math.abs(netCost).toFixed(0)}）</strong> 持有此新 LEAP Call`
+    : `賣出 ${current.ticker} ${current.strike} Call 可回收獲利 <strong style="color:var(--green)">$${directProfit.toFixed(0)}</strong>，買入新的 ${ns} Call 花費 $${newCost.toFixed(0)}，等於以成本 <strong style="color:var(--amber)">$${netCost.toFixed(0)}</strong> 持有此新 LEAP Call`;
+
+  el.innerHTML = `
+    <div class="roll-row"><span class="roll-key">賣出現有 ${current.ticker} ${current.strike} Call 回收獲利</span><span class="roll-val free">$${directProfit.toFixed(0)}</span></div>
+    <div class="roll-row"><span class="roll-key">買入新 ${ns} Call 花費</span><span class="roll-val">$${newCost.toFixed(0)}</span></div>
+    <div class="roll-row"><span class="roll-key">新 Strike 距 ITM（現價 ${current.underlying}）</span><span class="roll-val">${dist > 0 ? '+' : ''}${dist}%</span></div>
+    <div class="roll-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <span style="font-size:13px;color:var(--text-mid);line-height:1.8">${summary}</span>
+    </div>`;
+}
+
+function openAdd() {
+  editingId = null;
+  document.getElementById('formBadge').textContent = 'NEW';
+  document.getElementById('formTitle').textContent = '新增倉位';
+  document.getElementById('saveBtn').textContent   = '儲存倉位';
+  ['m-ticker','m-strike','m-underlying','m-mark','m-cost','m-expiry','m-note','m-iv'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.readOnly = false;
+    el.style.opacity = '1';
+    el.style.cursor = '';
+    el.style.borderColor = '';
+  });
+  document.getElementById('dteHint').textContent = '';
+  document.getElementById('edit-hint').style.display = 'none';
+  document.getElementById('detailPanel').classList.add('hidden');
+  document.getElementById('formPanel').classList.remove('hidden');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function openEdit() {
+  if (!current) return;
+  editingId = current.id;
+  document.getElementById('formBadge').textContent = 'EDIT';
+  document.getElementById('formTitle').textContent = `更新 ${current.ticker} 今日數據`;
+  document.getElementById('saveBtn').textContent   = '更新倉位';
+
+  document.getElementById('m-ticker').value        = current.ticker;
+  document.getElementById('m-strike').value        = current.strike;
+  document.getElementById('m-underlying').value    = current.underlying;
+  document.getElementById('m-mark').value          = current.mark;
+  document.getElementById('m-cost').value          = current.cost;
+  document.getElementById('m-expiry').value        = current.expiry;
+  document.getElementById('m-note').value          = current.note || '';
+  document.getElementById('m-iv').value            = current.iv || '';
+  updateDteHint();
+
+  const fixedIds = ['m-ticker','m-strike','m-cost','m-expiry','m-note'];
+  const editIds  = ['m-underlying','m-mark','m-iv'];
+  fixedIds.forEach(id => {
+    const el = document.getElementById(id);
+    el.readOnly = true;
+    el.style.opacity = '0.35';
+    el.style.cursor  = 'not-allowed';
+  });
+  editIds.forEach(id => {
+    const el = document.getElementById(id);
+    el.readOnly = false;
+    el.style.opacity = '1';
+    el.style.cursor  = '';
+    el.style.borderColor = 'var(--gold-dim)';
+  });
+
+  document.getElementById('edit-hint').style.display = 'block';
+  document.getElementById('detailPanel').classList.add('hidden');
+  document.getElementById('formPanel').classList.remove('hidden');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  setTimeout(() => document.getElementById('m-underlying').focus(), 100);
+}
+
+function cancelForm() {
+  document.getElementById('formPanel').classList.add('hidden');
+  if (current) document.getElementById('detailPanel').classList.remove('hidden');
+}
+
+function updateDteHint() {
+  const dte = calcDTE(document.getElementById('m-expiry').value);
+  const el  = document.getElementById('dteHint');
+  if (dte === null) { el.textContent = ''; return; }
+  el.textContent = dte > 0 ? `距今 ${dte} 天` : '已到期';
+  el.style.color = dte > 365 ? '#4caf82' : dte > 180 ? '#e0974a' : '#e05c5c';
+}
+
+function savePosition() {
+  const ticker     = (document.getElementById('m-ticker').value || '').toUpperCase().trim();
+  const strike     = parseFloat(document.getElementById('m-strike').value);
+  const underlying = parseFloat(document.getElementById('m-underlying').value);
+  const mark       = parseFloat(document.getElementById('m-mark').value);
+  const cost       = parseFloat(document.getElementById('m-cost').value);
+  const expiry     = document.getElementById('m-expiry').value;
+  const note       = document.getElementById('m-note').value;
+  const ivInput    = parseFloat(document.getElementById('m-iv').value);
+  const iv         = isNaN(ivInput) ? 30 : Math.max(1, Math.min(200, ivInput));
+  if (!ticker || [strike, underlying, mark, cost].some(isNaN) || !expiry) { showToast('請填入所有必要欄位'); return; }
+  if ((calcDTE(expiry) ?? 0) <= 0) { showToast('到期日必須是未來日期'); return; }
+
+  if (editingId) {
+    const i = all.findIndex(p => p.id === editingId);
+    if (i >= 0) {
+      const wasPreset = PRESET_IDS.has(editingId);
+      const currentPct = (mark - cost) / cost * 100;
+      const newPeak = Math.max(all[i].peakPct || 0, currentPct);
+      const newId = wasPreset ? 'c-' + Date.now() : editingId;
+      all[i] = { ...all[i], id: newId, ticker, strike, underlying, mark, cost, expiry, note, iv, peakPct: newPeak, updatedAt: Date.now(), preset: false };
+      if (wasPreset) {
+        const deleted = JSON.parse(localStorage.getItem('leap_deleted_presets') || '[]');
+        if (!deleted.includes(editingId)) deleted.push(editingId);
+        localStorage.setItem('leap_deleted_presets', JSON.stringify(deleted));
+      }
+      current = all[i];
+    }
+  } else {
+    const initPct = (mark - cost) / cost * 100;
+    const newP = { id: 'c-' + Date.now(), ticker, strike, underlying, mark, cost, expiry, note, iv, peakPct: initPct, updatedAt: Date.now(), preset: false };
+    all.push(newP);
+    current = newP;
+  }
+  saveData(); renderGrid(); renderDetail(current);
+  document.getElementById('formPanel').classList.add('hidden');
+  document.getElementById('detailPanel').classList.remove('hidden');
+  showToast(`${ticker} 倉位已儲存`);
+}
+
+function delPos(e, id) {
+  e.stopPropagation();
+  const p = all.find(x => x.id === id);
+  if (!p || !confirm(`確認刪除 ${p.ticker} 這張倉位？`)) return;
+  all = all.filter(x => x.id !== id);
+  const isOriginalPreset = PRESET_IDS.has(id);
+  if (isOriginalPreset) {
+    const deleted = JSON.parse(localStorage.getItem('leap_deleted_presets') || '[]');
+    if (!deleted.includes(id)) deleted.push(id);
+    localStorage.setItem('leap_deleted_presets', JSON.stringify(deleted));
+  }
+  saveData();
+  if (current?.id === id) { current = null; document.getElementById('detailPanel').classList.add('hidden'); }
+  renderGrid();
+  showToast(`${p.ticker} 已刪除`);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+loadData();
+</script>
+</body>
+</html>
