@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投資邏輯分享 — 第一階段</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:    #F7F4EE;
+  --cream-dk: #EDE8DF;
+  --white:    #FFFFFF;
+  --coral:    #D97B6C;
+  --coral-lt: #F5E6E3;
+  --sage:     #6EA896;
+  --sage-lt:  #E3F0EC;
+  --lav:      #9B87C0;
+  --lav-lt:   #EDE9F5;
+  --amber:    #C8963A;
+  --amber-lt: #F5EDD8;
+  --ink:      #2C2820;
+  --muted:    #8A8077;
+  --border:   #E0DAD0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+/* ── Layout ── */
+.wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* ── Section types ── */
+
+/* Big impact text section */
+.section-big {
+  padding: 10vh 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Normal content section */
+.section {
+  padding: 7vh 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-child { border-bottom: none; }
+
+/* ── Typography ── */
+.eyebrow {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase;
+  margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: .6rem;
+}
+.eyebrow::after {
+  content: '';
+  display: block; flex: 1; height: 1px;
+  background: var(--border);
+}
+
+.big {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(36px, 7vw, 68px);
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+.big em { font-style: italic; color: var(--coral); }
+.big.sage em { color: var(--sage); }
+.big.amber em { color: var(--amber); }
+.big.lav em   { color: var(--lav); }
+
+.mid {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(22px, 4vw, 38px);
+  line-height: 1.2; color: var(--ink);
+  margin-bottom: 1rem;
+}
+.mid em { font-style: italic; }
+
+.cue {
+  font-size: clamp(15px, 2.2vw, 20px);
+  font-weight: 700; color: var(--ink);
+  line-height: 1.5; margin-bottom: .75rem;
+}
+
+.body {
+  font-size: clamp(14px, 1.8vw, 17px);
+  color: var(--muted); line-height: 1.75;
+  margin-bottom: .75rem;
+}
+
+.body strong { color: var(--ink); font-weight: 700; }
+
+.note {
+  font-size: 13px; color: var(--muted);
+  font-style: italic; margin-top: .5rem;
+}
+
+/* ── Cards & callouts ── */
+.callout {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 1.5rem 1.75rem;
+  margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(44,40,32,.06);
+}
+.callout::before {
+  content: '';
+  position: absolute; left: 0; top: 0;
+  width: 4px; height: 100%;
+}
+.callout.coral::before { background: var(--coral); }
+.callout.sage::before  { background: var(--sage); }
+.callout.amber::before { background: var(--amber); }
+.callout.lav::before   { background: var(--lav); }
+
+.callout-title {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: .6rem;
+}
+
+.highlight {
+  background: var(--amber-lt);
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  margin: 1.5rem 0;
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(18px, 3vw, 26px);
+  color: var(--amber);
+  line-height: 1.3;
+}
+
+/* ── Comparison ── */
+.vs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.vs-card {
+  border-radius: 12px;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--border);
+}
+.vs-card .vs-label {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase;
+  margin-bottom: .75rem;
+}
+
+/* ── Row list ── */
+.row-list { margin: 1.5rem 0; }
+.row-item {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: .9rem 1.2rem;
+  background: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-bottom: .6rem;
+  box-shadow: 0 1px 6px rgba(44,40,32,.04);
+}
+.row-item .left { font-size: 14px; color: var(--ink); }
+.row-item .divider { width: 1px; height: 28px; background: var(--border); }
+.row-item .right { font-size: 13px; }
+.row-item .right strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+
+/* ── Score grid ── */
+.score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: .75rem;
+  margin: 1.5rem 0;
+}
+.score-card {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(44,40,32,.05);
+}
+.score-head {
+  padding: 1rem 1.1rem .75rem;
+}
+.score-pts {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px; line-height: 1;
+}
+.score-body {
+  background: var(--white);
+  padding: .75rem 1.1rem;
+}
+.score-item {
+  font-size: 12px; color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.score-item:last-child { border-bottom: none; }
+
+/* expandable score items */
+.score-item-btn {
+  width: 100%; background: none; border: none;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .5rem 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer; text-align: left;
+  transition: color .15s;
+}
+.score-item-btn:hover { color: var(--ink); }
+.score-item-btn .arrow {
+  font-size: 10px; color: var(--border);
+  transition: transform .2s, color .2s;
+  flex-shrink: 0; margin-left: .5rem;
+}
+.score-item.open .score-item-btn { color: var(--ink); }
+.score-item.open .score-item-btn .arrow { transform: rotate(90deg); color: var(--muted); }
+
+.score-expand {
+  display: none;
+  padding: .6rem 0 .8rem;
+  border-top: 1px dashed var(--border);
+}
+.score-item.open .score-expand { display: block; }
+
+/* mini table inside expand */
+.mini-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 11px; margin-bottom: .5rem;
+}
+.mini-table th {
+  background: var(--cream-dk); color: var(--muted);
+  font-weight: 700; font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: .35rem .5rem; text-align: left;
+}
+.mini-table td {
+  padding: .35rem .5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink); line-height: 1.4;
+}
+.mini-table tr:last-child td { border-bottom: none; }
+.expand-note {
+  font-size: 11px; color: var(--muted);
+  line-height: 1.6; margin-top: .4rem;
+}
+
+/* ── Pipeline ── */
+.pipeline {
+  display: flex; gap: .6rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+.pipe-step {
+  flex: 1; min-width: 80px;
+  border-radius: 10px;
+  padding: .85rem .9rem;
+  text-align: center;
+  border: 1.5px solid var(--border);
+}
+.pipe-step.active {
+  border-color: var(--coral);
+  box-shadow: 0 2px 12px rgba(217,123,108,.15);
+}
+.pipe-step .step-label {
+  font-size: 10px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  margin-bottom: .4rem;
+}
+.pipe-step .step-name {
+  font-size: 12px; font-weight: 700;
+  line-height: 1.3;
+}
+.pipe-step .step-file {
+  font-size: 9px; font-family: 'Courier New';
+  margin-top: .3rem; color: var(--muted);
+}
+
+/* ── Takeaways ── */
+.takeaway-list { margin: 1.5rem 0; }
+.takeaway {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 1rem 1.2rem;
+  background: var(--white);
+  border-radius: 8px; border: 1px solid var(--border);
+  margin-bottom: .6rem;
+  box-shadow: 0 1px 6px rgba(44,40,32,.04);
+}
+.takeaway-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px; color: var(--coral);
+  min-width: 1.6em; line-height: 1.2;
+}
+.takeaway-text { font-size: 15px; color: var(--ink); line-height: 1.6; padding-top: .15rem; }
+
+/* ── Homework ── */
+.homework {
+  background: var(--amber-lt);
+  border: 1.5px solid var(--amber);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  margin-top: 2rem;
+}
+.homework .hw-label {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: .75rem;
+}
+.homework .hw-text {
+  font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.6;
+}
+
+/* ── Progress bar ── */
+.progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 3px; background: var(--coral);
+  width: 0%; z-index: 100;
+  transition: width .1s;
+}
+
+/* ── Top nav ── */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(247,244,238,.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  z-index: 99;
+  padding: .6rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topnav .title {
+  font-size: 12px; font-weight: 700; color: var(--muted);
+}
+.topnav .sections {
+  display: flex; gap: 1.2rem;
+}
+.topnav .sec-link {
+  font-size: 11px; font-weight: 700;
+  color: var(--muted); text-decoration: none;
+  letter-spacing: .04em;
+  transition: color .2s;
+}
+.topnav .sec-link:hover { color: var(--coral); }
+
+body { padding-top: 44px; }
+
+/* ── Divider ornament ── */
+.ornament {
+  text-align: center; color: var(--border);
+  font-size: 18px; padding: 2rem 0;
+  letter-spacing: .4em;
+}
+
+/* ── Section counter ── */
+.sec-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 11px; color: var(--border);
+  letter-spacing: .1em;
+}
+
+@media (max-width: 560px) {
+  .vs { grid-template-columns: 1fr; }
+  .score-grid { grid-template-columns: 1fr; }
+  .pipeline { flex-direction: column; }
+  .row-item { grid-template-columns: 1fr; }
+  .row-item .divider { display: none; }
+  .topnav .sections { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="prog"></div>
+
+<nav class="topnav">
+  <span class="title">投資邏輯分享 · 第一階段</span>
+  <div class="sections">
+    <a href="#open" class="sec-link">開場</a>
+    <a href="#why" class="sec-link">為什麼</a>
+    <a href="#health" class="sec-link">公司健診</a>
+    <a href="#lazy" class="sec-link">懶人投資</a>
+    <a href="#entry" class="sec-link">進場</a>
+    <a href="#monitor" class="sec-link">觀察清單</a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     開場
+══════════════════════════════════════ -->
+<section class="section-big" id="open">
+  <div class="wrap">
+    <div class="sec-num">01 · 開場</div>
+    <div class="big" style="margin-top:.75rem">
+      我分享的是<br><em>自己的投資邏輯</em>
+    </div>
+    <div class="cue">專業建議到處都有。但實際操作長什麼樣子？</div>
+    <div class="body">我想分享的是思考邏輯，還有我怎麼把這套邏輯架構起來。這六支工具，就是我在整個投資流程裡實際在用的輔助工具。</div>
+
+    <div class="pipeline">
+      <div class="pipe-step active" style="background:var(--coral-lt)">
+        <div class="step-label" style="color:var(--coral)">研究層</div>
+        <div class="step-name">財報研究筆記</div>
+        <div class="step-file">watchlist.html</div>
+      </div>
+      <div class="pipe-step active" style="background:var(--sage-lt)">
+        <div class="step-label" style="color:var(--sage)">監控層</div>
+        <div class="step-name">交易觀察清單</div>
+        <div class="step-file">enter-monitor</div>
+      </div>
+      <div class="pipe-step" style="background:var(--cream-dk)">
+        <div class="step-label" style="color:var(--muted)">進場層</div>
+        <div class="step-name" style="color:var(--muted)">進場分析</div>
+        <div class="step-file">下次 →</div>
+      </div>
+      <div class="pipe-step" style="background:var(--cream-dk)">
+        <div class="step-label" style="color:var(--muted)">追蹤層</div>
+        <div class="step-name" style="color:var(--muted)">部位追蹤</div>
+        <div class="step-file">之後 →</div>
+      </div>
+      <div class="pipe-step" style="background:var(--cream-dk)">
+        <div class="step-label" style="color:var(--muted)">出場層</div>
+        <div class="step-name" style="color:var(--muted)">出場決策</div>
+        <div class="step-file">之後 →</div>
+      </div>
+    </div>
+
+    <a href="https://utopiawrite.github.io/" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; margin:.75rem 0 1.25rem; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">🔗 打開工具 →</a>
+
+    <div class="callout sage">
+      <div class="callout-title" style="color:var(--sage)">今天的範圍</div>
+      <div class="body" style="margin:0">前兩層：研究 + 監控。其他的之後按程度解鎖。這些表格是<strong>整理思路用的</strong>，填起來可以很隨性，看不懂的問 AI，不用有壓力。</div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     為什麼財報研究
+══════════════════════════════════════ -->
+<section class="section" id="why">
+  <div class="wrap">
+    <div class="sec-num">02 · 財報研究筆記</div>
+    <div class="big" style="margin-top:.75rem">
+      你說<em>「有信心」</em><br>但那個信心<br>哪裡來？
+    </div>
+
+    <div class="vs">
+      <div class="vs-card" style="background:var(--cream-dk)">
+        <div class="vs-label" style="color:#C0504D">❌ 常見狀況</div>
+        <div class="cue" style="font-size:15px; margin-bottom:.5rem">「我對蘋果有信心」</div>
+        <div class="body" style="margin:0">股市一跌，信心消失。原因是<strong>不知道自己買了什麼</strong>，沒有量化的根據。</div>
+      </div>
+      <div class="vs-card" style="background:var(--sage-lt)">
+        <div class="vs-label" style="color:var(--sage)">✅ 有依據的信心</div>
+        <div class="cue" style="font-size:15px; margin-bottom:.5rem">研究過的公司跌了</div>
+        <div class="body" style="margin:0">研究過的公司跌了，但基本面沒變，<strong>才能安心的繼續抱住。</strong></div>
+      </div>
+    </div>
+
+    <div class="ornament" style="padding:1rem 0; font-size:13px; color:var(--muted)">評估公司和評估一個人的財務狀況，邏輯是一樣的</div>
+
+    <div class="row-list">
+      <div class="row-item">
+        <div class="left">👤 這個人每個月薪水多少？</div>
+        <div class="divider"></div>
+        <div class="right" style="color:var(--muted)"><strong>營收</strong>連這都沒有就不用看了</div>
+        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--muted); opacity:.6; white-space:nowrap; align-self:center">基本門檻</div>
+      </div>
+      <div style="text-align:center; font-size:11px; font-weight:800; color:var(--muted); letter-spacing:.08em; padding:.5rem 0; opacity:.7">↓ 評分從這裡開始</div>
+      <div class="row-item">
+        <div class="left">👤 他有沒有賺到錢？</div>
+        <div class="divider"></div>
+        <div class="right"><strong style="color:var(--coral)">EPS / 淨利率</strong>每 100 元收入留下多少</div>
+        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--coral); opacity:.6; white-space:nowrap; align-self:center">損益表</div>
+      </div>
+      <div class="row-item">
+        <div class="left">👤 口袋裡真正剩下多少？</div>
+        <div class="divider"></div>
+        <div class="right"><strong style="color:var(--sage)">FCF 自由現金流</strong>比 EPS 更難造假</div>
+        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--sage); opacity:.6; white-space:nowrap; align-self:center">現金流量表</div>
+      </div>
+      <div class="row-item">
+        <div class="left">👤 他怎麼用他的錢？</div>
+        <div class="divider"></div>
+        <div class="right"><strong style="color:var(--amber)">ROIC / 負債比</strong>錢用得有沒有效率</div>
+        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--amber); opacity:.6; white-space:nowrap; align-self:center">資產負債表</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     公司健診評分
+══════════════════════════════════════ -->
+<section class="section" id="health">
+  <div class="wrap">
+    <div class="sec-num">03 · 公司健診評分</div>
+    <div class="big sage" style="margin-top:.75rem">
+      <em>價值投資</em>這個框架<br>本來就有人用
+    </div>
+    <div class="body">今天分享的是我實際怎麼使用它。打開 watchlist 來看。點每個指標可以展開說明 👇</div>
+
+    <div class="callout sage">
+      <div class="callout-title" style="color:var(--sage)">這張表格的由來</div>
+      <div class="body" style="margin:0">我以前做國外業務，公司每天發匯率表給我們，看久了對高點低點就有感覺了，匯率 30 以下就買進，30 以上有需要就賣出，這個 30 是一直看出來的，沒有什麼複雜的公式。<br><br>後來 Google 股票盤整了一段時間，只要有人問我，我大概就知道哪裡是支撐、哪裡是壓力，因為股價跌到某個位置就停，漲到某個位置又回來，根本不用看線圖。<br><br>這就是為什麼我做了這張表，<strong>看久了，感覺就出來了。</strong></div>
+    </div>
+
+    <div class="score-grid">
+
+      <!-- 財務指標 -->
+      <div class="score-card">
+        <div class="score-head" style="background:var(--sage-lt)">
+          <div class="callout-title" style="color:var(--sage); margin-bottom:.4rem">財務指標</div>
+          <div class="score-pts" style="color:var(--sage)">6 分</div>
+          <div class="note" style="margin-top:.3rem; color:var(--sage)">核心，先看這裡</div>
+        </div>
+        <div class="score-body">
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              E — EPS 每股盈餘 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <table class="mini-table">
+                <tr><th>個人</th><th>公司</th></tr>
+                <tr><td>今年年終 50 萬，明年 80 萬</td><td>每股股東可分到的獲利</td></tr>
+                <tr><td>年終有沒有逐年變多</td><td>10 年是否穩定成長</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              N — 淨利率 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <table class="mini-table">
+                <tr><th>個人</th><th>公司</th></tr>
+                <tr><td>月薪 5 萬，每月能存下多少</td><td>每 100 元收入留下幾塊利潤</td></tr>
+                <tr><td>每月存 1 萬，很強</td><td>&gt;20% 是優等生</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              F — FCF 自由現金流 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <table class="mini-table">
+                <tr><th>個人</th><th>公司</th></tr>
+                <tr><td>薪資單寫 10 萬</td><td>EPS 顯示獲利</td></tr>
+                <tr><td>匯進帳戶的 7 萬</td><td>FCF 實際現金</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              D — 股息 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note" style="margin-bottom:.5rem">EPS 是公司賺到、<em>可以</em>分的錢。股息是真的<em>願意給你</em>多少。</div>
+              <table class="mini-table">
+                <tr><th>類型</th><th>特徵</th><th>例子</th></tr>
+                <tr><td>成長股</td><td>賺的錢拿去繼續投資，股息少或沒有，正常</td><td>多數科技股</td></tr>
+                <tr><td>股息股</td><td>每年固定配息，放著收錢</td><td>中鋼、中華電、銀行股</td></tr>
+              </table>
+              <div class="expand-note">如果你對股價漲跌不敏感、打算放著不動，就要特別看股息。</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              R — ROIC 資本回報率 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <table class="mini-table">
+                <tr><th></th><th>套房 A</th><th>套房 B</th></tr>
+                <tr><td>買入價格</td><td>580 萬</td><td>580 萬</td></tr>
+                <tr><td>月租金</td><td>4 萬</td><td>8 萬</td></tr>
+                <tr><td>年租金</td><td>48 萬</td><td>96 萬</td></tr>
+                <tr><td>ROIC</td><td>約 8.3%</td><td style="font-weight:700; color:var(--sage)">約 16.6%</td></tr>
+              </table>
+              <div class="expand-note">同樣的錢，哪個值得？當然是 B。公司也一樣，持續 &gt;15% 是優等生。</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              I — 負債比 D/E <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <table class="mini-table">
+                <tr><th></th><th>個人（買房）</th><th>公司</th></tr>
+                <tr><td>總價</td><td>1,000 萬</td><td>總資產</td></tr>
+                <tr><td>自己出（Equity）</td><td>頭期款 300 萬</td><td>股東權益</td></tr>
+                <tr><td>借的（Debt）</td><td>貸款 700 萬</td><td>負債</td></tr>
+                <tr><td>D/E</td><td colspan="2" style="font-weight:700; color:var(--coral)">700 ÷ 300 = 2.3（借的是自己出的 2.3 倍）</td></tr>
+              </table>
+              <div class="expand-note">D/E 越低越穩，能到 0.5 以下很好，無負債更棒。</div>
+            </div>
+          </div>
+
+          <div class="score-item" style="border-bottom:none">
+            <div style="padding:.5rem 0; font-size:11px; color:var(--muted); font-style:italic">分數越高，你對這家公司的信心就越有根據</div>
+          </div>
+
+        </div>
+      </div>
+      <div class="score-card">
+        <div class="score-head" style="background:var(--lav-lt)">
+          <div class="callout-title" style="color:var(--lav); margin-bottom:.4rem">護城河</div>
+          <div class="score-pts" style="color:var(--lav)">4 分</div>
+          <div class="note" style="margin-top:.3rem; color:var(--lav)">加分題，看不懂填零</div>
+        </div>
+        <div class="score-body">
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              無形資產（品牌/專利）<span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">想喝可樂，腦子裡第一個出現的是 KO。這個品牌佔據你的心理空間，你願意多付一點錢買，這就是護城河。例：KO、AAPL、NKE</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              轉換成本 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">你用 iPhone 買了一堆 App，換 Android 就要重買。這個「換掉會很痛」的感覺，讓你繼續留在 Apple 生態圈。公司也一樣，客戶轉走的代價越高，護城河越深。例：MSFT、CRM、ADBE</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              網絡效應 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">使用者越多，整個網絡對每個人越有價值。為什麼 FB 都是老人在用？因為你的朋友都在上面。V 和 MA 也一樣，越多商家接受 Visa，持卡人越有用；越多人持卡，商家越不敢不接受。例：META、V、MA</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              成本優勢 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">為什麼雜貨店越來越少，最後都變成 7-11？因為統一集團採購量龐大，進貨價格比任何一家雜貨店都低。規模越大，成本越低，對手越難跟你競爭。雜貨店不是服務不好，是成本結構從一開始就輸了。例：7-11、COST、WMT</div>
+            </div>
+          </div>
+
+          <div class="score-item" style="border-bottom:none">
+            <div style="padding:.5rem 0; font-size:11px; color:var(--muted); font-style:italic">就像你的技能越多元，在公司越不怕被取代，護城河越深，公司越不怕競爭對手</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 風險扣分 -->
+      <div class="score-card">
+        <div class="score-head" style="background:var(--coral-lt)">
+          <div class="callout-title" style="color:var(--coral); margin-bottom:.4rem">風險扣分</div>
+          <div class="score-pts" style="color:var(--coral)">最多 −3</div>
+          <div class="note" style="margin-top:.3rem; color:var(--coral)">外部控制不了的變數</div>
+        </div>
+        <div class="score-body">
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              A — 政策風險 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">菸草公司突然被政府加稅、限制電子菸；UNH 因為健保制度改革整個商業模式被影響。不是公司做錯什麼，是政府一個決定就能改變遊戲規則。</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              S — 科技替代風險 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">大家還聽過 Nokia 嗎？當年手機市場第一，但沒跟上智慧型手機，就消失了。需要不斷砸研發才能維持競爭力的公司，這個風險永遠存在。</div>
+            </div>
+          </div>
+
+          <div class="score-item">
+            <button class="score-item-btn" onclick="toggleItem(this)">
+              K — 關鍵人物風險 <span class="arrow">▶</span>
+            </button>
+            <div class="score-expand">
+              <div class="expand-note">你有聽過麥當勞 CEO 說什麼話嗎？想不起來，對吧？但馬斯克說要去火星、說狗狗幣，股價就動了。這家公司的命運和某一個人綁在一起，那個人一出事就危險。</div>
+            </div>
+          </div>
+
+          <div class="score-item" style="border-bottom:none">
+            <div style="padding:.5rem 0; font-size:11px; color:var(--muted); font-style:italic">不影響財務健康，但會影響股價波動幅度和黑天鵝風險</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <a href="https://www.stockboss.io/" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; margin-top:1.25rem; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">🔗 StockBoss — 我用的工具 →</a>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     懶人投資
+══════════════════════════════════════ -->
+<section class="section" id="lazy">
+  <div class="wrap">
+    <div class="sec-num">04 · 懶人價值投資</div>
+    <div class="big amber" style="margin-top:.75rem">
+      分數夠高<br>放夠久<br><em>都是賺的</em>
+    </div>
+
+    <div class="highlight">
+      如果你還年輕，多一個優勢：時間。<br>任何時間進場，放 3 年以上，概率上你都會是正的。
+    </div>
+
+    <div class="body">當然這不是保證。但這就是為什麼選好公司這件事這麼重要，你不需要擇時，你需要的是選對。</div>
+
+    <a href="https://www.tradingview.com/" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; margin:1rem 0; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">📈 打開 TradingView，看好公司的長期走勢 →</a>
+
+    <div class="mid" style="margin-top:2rem">擔心買在高點？<br><em>這兩個動作幫你降低風險</em></div>
+
+    <div class="callout sage">
+      <div class="callout-title" style="color:var(--sage)">01 · 定期檢視</div>
+      <div class="cue" style="margin-bottom:.4rem">最少一年一次</div>
+      <div class="body" style="margin:0">懶人可以跟著季報走，一季一次。一間公司要好要爛，都是有跡可循的，早一點發現早一點處理。</div>
+    </div>
+
+    <div class="callout coral">
+      <div class="callout-title" style="color:var(--coral)">02 · 資產配置</div>
+      <div class="cue" style="margin-bottom:.4rem">不要把所有蛋放同一個籃子</div>
+      <div class="body" style="margin:0">分散到不同產業。研究顯示，15–20 支的分散效果就差不多了，超過反而沒效率。目標是<strong>整體資產成長</strong>，不是每一支都要賺。</div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     基本面頁面
+══════════════════════════════════════ -->
+<section class="section">
+  <div class="wrap">
+    <div class="sec-num">05 · 基本面頁面</div>
+    <div class="big" style="margin-top:.75rem">
+      基本面的紀錄重點<br><em>財報！</em>
+    </div>
+
+    <div class="cue">別人在看昨天，你要看明天</div>
+    <div class="body">歷史業績告訴你過去，業績指引告訴你要不要準備子彈。</div>
+    <div class="body">看到大跌敢不敢加？就看你對指引有沒有信心。你有時會看到「這季業績很好，但股價跌」，因為指引不夠有力，市場對未來失望了。</div>
+
+    <div class="callout amber">
+      <div class="callout-title" style="color:var(--amber)">公司健診 vs 基本面頁面</div>
+      <div class="body" style="margin:0">公司健診：懶人版<strong>一年一次</strong>，看長期體質。<br>基本面頁面：<strong>一季一次</strong>，追蹤動態，看業績指引有沒有往好的方向走。<br><br>定期觀察，有機會提早佈局 🌱</div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     進場時機
+══════════════════════════════════════ -->
+<section class="section" id="entry">
+  <div class="wrap">
+    <div class="sec-num">06 · 什麼時候進場？</div>
+    <div class="big lav" style="margin-top:.75rem">
+      研究完了<br><em>然後呢？</em>
+    </div>
+
+    <div class="body">方法很多，小白先看這兩個就夠，不用自己算，問 AI 確認。</div>
+
+    <div class="callout sage">
+      <div class="callout-title" style="color:var(--sage)">📍 支撐位</div>
+      <div class="cue" style="margin-bottom:.5rem">股價跌到某個位置就停下來</div>
+      <div class="body" style="margin:0">一直重複出現的價位，就是支撐。就像我的 Google 股票，每次跌到某個價就停、往上漲到某個價又回來，<strong>久了就有感覺了</strong>。現在直接問 AI：「AAPL 的支撐位在哪裡？」就好。</div>
+    </div>
+
+    <div class="callout amber">
+      <div class="callout-title" style="color:var(--amber)">📅 季線 / 年線</div>
+      <div class="cue" style="margin-bottom:.5rem">均線 = 平均成績單</div>
+      <div class="body" style="margin-bottom:.5rem">季線（90天）= 期中考平均，年線（250天）= 期末考平均。</div>
+      <div class="body" style="margin:0">股價在均線上方趨勢向上，跌到年線附近往往是好的進場機會。</div>
+    </div>
+
+    <div class="note" style="margin-top:1rem">還看不懂？問 AI</div>
+    <div style="display:flex; gap:.75rem; flex-wrap:wrap; margin-top:.75rem">
+      <a href="https://www.tradingview.com/chart/a0VrdpV3/?symbol=AAPL" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">📈 TradingView — AAPL 線圖 →</a>
+      <a href="https://www.google.com/finance/beta" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">🔍 Google Finance →</a>
+    </div>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     Enter Monitor
+══════════════════════════════════════ -->
+<section class="section" id="monitor">
+  <div class="wrap">
+    <div class="sec-num">07 · 交易觀察清單</div>
+    <div class="big" style="margin-top:.75rem">
+      腦子記不住<br>就<em>寫下來</em>
+    </div>
+
+    <div class="cue">watchlist 研究完、覺得不錯，就把它放進這個清單盯著</div>
+
+    <div class="callout lav">
+      <div class="body" style="margin:0">這個清單就是<strong>流水帳</strong>。不是要做複雜分析，就是怕市場好的時候一堆股票要看，放在腦子裡容易忘。現股和選擇權到期日也可以放進來，免得漏掉。</div>
+    </div>
+
+    <div class="body" style="margin-top:1rem">交易頻率低、記得住的人，不一定要用。沒有壓力。</div>
+  </div>
+</section>
+
+<div class="ornament">· · ·</div>
+
+<!-- ══════════════════════════════════════
+     收尾
+══════════════════════════════════════ -->
+<section class="section">
+  <div class="wrap">
+    <div class="sec-num">08 · 今天帶走什麼</div>
+    <div class="big" style="margin-top:.75rem; font-size:clamp(28px,5vw,52px)">
+      帶走<em>一個習慣</em><br>不是一堆知識
+    </div>
+
+    <div class="takeaway-list">
+      <div class="takeaway">
+        <span class="takeaway-num">01</span>
+        <span class="takeaway-text">公司財務 = 個人財務，三個問：賺不賺、口袋剩多少、錢怎麼用</span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-num">02</span>
+        <span class="takeaway-text">前 6 分是核心，護城河看不懂填零，扣分是外部風險</span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-num">03</span>
+        <span class="takeaway-text">好公司放夠久概率都是正的，如果你還年輕，時間是你的優勢</span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-num">04</span>
+        <span class="takeaway-text">歷史業績 + 業績指引，一起看才完整</span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-num">05</span>
+        <span class="takeaway-text">進場看支撐、季線、年線，不用自己算，還看不懂？問 AI</span>
+      </div>
+    </div>
+
+    <div class="homework">
+      <div class="hw-label">📋 作業</div>
+      <div class="hw-text">選一支你熟悉的公司，用 watchlist 填完一份公司健診，截圖群組討論！</div>
+    </div>
+  </div>
+</section>
+
+<div style="height:6rem"></div>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+  document.getElementById('prog').style.width = pct + '%';
+});
+
+// Toggle expandable score items
+function toggleItem(btn) {
+  const item = btn.closest('.score-item');
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>
