@@ -104,6 +104,11 @@
       font-weight: 400;
     }
 
+    .card--watchlist .card-tag {
+      background: #f0faf4;
+      color: #2d7a4f;
+    }
+
     .card--leap .card-tag {
       background: var(--tag-gold-bg);
       color: var(--gold);
@@ -165,6 +170,7 @@
     .divider           { animation: fadeUp 0.5s 0.1s ease both; }
     .card:nth-child(1) { animation: fadeUp 0.5s 0.18s ease both; }
     .card:nth-child(2) { animation: fadeUp 0.5s 0.28s ease both; }
+    .card:nth-child(3) { animation: fadeUp 0.5s 0.38s ease both; }
   </style>
 </head>
 <body>
@@ -178,6 +184,15 @@
     <div class="divider"></div>
 
     <div class="tools">
+
+      <a class="card card--watchlist" href="watchlist.html">
+        <div class="card-body">
+          <div class="card-tag">研究 · 財報筆記</div>
+          <div class="card-title">Watchlist 財報研究筆記</div>
+          <div class="card-desc">追蹤觀察名單中各股票的財報重點、關鍵指標與研究筆記。資料存於本地瀏覽器。</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
 
       <a class="card card--leap" href="leap.html">
         <div class="card-body">
