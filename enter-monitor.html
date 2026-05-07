@@ -3,470 +3,481 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>進場監控清單</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>交易觀察清單</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--dim:#8b949e;--mid:#dde4eb;--purple:#c084fc;--purple-dim:#7c3aed;--purple-bg:#1a1230;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;--blue:#60a5fa}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-button,input,select,textarea{font-family:inherit}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Header ── */
-.header{background:linear-gradient(135deg,#161b22,#1a1230);border-bottom:1px solid var(--border);padding:20px 16px 16px}
-.header-sub{font-size:10px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
-.header-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.header-title{font-family:'DM Serif Display',serif;font-size:24px;color:#f0f6fc}
-.header-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.btn-sm{padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--mid);font-size:11px;cursor:pointer;letter-spacing:.5px;white-space:nowrap}
-.btn-sm:hover{color:#fff;border-color:var(--mid)}
-.btn-add{padding:6px 14px;background:var(--purple-dim);border:1px solid var(--purple-dim);border-radius:5px;color:#fff;font-size:11px;cursor:pointer;letter-spacing:.5px;white-space:nowrap;font-weight:600}
-.btn-add:hover{background:#6d28d9;border-color:#6d28d9}
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #181818;
+    --bg3: #222;
+    --border: #2e2e2e;
+    --border2: #444;
+    --text: #e8e8e4;
+    --text2: #aaa;
+    --text3: #666;
+    --accent: #c8f06e;
+    --accent-dim: rgba(200,240,110,0.12);
+    --lc: #6eb5f0;
+    --lc-bg: rgba(110,181,240,0.12);
+    --sp: #6ee8b0;
+    --sp-bg: rgba(110,232,176,0.12);
+    --share: #f0c46e;
+    --share-bg: rgba(240,196,110,0.12);
+    --watch: #aaa;
+    --watch-bg: rgba(136,136,136,0.1);
+    --red: #e86e6e;
+    --red-bg: rgba(232,110,110,0.1);
+    --radius: 6px;
+    --font: 'DM Mono', 'SF Mono', 'Fira Code', monospace;
+  }
 
-/* ── Layout ── */
-.content{padding:20px 16px 60px;max-width:860px;margin:0 auto}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
 
-/* ── Empty state ── */
-.empty{text-align:center;padding:64px 16px;color:var(--dim)}
-.empty-icon{font-size:32px;margin-bottom:12px}
-.empty-title{font-size:15px;font-weight:600;color:var(--mid);margin-bottom:6px}
-.empty-desc{font-size:13px;line-height:1.7}
+  .container { max-width: 900px; margin: 0 auto; }
 
-/* ── Entry card ── */
-.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;transition:.2s}
-.entry-card:hover{border-color:#444c56}
-.entry-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
-.entry-status{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.status-waiting{background:var(--yellow)}
-.status-ready{background:var(--green)}
-.status-passed{background:var(--dim)}
-.entry-ticker{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:#fff;min-width:80px}
-.entry-name{font-size:13px;color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.entry-type-badge{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:4px;font-weight:700;white-space:nowrap}
-.type-stock{background:#0d2137;color:var(--blue)}
-.type-call{background:#1a2d0d;color:var(--green)}
-.type-put{background:#2d0d0d;color:var(--red)}
-.type-other{background:var(--surface2);color:var(--dim)}
-.entry-chevron{color:var(--dim);font-size:12px;transition:transform .2s;flex-shrink:0}
-.entry-card.open .entry-chevron{transform:rotate(180deg)}
+  header { margin-bottom: 32px; }
+  header h1 {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+  header p { font-size: 12px; color: var(--text3); letter-spacing: 0.05em; }
 
-/* ── Entry body ── */
-.entry-body{display:none;border-top:1px solid var(--border);padding:16px}
-.entry-card.open .entry-body{display:block}
+  .add-form {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-.section-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);font-weight:700;margin-bottom:10px}
+  input, select, textarea {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--border2); }
+  input::placeholder, textarea::placeholder { color: var(--text3); }
+  select option { background: var(--bg3); }
 
-.conditions-list{margin-bottom:16px}
-.condition-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
-.condition-item:last-child{border-bottom:none}
-.cond-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:.15s}
-.cond-check.checked{background:var(--purple-dim);border-color:var(--purple-dim)}
-.cond-check.checked::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
-.cond-text{font-size:13px;color:var(--text);line-height:1.6;flex:1}
-.cond-text.checked-text{color:var(--dim);text-decoration:line-through}
+  #inp-ticker { width: 80px; text-transform: uppercase; }
+  #inp-date { width: 130px; color-scheme: dark; }
+  #inp-action { width: 115px; }
+  #inp-note { flex: 1; min-width: 140px; }
 
-.notes-box{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:13px;color:var(--mid);line-height:1.75;white-space:pre-wrap;min-height:40px}
-.notes-box:empty::before{content:'（無備註）';color:var(--dim)}
+  .btn-add {
+    background: var(--accent-dim);
+    border: 0.5px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 7px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: rgba(200,240,110,0.22); }
 
-.entry-meta{display:flex;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
-.meta-item{font-size:11px;color:var(--dim)}
-.meta-item span{color:var(--mid);margin-left:4px}
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
 
-.entry-actions{display:flex;gap:6px;margin-top:14px}
-.btn-edit{padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--mid);font-size:11px;cursor:pointer}
-.btn-edit:hover{border-color:var(--mid);color:#fff}
-.btn-delete{padding:5px 12px;background:transparent;border:1px solid #3a1a1a;border-radius:5px;color:#f87171;font-size:11px;cursor:pointer}
-.btn-delete:hover{background:#2d0d0d}
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .controls label { font-size: 12px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
 
-/* ── Status bar ── */
-.status-bar{display:flex;gap:16px;margin-bottom:20px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
-.stat{text-align:center}
-.stat-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500}
-.stat-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-top:2px}
-.stat-waiting .stat-num{color:var(--yellow)}
-.stat-ready .stat-num{color:var(--green)}
-.stat-passed .stat-num{color:var(--dim)}
+  .sort-btn {
+    background: none;
+    border: 0.5px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+  .sort-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
-/* ── Modal ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal-overlay.hidden{display:none}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
-.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
-.modal-title{font-size:15px;font-weight:700;color:#fff}
-.modal-close{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;line-height:1}
-.modal-close:hover{color:#fff}
-.modal-body{padding:20px}
-.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--border)}
+  .divider { width: 1px; height: 16px; background: var(--border); align-self: center; }
 
-.form-field{margin-bottom:14px}
-.form-label{font-size:11px;color:var(--dim);margin-bottom:5px;letter-spacing:.3px;display:block}
-.form-input,.form-select,.form-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:8px 10px;color:var(--text);font-size:13px}
-.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:#7c3aed;box-shadow:0 0 0 2px rgba(124,58,237,.15)}
-.form-select{cursor:pointer}
-.form-textarea{resize:vertical;line-height:1.65;min-height:80px}
-.form-row{display:flex;gap:10px}
-.form-row>.form-field{flex:1;min-width:0}
+  #filter-ticker { width: 80px; font-size: 12px; padding: 4px 8px; }
+  #filter-action { font-size: 12px; padding: 4px 8px; }
 
-.conditions-editor{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:4px}
-.cond-edit-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border)}
-.cond-edit-item:last-child{border-bottom:none}
-.cond-edit-input{flex:1;background:transparent;border:none;color:var(--text);font-size:13px;padding:2px 0}
-.cond-edit-input:focus{outline:none}
-.cond-edit-input::placeholder{color:var(--dim)}
-.cond-remove{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 4px;line-height:1}
-.cond-remove:hover{color:var(--red)}
-.cond-add-row{padding:8px 10px;background:transparent;border:none;color:var(--purple);font-size:12px;cursor:pointer;text-align:left;width:100%;letter-spacing:.3px}
-.cond-add-row:hover{background:var(--surface2)}
+  .btn-edit-mode {
+    background: none;
+    border: 0.5px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-edit-mode:hover { border-color: var(--border2); color: var(--text); }
+  .btn-edit-mode.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
 
-.btn-cancel{padding:7px 16px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--mid);font-size:12px;cursor:pointer}
-.btn-cancel:hover{border-color:var(--mid);color:#fff}
-.btn-save{padding:7px 20px;background:var(--purple-dim);border:1px solid var(--purple-dim);border-radius:5px;color:#fff;font-size:12px;cursor:pointer;font-weight:600}
-.btn-save:hover{background:#6d28d9}
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 
-/* ── Filter bar ── */
-.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.filter-btn{padding:5px 14px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--dim);font-size:12px;cursor:pointer;transition:.15s}
-.filter-btn:hover{border-color:var(--mid);color:var(--mid)}
-.filter-btn.active{background:var(--purple-dim);border-color:var(--purple-dim);color:#fff}
+  col.col-ticker { width: 82px; }
+  col.col-date   { width: 118px; }
+  col.col-action { width: 108px; }
+  col.col-note   { width: auto; }
+  col.col-del    { width: 36px; }
+
+  thead th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 400;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  tbody tr { border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: var(--bg2); }
+  tbody tr.group-start td { border-top: 1px solid var(--border2); }
+  tbody td { padding: 10px 12px; vertical-align: top; }
+
+  /* view mode */
+  .ticker-label { color: var(--text); font-weight: 400; letter-spacing: 0.05em; font-size: 14px; }
+  .ticker-repeat { color: var(--text3); font-size: 12px; padding-top: 2px; }
+  .date-cell { color: var(--text2); font-size: 13px; white-space: nowrap; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .badge-LC    { color: var(--lc);    background: var(--lc-bg);    border: 0.5px solid rgba(110,181,240,0.3); }
+  .badge-SP    { color: var(--sp);    background: var(--sp-bg);    border: 0.5px solid rgba(110,232,176,0.3); }
+  .badge-Share { color: var(--share); background: var(--share-bg); border: 0.5px solid rgba(240,196,110,0.3); }
+  .badge-Watch { color: var(--watch); background: var(--watch-bg); border: 0.5px solid #333; }
+
+  .note-cell {
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.65;
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  /* edit mode cells */
+  .edit-mode tbody td { padding: 6px 6px; vertical-align: middle; }
+
+  .e-ticker { width: 100%; text-transform: uppercase; font-size: 13px; padding: 5px 7px; }
+  .e-date   { width: 100%; font-size: 13px; padding: 5px 7px; color-scheme: dark; }
+  .e-action { width: 100%; font-size: 13px; padding: 5px 7px; }
+  .e-note   { width: 100%; font-size: 13px; line-height: 1.55; resize: vertical; min-height: 56px; padding: 5px 7px; }
+
+  .btn-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 3px 7px;
+    border-radius: var(--radius);
+    transition: all 0.15s;
+    font-family: var(--font);
+    color: var(--text3);
+    display: none;
+  }
+  .edit-mode .btn-del { display: inline-block; }
+  .btn-del:hover { background: var(--red-bg); color: var(--red); }
+
+  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; letter-spacing: 0.05em; }
+  .status-bar { margin-top: 16px; font-size: 12px; color: var(--text3); letter-spacing: 0.05em; }
+
+  .export-row { margin-top: 32px; display: flex; gap: 8px; }
+  .btn-export {
+    background: none;
+    border: 0.5px solid var(--border);
+    color: var(--text2);
+    font-family: var(--font);
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+  .btn-export:hover { border-color: var(--border2); color: var(--text); }
 </style>
 </head>
 <body>
+<div class="container">
+  <header>
+    <h1>交易觀察清單</h1>
+    <p>Trading Watchlist — 資料儲存於本機 localStorage</p>
+  </header>
 
-<div class="header">
-  <div class="header-sub">utopiawrite · 交易監控</div>
-  <div class="header-top">
-    <div class="header-title">進場監控清單</div>
-    <div class="header-actions">
-      <button class="btn-sm" onclick="exportData()">備份</button>
-      <button class="btn-sm" onclick="document.getElementById('importFile').click()">匯入</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-      <button class="btn-add" onclick="openModal()">＋ 新增標的</button>
-    </div>
-  </div>
-</div>
-
-<div class="content">
-
-  <div class="status-bar">
-    <div class="stat stat-waiting">
-      <div class="stat-num" id="countWaiting">0</div>
-      <div class="stat-label">等待中</div>
-    </div>
-    <div class="stat stat-ready">
-      <div class="stat-num" id="countReady">0</div>
-      <div class="stat-label">條件達成</div>
-    </div>
-    <div class="stat stat-passed">
-      <div class="stat-num" id="countPassed">0</div>
-      <div class="stat-label">已過期 / 放棄</div>
-    </div>
+  <div class="add-form">
+    <input type="text" id="inp-ticker" placeholder="標的" maxlength="10">
+    <input type="date" id="inp-date">
+    <select id="inp-action">
+      <option value="Watch">觀察中</option>
+      <option value="LC">LEAP Call</option>
+      <option value="SP">Sell Put</option>
+      <option value="Share">Buy Share</option>
+    </select>
+    <input type="text" id="inp-note" placeholder="備註">
+    <button class="btn-add" onclick="addRow()">+ 新增</button>
   </div>
 
-  <div class="filter-bar">
-    <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
-    <button class="filter-btn" onclick="setFilter('waiting', this)">等待中</button>
-    <button class="filter-btn" onclick="setFilter('ready', this)">條件達成</button>
-    <button class="filter-btn" onclick="setFilter('passed', this)">已過期 / 放棄</button>
+  <div class="toolbar">
+    <div class="controls">
+      <label>排序</label>
+      <button class="sort-btn active" id="sort-ticker" onclick="setSort('ticker')">以標的</button>
+      <button class="sort-btn" id="sort-date" onclick="setSort('date')">以日期</button>
+      <div class="divider"></div>
+      <label>篩選</label>
+      <select id="filter-action" onchange="render()">
+        <option value="">全部</option>
+        <option value="Watch">觀察中</option>
+        <option value="LC">LEAP Call</option>
+        <option value="SP">Sell Put</option>
+        <option value="Share">Buy Share</option>
+      </select>
+      <input type="text" id="filter-ticker" placeholder="標的" oninput="render()">
+    </div>
+    <button class="btn-edit-mode" id="btn-edit-mode" onclick="toggleEditMode()">編輯</button>
   </div>
 
-  <div id="entriesList"></div>
+  <table id="main-table">
+    <colgroup>
+      <col class="col-ticker">
+      <col class="col-date">
+      <col class="col-action">
+      <col class="col-note">
+      <col class="col-del">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>標的</th>
+        <th>日期</th>
+        <th>操作</th>
+        <th>備註</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbl-body"></tbody>
+  </table>
+  <div id="empty-msg" class="empty" style="display:none;">還沒有紀錄。</div>
+  <div class="status-bar" id="status-bar"></div>
 
-</div>
-
-<!-- Modal -->
-<div class="modal-overlay hidden" id="modalOverlay" onclick="closeModalOnOverlay(event)">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title" id="modalTitle">新增監控標的</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-field">
-          <label class="form-label">代號 (Ticker)</label>
-          <input class="form-input" id="fTicker" placeholder="e.g. NVDA">
-        </div>
-        <div class="form-field">
-          <label class="form-label">名稱</label>
-          <input class="form-input" id="fName" placeholder="e.g. Nvidia">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-field">
-          <label class="form-label">交易類型</label>
-          <select class="form-select" id="fType">
-            <option value="stock">買股票 (Stock)</option>
-            <option value="call">買 Call</option>
-            <option value="put">買 Put</option>
-            <option value="other">其他</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">狀態</label>
-          <select class="form-select" id="fStatus">
-            <option value="waiting">等待中</option>
-            <option value="ready">條件達成</option>
-            <option value="passed">已過期 / 放棄</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-field">
-        <label class="form-label">進場條件（逐條列出）</label>
-        <div class="conditions-editor" id="conditionsEditor"></div>
-        <button class="cond-add-row" onclick="addConditionField()">＋ 新增條件</button>
-      </div>
-      <div class="form-field">
-        <label class="form-label">備註 / 操作邏輯</label>
-        <textarea class="form-textarea" id="fNotes" placeholder="記錄投資邏輯、目標價位、風險考量等…"></textarea>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-save" onclick="saveEntry()">儲存</button>
-    </div>
+  <div class="export-row">
+    <button class="btn-export" onclick="exportCSV()">匯出 CSV</button>
   </div>
 </div>
 
 <script>
-const STORAGE_KEY = 'enter_monitor_v1';
-let entries = [];
-let editingId = null;
-let currentFilter = 'all';
+const KEY = 'trading-watchlist-v1';
+let rows = [];
+let sortMode = 'ticker';
+let editMode = false;
+const LABELS = { LC: 'LEAP Call', SP: 'Sell Put', Share: 'Buy Share', Watch: '觀察中' };
 
 function load() {
-  try { entries = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { entries = []; }
+  try {
+    const s = localStorage.getItem(KEY);
+    if (s) rows = JSON.parse(s);
+  } catch(e) { rows = []; }
+  document.getElementById('inp-date').value = new Date().toISOString().slice(0,10);
   render();
 }
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+function save() { localStorage.setItem(KEY, JSON.stringify(rows)); }
+
+function setSort(mode) {
+  sortMode = mode;
+  document.getElementById('sort-ticker').classList.toggle('active', mode === 'ticker');
+  document.getElementById('sort-date').classList.toggle('active', mode === 'date');
+  render();
 }
 
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function toggleEditMode() {
+  if (editMode) {
+    // save all edits before leaving edit mode
+    flushEdits();
+  }
+  editMode = !editMode;
+  const btn = document.getElementById('btn-edit-mode');
+  btn.textContent = editMode ? '完成' : '編輯';
+  btn.classList.toggle('active', editMode);
+  document.getElementById('main-table').classList.toggle('edit-mode', editMode);
   render();
+}
+
+function flushEdits() {
+  const tbody = document.getElementById('tbl-body');
+  const tickers = tbody.querySelectorAll('.e-ticker');
+  tickers.forEach(el => {
+    const id = el.dataset.id;
+    const idx = rows.findIndex(r => r.id === id);
+    if (idx < 0) return;
+    const row = el.closest('tr');
+    rows[idx].ticker = el.value.trim().toUpperCase() || rows[idx].ticker;
+    rows[idx].date   = row.querySelector('.e-date').value   || rows[idx].date;
+    rows[idx].action = row.querySelector('.e-action').value;
+    rows[idx].note   = row.querySelector('.e-note').value.trim();
+  });
+  save();
+}
+
+function getSorted() {
+  const fa = document.getElementById('filter-action').value;
+  const ft = document.getElementById('filter-ticker').value.toUpperCase().trim();
+  let list = rows.filter(r => (!fa || r.action === fa) && (!ft || r.ticker.includes(ft)));
+  if (sortMode === 'ticker') {
+    list.sort((a,b) => a.ticker.localeCompare(b.ticker) || b.date.localeCompare(a.date));
+  } else {
+    list.sort((a,b) => b.date.localeCompare(a.date) || a.ticker.localeCompare(b.ticker));
+  }
+  return list;
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function render() {
-  const list = document.getElementById('entriesList');
-  const filtered = currentFilter === 'all' ? entries : entries.filter(e => e.status === currentFilter);
+  const list = getSorted();
+  const tbody = document.getElementById('tbl-body');
+  const empty = document.getElementById('empty-msg');
 
-  document.getElementById('countWaiting').textContent = entries.filter(e => e.status === 'waiting').length;
-  document.getElementById('countReady').textContent = entries.filter(e => e.status === 'ready').length;
-  document.getElementById('countPassed').textContent = entries.filter(e => e.status === 'passed').length;
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty">
-      <div class="empty-icon">⏳</div>
-      <div class="empty-title">${currentFilter === 'all' ? '尚無監控標的' : '此分類無資料'}</div>
-      <div class="empty-desc">${currentFilter === 'all' ? '點擊右上角「＋ 新增標的」開始記錄' : '切換到其他篩選查看'}</div>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = filtered.map(e => {
-    const statusClass = { waiting: 'status-waiting', ready: 'status-ready', passed: 'status-passed' }[e.status] || 'status-waiting';
-    const typeClass = { stock: 'type-stock', call: 'type-call', put: 'type-put', other: 'type-other' }[e.type] || 'type-other';
-    const typeLabel = { stock: 'Stock', call: 'Call', put: 'Put', other: '其他' }[e.type] || e.type;
-    const checkedCount = (e.conditions || []).filter(c => c.checked).length;
-    const totalCount = (e.conditions || []).length;
-    const condSummary = totalCount > 0 ? `${checkedCount}/${totalCount} 條件` : '';
-
-    const conditionsHtml = (e.conditions || []).map((c, ci) => `
-      <div class="condition-item">
-        <div class="cond-check ${c.checked ? 'checked' : ''}" onclick="toggleCondition('${e.id}', ${ci})"></div>
-        <div class="cond-text ${c.checked ? 'checked-text' : ''}">${escHtml(c.text)}</div>
-      </div>`).join('');
-
-    return `<div class="entry-card" id="card-${e.id}">
-      <div class="entry-head" onclick="toggleCard('${e.id}')">
-        <div class="entry-status ${statusClass}"></div>
-        <div class="entry-ticker">${escHtml(e.ticker)}</div>
-        <div class="entry-name">${escHtml(e.name)}${condSummary ? ' · ' + condSummary : ''}</div>
-        <div class="entry-type-badge ${typeClass}">${typeLabel}</div>
-        <div class="entry-chevron">▼</div>
-      </div>
-      <div class="entry-body">
-        ${totalCount > 0 ? `<div class="section-label">進場條件</div>
-        <div class="conditions-list">${conditionsHtml}</div>` : ''}
-        <div class="section-label">備註 / 操作邏輯</div>
-        <div class="notes-box">${escHtml(e.notes || '')}</div>
-        <div class="entry-meta">
-          <div class="meta-item">建立<span>${formatDate(e.createdAt)}</span></div>
-          ${e.updatedAt ? `<div class="meta-item">更新<span>${formatDate(e.updatedAt)}</span></div>` : ''}
-        </div>
-        <div class="entry-actions">
-          <button class="btn-edit" onclick="openModal('${e.id}')">編輯</button>
-          <button class="btn-delete" onclick="deleteEntry('${e.id}')">刪除</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleCard(id) {
-  const card = document.getElementById('card-' + id);
-  card.classList.toggle('open');
-}
-
-function toggleCondition(id, ci) {
-  const e = entries.find(x => x.id === id);
-  if (!e) return;
-  e.conditions[ci].checked = !e.conditions[ci].checked;
-  if (e.conditions.length > 0 && e.conditions.every(c => c.checked)) {
-    e.status = 'ready';
-  } else if (e.status === 'ready' && !e.conditions.every(c => c.checked)) {
-    e.status = 'waiting';
-  }
-  e.updatedAt = new Date().toISOString();
-  save();
-  render();
-  setTimeout(() => {
-    const card = document.getElementById('card-' + id);
-    if (card) card.classList.add('open');
-  }, 0);
-}
-
-function openModal(id) {
-  editingId = id || null;
-  document.getElementById('modalTitle').textContent = id ? '編輯監控標的' : '新增監控標的';
-  if (id) {
-    const e = entries.find(x => x.id === id);
-    if (!e) return;
-    document.getElementById('fTicker').value = e.ticker;
-    document.getElementById('fName').value = e.name;
-    document.getElementById('fType').value = e.type;
-    document.getElementById('fStatus').value = e.status;
-    document.getElementById('fNotes').value = e.notes || '';
-    renderConditionFields(e.conditions || []);
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
   } else {
-    document.getElementById('fTicker').value = '';
-    document.getElementById('fName').value = '';
-    document.getElementById('fType').value = 'stock';
-    document.getElementById('fStatus').value = 'waiting';
-    document.getElementById('fNotes').value = '';
-    renderConditionFields([]);
-  }
-  document.getElementById('modalOverlay').classList.remove('hidden');
-}
+    empty.style.display = 'none';
+    let lastTicker = null;
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.add('hidden');
-  editingId = null;
-}
+    tbody.innerHTML = list.map(r => {
+      const isNew = sortMode === 'ticker' && r.ticker !== lastTicker;
+      if (sortMode === 'ticker') lastTicker = r.ticker;
+      const groupClass = isNew ? ' class="group-start"' : '';
 
-function closeModalOnOverlay(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
+      if (editMode) {
+        return `<tr${groupClass}>
+          <td><input class="e-ticker" data-id="${r.id}" value="${esc(r.ticker)}"></td>
+          <td><input type="date" class="e-date" value="${r.date}"></td>
+          <td><select class="e-action">
+            <option value="Watch"${r.action==='Watch'?' selected':''}>觀察中</option>
+            <option value="LC"${r.action==='LC'?' selected':''}>LEAP Call</option>
+            <option value="SP"${r.action==='SP'?' selected':''}>Sell Put</option>
+            <option value="Share"${r.action==='Share'?' selected':''}>Buy Share</option>
+          </select></td>
+          <td><textarea class="e-note">${esc(r.note||'')}</textarea></td>
+          <td><button class="btn-del" onclick="del('${r.id}')">✕</button></td>
+        </tr>`;
+      }
 
-function renderConditionFields(conditions) {
-  const editor = document.getElementById('conditionsEditor');
-  editor.innerHTML = conditions.map((c, i) => `
-    <div class="cond-edit-item">
-      <input class="cond-edit-input" placeholder="條件描述，例：價格跌破 $850" value="${escHtml(c.text)}">
-      <button class="cond-remove" onclick="removeCondField(this)">✕</button>
-    </div>`).join('');
-}
+      const tickerCell = isNew
+        ? `<td class="ticker-label">${r.ticker}</td>`
+        : sortMode === 'ticker'
+          ? `<td class="ticker-repeat">↳</td>`
+          : `<td class="ticker-label">${r.ticker}</td>`;
 
-function addConditionField() {
-  const editor = document.getElementById('conditionsEditor');
-  const div = document.createElement('div');
-  div.className = 'cond-edit-item';
-  div.innerHTML = `<input class="cond-edit-input" placeholder="條件描述，例：RSI 跌破 40"><button class="cond-remove" onclick="removeCondField(this)">✕</button>`;
-  editor.appendChild(div);
-  div.querySelector('input').focus();
-}
-
-function removeCondField(btn) {
-  btn.parentElement.remove();
-}
-
-function saveEntry() {
-  const ticker = document.getElementById('fTicker').value.trim().toUpperCase();
-  const name = document.getElementById('fName').value.trim();
-  if (!ticker) { alert('請輸入代號'); return; }
-
-  const condInputs = document.querySelectorAll('#conditionsEditor .cond-edit-input');
-  const conditions = Array.from(condInputs).map(inp => ({ text: inp.value.trim(), checked: false })).filter(c => c.text);
-
-  if (editingId) {
-    const e = entries.find(x => x.id === editingId);
-    const oldConds = e.conditions || [];
-    conditions.forEach(c => {
-      const old = oldConds.find(o => o.text === c.text);
-      if (old) c.checked = old.checked;
-    });
-    e.ticker = ticker;
-    e.name = name;
-    e.type = document.getElementById('fType').value;
-    e.status = document.getElementById('fStatus').value;
-    e.conditions = conditions;
-    e.notes = document.getElementById('fNotes').value.trim();
-    e.updatedAt = new Date().toISOString();
-  } else {
-    entries.unshift({
-      id: uid(),
-      ticker,
-      name,
-      type: document.getElementById('fType').value,
-      status: document.getElementById('fStatus').value,
-      conditions,
-      notes: document.getElementById('fNotes').value.trim(),
-      createdAt: new Date().toISOString(),
-      updatedAt: null
-    });
+      return `<tr${groupClass}>
+        ${tickerCell}
+        <td class="date-cell">${r.date}</td>
+        <td><span class="badge badge-${r.action}">${LABELS[r.action]}</span></td>
+        <td class="note-cell">${esc(r.note) || '—'}</td>
+        <td></td>
+      </tr>`;
+    }).join('');
   }
 
-  save();
-  render();
-  closeModal();
+  const total = rows.length;
+  const shown = list.length;
+  document.getElementById('status-bar').textContent =
+    `共 ${total} 筆紀錄${shown !== total ? `，目前顯示 ${shown} 筆` : ''}`;
 }
 
-function deleteEntry(id) {
-  if (!confirm('確定刪除此標的？')) return;
-  entries = entries.filter(e => e.id !== id);
+function addRow() {
+  const ticker = document.getElementById('inp-ticker').value.trim().toUpperCase();
+  const date   = document.getElementById('inp-date').value;
+  if (!ticker || !date) { document.getElementById('inp-ticker').focus(); return; }
+  if (editMode) { flushEdits(); editMode = false; document.getElementById('btn-edit-mode').textContent = '編輯'; document.getElementById('btn-edit-mode').classList.remove('active'); document.getElementById('main-table').classList.remove('edit-mode'); }
+  rows.push({
+    id: Date.now().toString(), ticker, date,
+    action: document.getElementById('inp-action').value,
+    note: document.getElementById('inp-note').value.trim()
+  });
   save();
+  document.getElementById('inp-ticker').value = '';
+  document.getElementById('inp-note').value = '';
   render();
 }
 
-function exportData() {
-  const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+function del(id) {
+  if (!confirm('刪除這筆紀錄？')) return;
+  flushEdits();
+  rows = rows.filter(r => r.id !== id);
+  save(); render();
+}
+
+function exportCSV() {
+  const header = '標的,日期,操作,備註';
+  const body = rows.map(r =>
+    `${r.ticker},${r.date},${LABELS[r.action]},"${(r.note||'').replace(/"/g,'""')}"`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF' + header + '\n' + body], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'enter-monitor-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = `trading_watchlist_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
 }
 
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) throw new Error();
-      entries = data;
-      save();
-      render();
-      alert('匯入成功，共 ' + data.length + ' 筆資料。');
-    } catch { alert('檔案格式錯誤，請確認是正確的備份檔。'); }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-function escHtml(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function formatDate(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0');
-}
+document.getElementById('inp-note').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addRow();
+});
 
 load();
 </script>
