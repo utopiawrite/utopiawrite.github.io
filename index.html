@@ -109,6 +109,11 @@
       color: #2d7a4f;
     }
 
+    .card--monitor .card-tag {
+      background: #f3f0fa;
+      color: #6d3fa0;
+    }
+
     .card--leap .card-tag {
       background: var(--tag-gold-bg);
       color: var(--gold);
@@ -171,6 +176,7 @@
     .card:nth-child(1) { animation: fadeUp 0.5s 0.18s ease both; }
     .card:nth-child(2) { animation: fadeUp 0.5s 0.28s ease both; }
     .card:nth-child(3) { animation: fadeUp 0.5s 0.38s ease both; }
+    .card:nth-child(4) { animation: fadeUp 0.5s 0.48s ease both; }
   </style>
 </head>
 <body>
@@ -190,6 +196,15 @@
           <div class="card-tag">研究 · 財報筆記</div>
           <div class="card-title">Watchlist 財報研究筆記</div>
           <div class="card-desc">追蹤觀察名單中各股票的財報重點、關鍵指標與研究筆記。資料存於本地瀏覽器。</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+
+      <a class="card card--monitor" href="enter-monitor.html">
+        <div class="card-body">
+          <div class="card-tag">交易 · 等待進場</div>
+          <div class="card-title">進場監控清單</div>
+          <div class="card-desc">記錄想交易但尚未進場的標的，設定等待條件，待條件達成時提醒自己執行。資料存於本地瀏覽器。</div>
         </div>
         <div class="card-arrow">→</div>
       </a>
