@@ -66,27 +66,14 @@ const INIT_ACCOUNTS=[
   {id:"c1",label:"現金",cat:"現金",type:"asset",usd:false},
   {id:"b1",label:"銀行帳戶 1",cat:"銀行",type:"asset",usd:false},
   {id:"b2",label:"銀行帳戶 2",cat:"銀行",type:"asset",usd:false},
-  {id:"b3",label:"銀行帳戶 3",cat:"銀行",type:"asset",usd:false},
-  {id:"b4",label:"銀行帳戶 4",cat:"銀行",type:"asset",usd:false},
-  {id:"b5",label:"銀行帳戶 5",cat:"銀行",type:"asset",usd:false},
-  {id:"b6",label:"銀行帳戶 6（USD）",cat:"銀行",type:"asset",usd:true},
-  {id:"b7",label:"銀行帳戶 7",cat:"銀行",type:"asset",usd:false},
-  {id:"b8",label:"銀行帳戶 8",cat:"銀行",type:"asset",usd:false},
-  {id:"b9",label:"銀行帳戶 9",cat:"銀行",type:"asset",usd:false},
-  {id:"b10",label:"銀行帳戶 10（USD）",cat:"銀行",type:"asset",usd:true},
-  {id:"b11",label:"銀行帳戶 11（USD）",cat:"銀行",type:"asset",usd:true},
-  {id:"b12",label:"銀行帳戶 12",cat:"銀行",type:"asset",usd:false},
+  {id:"b6",label:"銀行帳戶 3（USD）",cat:"銀行",type:"asset",usd:true},
   {id:"e1",label:"電子支付 1",cat:"電子支付",type:"asset",usd:false},
   {id:"e2",label:"電子支付 2",cat:"電子支付",type:"asset",usd:false},
   {id:"s1",label:"儲值卡 1",cat:"儲值卡",type:"asset",usd:false},
   {id:"s2",label:"儲值卡 2",cat:"儲值卡",type:"asset",usd:false},
   {id:"v1",label:"國內股票",cat:"證券",type:"asset",usd:false},
   {id:"v2",label:"美股帳戶 1（USD）",cat:"證券",type:"asset",usd:true},
-  {id:"v3",label:"海外投資 1（USD）",cat:"證券",type:"asset",usd:true},
-  {id:"v4",label:"基金",cat:"證券",type:"asset",usd:false},
-  {id:"v5",label:"美股帳戶 2（USD）",cat:"證券",type:"asset",usd:true},
-  {id:"v6",label:"美股帳戶 3（USD）",cat:"證券",type:"asset",usd:true},
-  {id:"v7",label:"海外投資 2",cat:"證券",type:"asset",usd:false},
+  {id:"v3",label:"美股帳戶 2（USD）",cat:"證券",type:"asset",usd:true},
   {id:"p1",label:"不動產 1",cat:"不動產",type:"asset",usd:false},
   {id:"p2",label:"不動產 2",cat:"不動產",type:"asset",usd:false},
   {id:"p3",label:"不動產 3",cat:"不動產",type:"asset",usd:false},
@@ -95,15 +82,9 @@ const INIT_ACCOUNTS=[
   {id:"l1",label:"信用卡 1",cat:"信用卡",type:"liability",usd:false},
   {id:"l2",label:"信用卡 2",cat:"信用卡",type:"liability",usd:false},
   {id:"l3",label:"信用卡 3",cat:"信用卡",type:"liability",usd:false},
-  {id:"l4",label:"信用卡 4",cat:"信用卡",type:"liability",usd:false},
-  {id:"l5",label:"信用卡 5",cat:"信用卡",type:"liability",usd:false},
-  {id:"l6",label:"信用卡 6",cat:"信用卡",type:"liability",usd:false},
   {id:"d1",label:"信貸",cat:"貸款",type:"liability",usd:false},
   {id:"d2",label:"車貸",cat:"貸款",type:"liability",usd:false},
   {id:"d3",label:"房貸 1",cat:"貸款",type:"liability",usd:false},
-  {id:"d4",label:"房貸 2",cat:"貸款",type:"liability",usd:false},
-  {id:"d5",label:"房屋增貸",cat:"貸款",type:"liability",usd:false},
-  {id:"d6",label:"房貸 3",cat:"貸款",type:"liability",usd:false},
 ];
 
 const INIT_FIXED=[
@@ -141,6 +122,8 @@ function App(){
   const [showAdd,setShowAdd]=useState(false);
   const [newAcc,setNewAcc]=useState({label:"",cat:"銀行",usd:false});
   const [confirmDel,setConfirmDel]=useState(null);
+  const [editingAcc,setEditingAcc]=useState(null);
+  const [editLabel,setEditLabel]=useState("");
 
   const [fixedItems,setFixedItems]=useState(()=>{
     const saved=LS.get("nw_fixed_items");
@@ -376,10 +359,10 @@ function App(){
         </div>
         <div style={{display:"flex",gap:0,overflowX:"auto",scrollbarWidth:"none"}}>
           <NavBtn v="dashboard" label="📊 總覽"/>
+          <NavBtn v="manage"    label="⚙️ 設定帳戶"/>
           <NavBtn v="input"     label="✏️ 更新"/>
           <NavBtn v="fixed"     label="📌 固定支出"/>
           <NavBtn v="fixedincome" label="💰 固定收入"/>
-          <NavBtn v="manage"    label="⚙️ 帳戶"/>
         </div>
       </div>
 
@@ -820,18 +803,41 @@ function App(){
 
         {/* ══════════════════════════════ MANAGE ══════════════════════════════ */}
         {view==="manage"&&<>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-            <span style={{fontWeight:700,fontSize:15}}>⚙️ 帳戶管理</span>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <span style={{fontWeight:700,fontSize:15}}>⚙️ 設定帳戶</span>
             <button onClick={()=>setShowAdd(true)} style={btnPrimary}>＋ 新增帳戶</button>
+          </div>
+          <div style={{fontSize:12,color:C.sub,marginBottom:14,padding:"10px 14px",background:C.lavBg,borderRadius:8,border:`1px solid ${C.lav}22`}}>
+            先在這裡新增你的帳戶，再到「✏️ 更新」填入數字。點帳戶名稱可以改名。
           </div>
           {ALL_CATS.map(cat=>{
             const accs=accounts.filter(a=>a.cat===cat);
             if(!accs.length) return null;
             return <div key={cat} style={{...card,padding:14}}>
               <div style={{fontSize:13,fontWeight:600,marginBottom:10}}>{CAT_ICONS[cat]} {cat}</div>
-              {accs.map(a=><div key={a.id} style={{display:"flex",alignItems:"center",padding:"8px 0",borderTop:`1px solid ${C.border}`}}>
-                <span style={{flex:1,color:C.sub,fontSize:13}}>{a.label}</span>
-                {a.usd&&<span style={{marginRight:8,fontSize:10,background:C.amberBg,color:C.amber,border:`1px solid ${C.amberBorder}`,padding:"1px 5px",borderRadius:5}}>USD</span>}
+              {accs.map(a=><div key={a.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderTop:`1px solid ${C.border}`}}>
+                {editingAcc===a.id?(
+                  <input autoFocus value={editLabel} onChange={e=>setEditLabel(e.target.value)}
+                    onKeyDown={e=>{
+                      if(e.key==="Enter"&&editLabel.trim()){
+                        setAccounts(p=>p.map(x=>x.id===a.id?{...x,label:editLabel.trim()}:x));
+                        setEditingAcc(null);
+                      }
+                      if(e.key==="Escape") setEditingAcc(null);
+                    }}
+                    onBlur={()=>{
+                      if(editLabel.trim()) setAccounts(p=>p.map(x=>x.id===a.id?{...x,label:editLabel.trim()}:x));
+                      setEditingAcc(null);
+                    }}
+                    style={{...inp,flex:1,fontSize:13}}/>
+                ):(
+                  <span onClick={()=>{setEditingAcc(a.id);setEditLabel(a.label);}}
+                    style={{flex:1,color:C.sub,fontSize:13,cursor:"pointer"}}
+                    title="點擊改名">{a.label}</span>
+                )}
+                <span style={{fontSize:10,background:a.usd?C.amberBg:C.accent,color:a.usd?C.amber:C.muted,border:`1px solid ${a.usd?C.amberBorder:C.border}`,padding:"1px 7px",borderRadius:5,fontWeight:600,minWidth:30,textAlign:"center"}}>
+                  {a.usd?"USD":"TWD"}
+                </span>
                 <button onClick={()=>setConfirmDel(a)} style={{background:C.accent,border:`1px solid ${C.border}`,color:C.red,padding:"3px 10px",borderRadius:6,cursor:"pointer",fontSize:12}}>刪除</button>
               </div>)}
             </div>;
@@ -1009,10 +1015,13 @@ function App(){
               {ALL_CATS.map(c=><option key={c} value={c}>{CAT_ICONS[c]} {c}</option>)}
             </select>
           </div>
-          <label style={{display:"flex",alignItems:"center",gap:8,marginBottom:20,cursor:"pointer",fontSize:13,color:C.sub}}>
-            <input type="checkbox" checked={newAcc.usd||false} onChange={e=>setNewAcc(p=>({...p,usd:e.target.checked}))}/>
-            美金帳戶（填入 USD 金額）
-          </label>
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>幣別</div>
+            <select value={newAcc.usd?"USD":"TWD"} onChange={e=>setNewAcc(p=>({...p,usd:e.target.value==="USD"}))} style={{...inp,width:"100%",cursor:"pointer"}}>
+              <option value="TWD">台幣 TWD</option>
+              <option value="USD">美金 USD（填入美金金額，依匯率換算）</option>
+            </select>
+          </div>
           <div style={{display:"flex",gap:8}}>
             <button onClick={()=>setShowAdd(false)} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
             <button onClick={()=>{
