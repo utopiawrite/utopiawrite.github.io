@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💼 資產指揮中心</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#F7F4EE;font-family:system-ui,-apple-system,sans-serif;font-size:14px;color:#2C2820}
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+  input,select{outline:none}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#E0DAD0;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect}=React;
+
+const fmt=n=>new Intl.NumberFormat("zh-TW").format(Math.round(Math.abs(n)));
+const fmtShort=n=>{
+  const a=Math.abs(n),s=n<0?"-":"";
+  if(a>=1e8)return s+(a/1e8).toFixed(2)+"億";
+  if(a>=1e4)return s+(a/1e4).toFixed(0)+"萬";
+  return s+fmt(n);
+};
+const prevMonth=()=>{const d=new Date(),m=d.getMonth();return m===0?`${d.getFullYear()-1}-12`:`${d.getFullYear()}-${String(m).padStart(2,"0")}`;};
+const monthLabel=k=>{const[y,m]=k.split("-");return `${y}年${m}月`;};
+
+const LS={
+  get:k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+
+const CATS_ASSET=["現金","銀行","電子支付","儲值卡","證券","不動產","其他資產"];
+const CATS_LIAB=["信用卡","貸款","其他負債"];
+const ALL_CATS=[...CATS_ASSET,...CATS_LIAB];
+const CAT_ICONS={現金:"💵",銀行:"🏦",電子支付:"📱",儲值卡:"🎴",證券:"📈",不動產:"🏠",其他資產:"💼",信用卡:"💳",貸款:"🏛️",其他負債:"📋"};
+
+const INIT_FIXED_CATS=[
+  {id:"fc1",label:"居住",icon:"🏠"},{id:"fc2",label:"交通",icon:"🚗"},
+  {id:"fc3",label:"通訊",icon:"📡"},{id:"fc4",label:"保費",icon:"🛡️"},
+  {id:"fc5",label:"生活",icon:"🛒"},{id:"fc6",label:"娛樂",icon:"🎬"},
+  {id:"fc7",label:"其他",icon:"📌"},
+];
+const CAT_EMOJI=["📌","🏠","🚗","✈️","🍽️","💊","🎓","💅","🐾","🎁","💡","🌿","⚙️","📡","🛡️","🛒","🎬","📚","🏋️","💻"];
+const INIT_FIXED_INCOME_CATS=[
+  {id:"fic1",label:"工作收入",icon:"💼"},{id:"fic2",label:"投資收益",icon:"📈"},
+  {id:"fic3",label:"租金收入",icon:"🏠"},{id:"fic4",label:"其他收入",icon:"💰"},
+];
+
+const C={
+  bg:"#F7F4EE",surface:"#FFFFFF",border:"#E0DAD0",
+  text:"#2C2820",sub:"#8A8077",muted:"#BDB4A8",
+  accent:"#EDE8DF",
+  green:"#6EA896",greenBg:"#E3F0EC",
+  red:"#D97B6C",redBg:"#F5E6E3",
+  amber:"#C8963A",amberBg:"#F5EDD8",amberBorder:"#E8D5A8",
+  lav:"#9B87C0",lavBg:"#EDE9F5",
+};
+
+const INIT_ACCOUNTS=[
+  {id:"c1",label:"現金",cat:"現金",type:"asset",usd:false},
+  {id:"b1",label:"銀行帳戶 1",cat:"銀行",type:"asset",usd:false},
+  {id:"b2",label:"銀行帳戶 2",cat:"銀行",type:"asset",usd:false},
+  {id:"b3",label:"銀行帳戶 3",cat:"銀行",type:"asset",usd:false},
+  {id:"b4",label:"銀行帳戶 4",cat:"銀行",type:"asset",usd:false},
+  {id:"b5",label:"銀行帳戶 5",cat:"銀行",type:"asset",usd:false},
+  {id:"b6",label:"銀行帳戶 6（USD）",cat:"銀行",type:"asset",usd:true},
+  {id:"b7",label:"銀行帳戶 7",cat:"銀行",type:"asset",usd:false},
+  {id:"b8",label:"銀行帳戶 8",cat:"銀行",type:"asset",usd:false},
+  {id:"b9",label:"銀行帳戶 9",cat:"銀行",type:"asset",usd:false},
+  {id:"b10",label:"銀行帳戶 10（USD）",cat:"銀行",type:"asset",usd:true},
+  {id:"b11",label:"銀行帳戶 11（USD）",cat:"銀行",type:"asset",usd:true},
+  {id:"b12",label:"銀行帳戶 12",cat:"銀行",type:"asset",usd:false},
+  {id:"e1",label:"電子支付 1",cat:"電子支付",type:"asset",usd:false},
+  {id:"e2",label:"電子支付 2",cat:"電子支付",type:"asset",usd:false},
+  {id:"s1",label:"儲值卡 1",cat:"儲值卡",type:"asset",usd:false},
+  {id:"s2",label:"儲值卡 2",cat:"儲值卡",type:"asset",usd:false},
+  {id:"v1",label:"國內股票",cat:"證券",type:"asset",usd:false},
+  {id:"v2",label:"美股帳戶 1（USD）",cat:"證券",type:"asset",usd:true},
+  {id:"v3",label:"海外投資 1（USD）",cat:"證券",type:"asset",usd:true},
+  {id:"v4",label:"基金",cat:"證券",type:"asset",usd:false},
+  {id:"v5",label:"美股帳戶 2（USD）",cat:"證券",type:"asset",usd:true},
+  {id:"v6",label:"美股帳戶 3（USD）",cat:"證券",type:"asset",usd:true},
+  {id:"v7",label:"海外投資 2",cat:"證券",type:"asset",usd:false},
+  {id:"p1",label:"不動產 1",cat:"不動產",type:"asset",usd:false},
+  {id:"p2",label:"不動產 2",cat:"不動產",type:"asset",usd:false},
+  {id:"p3",label:"不動產 3",cat:"不動產",type:"asset",usd:false},
+  {id:"o1",label:"其他資產 1",cat:"其他資產",type:"asset",usd:false},
+  {id:"o2",label:"其他資產 2",cat:"其他資產",type:"asset",usd:false},
+  {id:"l1",label:"信用卡 1",cat:"信用卡",type:"liability",usd:false},
+  {id:"l2",label:"信用卡 2",cat:"信用卡",type:"liability",usd:false},
+  {id:"l3",label:"信用卡 3",cat:"信用卡",type:"liability",usd:false},
+  {id:"l4",label:"信用卡 4",cat:"信用卡",type:"liability",usd:false},
+  {id:"l5",label:"信用卡 5",cat:"信用卡",type:"liability",usd:false},
+  {id:"l6",label:"信用卡 6",cat:"信用卡",type:"liability",usd:false},
+  {id:"d1",label:"信貸",cat:"貸款",type:"liability",usd:false},
+  {id:"d2",label:"車貸",cat:"貸款",type:"liability",usd:false},
+  {id:"d3",label:"房貸 1",cat:"貸款",type:"liability",usd:false},
+  {id:"d4",label:"房貸 2",cat:"貸款",type:"liability",usd:false},
+  {id:"d5",label:"房屋增貸",cat:"貸款",type:"liability",usd:false},
+  {id:"d6",label:"房貸 3",cat:"貸款",type:"liability",usd:false},
+];
+
+const INIT_FIXED=[
+  {id:"f1",label:"房貸",cat:"居住"},
+  {id:"f2",label:"車貸",cat:"交通"},
+  {id:"f3",label:"保險",cat:"保費"},
+  {id:"f4",label:"電話費",cat:"通訊"},
+  {id:"f5",label:"網路費",cat:"通訊"},
+  {id:"f6",label:"水電瓦斯",cat:"居住"},
+  {id:"f7",label:"管理費",cat:"居住"},
+];
+
+const INIT_FIXED_INCOME=[
+  {id:"fi1",label:"工作收入"},
+  {id:"fi2",label:"租金收入"},
+];
+
+// USD conversion helper — backward compat: old snapshots without _rate already store TWD
+const toTwd=(snap,acc,rawVal)=>{
+  if(!acc.usd||!snap||!('_rate' in snap)) return rawVal;
+  return rawVal*(parseFloat(snap._rate)||1);
+};
+
+function App(){
+  const [view,setView]=useState("dashboard");
+  const [hideNums,setHideNums]=useState(false);
+  const [excludeRealty,setExcludeRealty]=useState(false);
+
+  const [accounts,setAccounts]=useState(()=>LS.get("nw_accounts")||INIT_ACCOUNTS);
+  const [history,setHistory]=useState(()=>LS.get("nw_history")||{});
+  const [form,setForm]=useState({});
+  const [usdRate,setUsdRate]=useState("");
+  const [editMonth,setEditMonth]=useState(prevMonth());
+  const [collapsed,setCollapsed]=useState({});
+  const [showAdd,setShowAdd]=useState(false);
+  const [newAcc,setNewAcc]=useState({label:"",cat:"銀行",usd:false});
+  const [confirmDel,setConfirmDel]=useState(null);
+
+  const [fixedItems,setFixedItems]=useState(()=>{
+    const saved=LS.get("nw_fixed_items");
+    if(saved) return saved.map(f=>f.cat?f:{...f,cat:"其他"});
+    return INIT_FIXED;
+  });
+  const [fixedAmounts,setFixedAmounts]=useState(()=>LS.get("nw_fixed_amounts")||{});
+  const [fixedInputMode,setFixedInputMode]=useState(false);
+  const [fixedForm,setFixedForm]=useState({});
+  const [showAddFixed,setShowAddFixed]=useState(false);
+  const [newFixed,setNewFixed]=useState({label:"",cat:"其他",amount:""});
+  const [fixedCollapsed,setFixedCollapsed]=useState({});
+  const [fixedCats,setFixedCats]=useState(()=>LS.get("nw_fixed_cats")||INIT_FIXED_CATS);
+  const [showManageCats,setShowManageCats]=useState(false);
+  const [newCat,setNewCat]=useState({label:"",icon:"📌"});
+  const [fixedSubItems,setFixedSubItems]=useState(()=>LS.get("nw_fixed_sub_items")||[]);
+  const [addSubParent,setAddSubParent]=useState(null);
+  const [newSubLabel,setNewSubLabel]=useState("");
+  const [expandedItems,setExpandedItems]=useState({});
+
+  const [fixedIncomeItems,setFixedIncomeItems]=useState(()=>LS.get("nw_fixed_income_items")||INIT_FIXED_INCOME);
+  const [fixedIncomeAmounts,setFixedIncomeAmounts]=useState(()=>LS.get("nw_fixed_income_amounts")||{});
+  const [fixedIncomeInputMode,setFixedIncomeInputMode]=useState(false);
+  const [fixedIncomeForm,setFixedIncomeForm]=useState({});
+  const [showAddFixedIncome,setShowAddFixedIncome]=useState(false);
+  const [newFixedIncome,setNewFixedIncome]=useState({label:"",cat:"其他收入",amount:""});
+  const [fixedIncomeCats,setFixedIncomeCats]=useState(()=>LS.get("nw_fi_cats")||INIT_FIXED_INCOME_CATS);
+  const [fixedIncomeSubItems,setFixedIncomeSubItems]=useState(()=>LS.get("nw_fi_sub_items")||[]);
+  const [addIncomeSubParent,setAddIncomeSubParent]=useState(null);
+  const [newIncomeSubLabel,setNewIncomeSubLabel]=useState("");
+  const [expandedIncomeItems,setExpandedIncomeItems]=useState({});
+  const [showManageIncomeCats,setShowManageIncomeCats]=useState(false);
+  const [newIncomeCat,setNewIncomeCat]=useState({label:"",icon:"💰"});
+
+  useEffect(()=>LS.set("nw_accounts",accounts),[accounts]);
+  useEffect(()=>LS.set("nw_history",history),[history]);
+  useEffect(()=>LS.set("nw_fixed_items",fixedItems),[fixedItems]);
+  useEffect(()=>LS.set("nw_fixed_cats",fixedCats),[fixedCats]);
+  useEffect(()=>LS.set("nw_fixed_sub_items",fixedSubItems),[fixedSubItems]);
+  useEffect(()=>LS.set("nw_fi_cats",fixedIncomeCats),[fixedIncomeCats]);
+  useEffect(()=>LS.set("nw_fi_sub_items",fixedIncomeSubItems),[fixedIncomeSubItems]);
+  useEffect(()=>LS.set("nw_fixed_amounts",fixedAmounts),[fixedAmounts]);
+  useEffect(()=>LS.set("nw_fixed_income_items",fixedIncomeItems),[fixedIncomeItems]);
+  useEffect(()=>LS.set("nw_fixed_income_amounts",fixedIncomeAmounts),[fixedIncomeAmounts]);
+
+  const sortedKeys=Object.keys(history).sort();
+
+  useEffect(()=>{
+    if(view==="input"){
+      const targetSnap=history[editMonth];
+      const prior=Object.keys(history).sort().filter(k=>k<editMonth);
+      const priorKey=prior[prior.length-1];
+      const sourceSnap=targetSnap||(priorKey?history[priorKey]:null)||{};
+      const{_rate,...vals}=sourceSnap;
+      setForm(vals);
+      setUsdRate(_rate!=null?String(_rate):"");
+    }
+  },[view,editMonth]);
+
+  const mask=n=>hideNums?"• • • •":fmt(n);
+  const maskS=n=>hideNums?"• •":fmtShort(n);
+
+  const exportData=()=>{
+    const data={accounts,history,fixedItems,fixedAmounts,fixedCats,fixedSubItems,fixedIncomeItems,fixedIncomeAmounts,fixedIncomeCats,fixedIncomeSubItems,exportedAt:new Date().toISOString()};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`資產備份_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  };
+
+  const importData=()=>{
+    const inp=document.createElement("input");
+    inp.type="file";inp.accept=".json";
+    inp.onchange=e=>{
+      const f=e.target.files[0];if(!f)return;
+      const r=new FileReader();
+      r.onload=ev=>{
+        try{
+          const d=JSON.parse(ev.target.result);
+          if(d.accounts) setAccounts(d.accounts);
+          if(d.history) setHistory(d.history);
+          if(d.fixedItems) setFixedItems(d.fixedItems.map(f=>f.cat?f:{...f,cat:"其他"}));
+          if(d.fixedCats) setFixedCats(d.fixedCats);
+          if(d.fixedSubItems) setFixedSubItems(d.fixedSubItems);
+          if(d.fixedIncomeCats) setFixedIncomeCats(d.fixedIncomeCats);
+          if(d.fixedIncomeSubItems) setFixedIncomeSubItems(d.fixedIncomeSubItems);
+          if(d.fixedAmounts) setFixedAmounts(d.fixedAmounts);
+          if(d.fixedIncomeItems) setFixedIncomeItems(d.fixedIncomeItems);
+          if(d.fixedIncomeAmounts) setFixedIncomeAmounts(d.fixedIncomeAmounts);
+          alert("✅ 匯入成功！");
+        }catch(err){alert("❌ 檔案格式錯誤");}
+      };
+      r.readAsText(f);
+    };
+    inp.click();
+  };
+
+  // calcSnap: excludeCats removes whole categories; excludeIds removes specific accounts
+  const calcSnap=(snap,excludeCats=[],excludeIds=[])=>{
+    let assets=0,liabs=0;
+    accounts.forEach(a=>{
+      if(excludeCats.length&&excludeCats.includes(a.cat)) return;
+      if(excludeIds.length&&excludeIds.includes(a.id)) return;
+      const v=parseFloat(snap?.[a.id])||0;
+      const twdVal=toTwd(snap,a,v);
+      a.type==="asset"?(assets+=twdVal):(liabs+=twdVal);
+    });
+    return{assets,liabs,net:assets-liabs};
+  };
+
+  // IDs of mortgage accounts (房貸/增貸) to exclude alongside 不動產 in the toggle
+  const realtyLoanIds=accounts
+    .filter(a=>a.cat==="貸款"&&(a.label.includes("房貸")||a.label.includes("增貸")))
+    .map(a=>a.id);
+
+  const latestKey=sortedKeys[sortedKeys.length-1]||null;
+  const prevKey=sortedKeys[sortedKeys.length-2]||null;
+  const latestSnap=latestKey?calcSnap(history[latestKey]):null;
+  const prevSnap=prevKey?calcSnap(history[prevKey]):null;
+  const diff=latestSnap&&prevSnap?latestSnap.net-prevSnap.net:null;
+  const pct=diff!==null&&prevSnap&&prevSnap.net!==0?((diff/Math.abs(prevSnap.net))*100).toFixed(1):null;
+
+  const chartData=sortedKeys.slice(-12).map(k=>({
+    ...calcSnap(history[k],excludeRealty?["不動產"]:[],excludeRealty?realtyLoanIds:[]),k
+  }));
+  const maxVal=chartData.length?Math.max(...chartData.map(d=>Math.max(d.assets,d.net)),1):1;
+
+  // FX impact: how much of this month's net change is purely from exchange rate movement
+  const fxImpact=(()=>{
+    if(!latestKey||!prevKey) return null;
+    const curRate=parseFloat(history[latestKey]?._rate);
+    const prevRate=parseFloat(history[prevKey]?._rate);
+    if(!curRate||!prevRate) return null;
+    let usdNetPrev=0;
+    accounts.forEach(a=>{
+      if(!a.usd) return;
+      const pv=parseFloat(history[prevKey]?.[a.id])||0;
+      usdNetPrev+=(a.type==="asset"?pv:-pv);
+    });
+    return usdNetPrev*(curRate-prevRate);
+  })();
+
+  // Preview calc for input form
+  const calcFormPreview=()=>{
+    const rate=parseFloat(usdRate)||0;
+    let assets=0,liabs=0;
+    accounts.forEach(a=>{
+      const v=parseFloat(form[a.id])||0;
+      const twdVal=(a.usd&&rate)?v*rate:v;
+      a.type==="asset"?(assets+=twdVal):(liabs+=twdVal);
+    });
+    return{assets,liabs,net:assets-liabs};
+  };
+
+  const card={background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,marginBottom:10,overflow:"hidden"};
+  const inp={background:C.accent,border:`1px solid ${C.border}`,color:C.text,padding:"7px 10px",borderRadius:8,fontSize:14};
+  const overlay="rgba(44,40,32,0.45)";
+  const btnPrimary={background:C.text,border:"none",color:C.bg,padding:"7px 14px",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:600};
+  const btnSecondary={background:C.accent,border:`1px solid ${C.border}`,color:C.sub,padding:"7px 14px",borderRadius:8,cursor:"pointer",fontSize:13};
+
+  const NavBtn=({v,label})=>(
+    <button onClick={()=>setView(v)} style={{
+      background:"transparent",color:view===v?C.text:C.sub,
+      border:"none",padding:"8px 12px 6px",cursor:"pointer",fontSize:12,
+      fontWeight:view===v?700:400,
+      borderBottom:view===v?`2px solid ${C.lav}`:"2px solid transparent",
+      transition:"color 0.15s",whiteSpace:"nowrap",
+    }}>{label}</button>
+  );
+
+  const buildGroups=()=>{
+    const catLabels=fixedCats.map(c=>c.label);
+    const groups={};
+    catLabels.forEach(cat=>{
+      const items=fixedItems.filter(f=>(f.cat||"其他")===cat);
+      if(items.length) groups[cat]=items;
+    });
+    fixedItems.forEach(f=>{
+      const cat=f.cat||"其他";
+      if(!catLabels.includes(cat)){
+        if(!groups[cat]) groups[cat]=[];
+        if(!groups[cat].find(x=>x.id===f.id)) groups[cat].push(f);
+      }
+    });
+    return groups;
+  };
+  const getCatIcon=label=>(fixedCats.find(c=>c.label===label)||{icon:"📌"}).icon;
+  const getIncomeCatIcon=label=>(fixedIncomeCats.find(c=>c.label===label)||{icon:"💰"}).icon;
+  const getIncomeItemTotal=(fid)=>{
+    const subs=fixedIncomeSubItems.filter(s=>s.parentId===fid);
+    if(subs.length===0) return parseFloat(fixedIncomeAmounts[fid])||0;
+    return subs.reduce((s,sub)=>s+(parseFloat(fixedIncomeAmounts[sub.id])||0),0);
+  };
+  const buildIncomeGroups=()=>{
+    const catLabels=fixedIncomeCats.map(c=>c.label);
+    const groups={};
+    catLabels.forEach(cat=>{
+      const items=fixedIncomeItems.filter(f=>(f.cat||"其他收入")===cat);
+      if(items.length) groups[cat]=items;
+    });
+    fixedIncomeItems.forEach(f=>{
+      const cat=f.cat||"其他收入";
+      if(!catLabels.includes(cat)){
+        if(!groups[cat]) groups[cat]=[];
+        if(!groups[cat].find(x=>x.id===f.id)) groups[cat].push(f);
+      }
+    });
+    return groups;
+  };
+  const getItemTotal=(fid)=>{
+    const subs=fixedSubItems.filter(s=>s.parentId===fid);
+    if(subs.length===0) return parseFloat(fixedAmounts[fid])||0;
+    return subs.reduce((s,sub)=>s+(parseFloat(fixedAmounts[sub.id])||0),0);
+  };
+
+  return (
+    <div style={{background:C.bg,minHeight:"100vh",color:C.text}}>
+
+      {/* ── Header ── */}
+      <div style={{background:C.surface,borderBottom:`1px solid ${C.border}`,padding:"10px 16px 0",position:"sticky",top:0,zIndex:100}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+          <span style={{fontSize:17}}>💼</span>
+          <span style={{fontWeight:700,fontSize:15,flex:1,letterSpacing:"-0.3px"}}>資產指揮中心</span>
+          <button onClick={()=>setHideNums(h=>!h)} style={{
+            background:hideNums?C.lav:C.accent,
+            border:`1px solid ${hideNums?C.lav:C.border}`,
+            color:hideNums?"#fff":C.sub,
+            padding:"5px 10px",borderRadius:6,cursor:"pointer",fontSize:11,fontWeight:600,
+          }}>{hideNums?"👁 顯示金額":"🙈 隱藏金額"}</button>
+          <button onClick={importData} style={{...btnSecondary,padding:"5px 8px",fontSize:11}}>📥 匯入</button>
+          <button onClick={exportData} style={{...btnPrimary,padding:"5px 10px",fontSize:11}}>📤 備份</button>
+        </div>
+        <div style={{display:"flex",gap:0,overflowX:"auto",scrollbarWidth:"none"}}>
+          <NavBtn v="dashboard" label="📊 總覽"/>
+          <NavBtn v="input"     label="✏️ 更新"/>
+          <NavBtn v="fixed"     label="📌 固定支出"/>
+          <NavBtn v="fixedincome" label="💰 固定收入"/>
+          <NavBtn v="manage"    label="⚙️ 帳戶"/>
+        </div>
+      </div>
+
+      <div style={{padding:16,maxWidth:660,margin:"0 auto"}}>
+
+        {/* ══════════════════════════════ DASHBOARD ══════════════════════════════ */}
+        {view==="dashboard"&&(
+          !latestSnap?(
+            <div style={{textAlign:"center",padding:60,color:C.muted}}>
+              <div style={{fontSize:48,marginBottom:12}}>📊</div>
+              <div style={{marginBottom:6,color:C.sub}}>還沒有資料</div>
+              <div style={{fontSize:12}}>點「✏️ 更新」填入數字</div>
+            </div>
+          ):<>
+            {/* Hero card */}
+            <div style={{background:"linear-gradient(135deg, #6B8A8A 0%, #7A9080 100%)",borderRadius:14,padding:"22px 24px",marginBottom:14,color:"#fff"}}>
+              <div style={{fontSize:11,opacity:.55,marginBottom:4,letterSpacing:"0.06em"}}>淨資產 · {monthLabel(latestKey)}</div>
+              <div style={{fontSize:36,fontWeight:700,letterSpacing:"-1.5px",lineHeight:1.1}}>
+                {hideNums?"• • • • • •":`TWD ${fmt(latestSnap.net)}`}
+              </div>
+              {diff!==null&&<div style={{marginTop:10}}>
+                <div style={{fontSize:12,background:"rgba(255,255,255,0.1)",display:"inline-flex",alignItems:"center",gap:6,padding:"4px 12px",borderRadius:20}}>
+                  <span>{diff>=0?"▲":"▼"}</span>
+                  <span>{hideNums?"• •":`${diff>=0?"+":"-"}TWD ${fmt(diff)}`}</span>
+                  {pct&&!hideNums&&<span style={{opacity:.6}}>({pct}%)</span>}
+                  <span style={{opacity:.5}}>vs 上月</span>
+                </div>
+                {fxImpact!==null&&!hideNums&&(
+                  <div style={{marginTop:5,fontSize:11,opacity:.65,paddingLeft:2}}>
+                    匯率影響 {fxImpact>=0?"+":""}{fmtShort(fxImpact)} · 實際變動 {(diff-fxImpact)>=0?"+":""}{fmtShort(diff-fxImpact)}
+                  </div>
+                )}
+              </div>}
+              <div style={{display:"flex",gap:24,marginTop:16,paddingTop:14,borderTop:"1px solid rgba(255,255,255,0.12)"}}>
+                <div>
+                  <div style={{fontSize:11,opacity:.5,marginBottom:2}}>資產合計</div>
+                  <div style={{fontSize:16,fontWeight:600}}>{maskS(latestSnap.assets)}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:11,opacity:.5,marginBottom:2}}>負債合計</div>
+                  <div style={{fontSize:16,fontWeight:600}}>{maskS(latestSnap.liabs)}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trend chart */}
+            {chartData.length>1&&<div style={{...card,padding:16,marginBottom:14}}>
+              <div style={{display:"flex",alignItems:"center",marginBottom:14}}>
+                <div style={{fontSize:12,color:C.sub,fontWeight:600,letterSpacing:"0.04em",flex:1}}>淨資產趨勢</div>
+                <button onClick={()=>setExcludeRealty(p=>!p)} style={{
+                  fontSize:11,padding:"3px 10px",borderRadius:20,cursor:"pointer",fontWeight:600,
+                  background:excludeRealty?C.lav:C.accent,
+                  border:`1px solid ${excludeRealty?C.lav:C.border}`,
+                  color:excludeRealty?"#fff":C.sub,
+                  transition:"all 0.15s",
+                }}>
+                  {excludeRealty?"不含不動產":"含不動產"}
+                </button>
+              </div>
+              <div style={{display:"flex",alignItems:"flex-end",gap:4,height:88}}>
+                {chartData.map((d,i)=>{
+                  const minVal=Math.min(...chartData.map(x=>x.net));
+                  const range=maxVal-(minVal<0?minVal:0);
+                  const base=range>0?(d.net-(minVal<0?minVal:0))/range:0.5;
+                  const h=Math.max(4,base*80);
+                  const up=i===0||d.net>=chartData[i-1].net;
+                  const isNow=i===chartData.length-1;
+                  const barColor=isNow?C.lav:up?C.green:C.red;
+                  const[,m]=d.k.split("-");
+                  const delta=i>0?d.net-chartData[i-1].net:null;
+                  return <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+                    <div style={{fontSize:8,color:C.muted,height:20,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",gap:1}}>
+                      {!hideNums&&<span>{fmtShort(d.net)}</span>}
+                      {delta!==null&&!hideNums&&<span style={{fontWeight:700,color:delta>=0?C.green:C.red}}>{delta>=0?"+":""}{fmtShort(delta)}</span>}
+                    </div>
+                    <div style={{width:"100%",height:h,background:barColor,borderRadius:"3px 3px 0 0",opacity:isNow?1:.7}}/>
+                    <div style={{fontSize:8,color:C.muted}}>{m}月</div>
+                  </div>;
+                })}
+              </div>
+            </div>}
+
+            {/* Category breakdown */}
+            {ALL_CATS.map(cat=>{
+              const accs=accounts.filter(a=>a.cat===cat);
+              if(!accs.length) return null;
+              const curSnap=history[latestKey];
+              const prvSnap=prevKey?history[prevKey]:null;
+              const total=accs.reduce((s,a)=>{
+                const v=parseFloat(curSnap?.[a.id])||0;
+                return s+toTwd(curSnap,a,v);
+              },0);
+              const isLiab=CATS_LIAB.includes(cat),open=collapsed[cat]!==true;
+              return <div key={cat} style={card}>
+                <div onClick={()=>setCollapsed(p=>({...p,[cat]:open}))} style={{display:"flex",alignItems:"center",padding:"13px 16px",cursor:"pointer",userSelect:"none"}}>
+                  <span style={{marginRight:8,fontSize:16}}>{CAT_ICONS[cat]}</span>
+                  <span style={{fontWeight:600,flex:1}}>{cat}</span>
+                  <span style={{fontWeight:600,fontSize:14,color:total===0?C.muted:isLiab?C.red:C.green}}>
+                    {total?(isLiab?"-":"")+mask(total):"—"}
+                  </span>
+                  <span style={{marginLeft:10,color:C.muted,fontSize:10}}>{open?"▲":"▼"}</span>
+                </div>
+                {open&&(()=>{
+                  const twdAccs=accs.filter(a=>!a.usd);
+                  const usdAccs=accs.filter(a=>a.usd);
+                  const hasBoth=twdAccs.length>0&&usdAccs.length>0;
+                  const renderRow=a=>{
+                    const vRaw=parseFloat(curSnap?.[a.id])||0;
+                    const v=toTwd(curSnap,a,vRaw);
+                    const pvRaw=prvSnap!=null?parseFloat(prvSnap?.[a.id])||0:null;
+                    const pv=pvRaw!==null?toTwd(prvSnap,a,pvRaw):null;
+                    const d=pv!==null?v-pv:null;
+                    return <div key={a.id} style={{display:"flex",alignItems:"center",padding:"9px 16px 9px 44px",borderTop:`1px solid ${C.border}`}}>
+                      <div style={{flex:1,display:"flex",alignItems:"center",gap:6}}>
+                        <span style={{color:C.sub,fontSize:13}}>{a.label}</span>
+                        {a.usd&&<span style={{fontSize:10,background:C.amberBg,color:C.amber,border:`1px solid ${C.amberBorder}`,padding:"1px 5px",borderRadius:5,fontWeight:600}}>USD</span>}
+                      </div>
+                      <div style={{textAlign:"right"}}>
+                        <div style={{fontWeight:600,color:v?C.text:C.muted,fontSize:13}}>{v?mask(v):"—"}</div>
+                        {d!==null&&d!==0&&!hideNums&&<div style={{fontSize:11,color:d>0?C.green:C.red}}>{d>0?"+":"-"}{fmt(d)}</div>}
+                      </div>
+                    </div>;
+                  };
+                  return <>
+                    {twdAccs.map(renderRow)}
+
+                    {hasBoth&&null}
+                    {usdAccs.map(renderRow)}
+                  </>;
+                })()}
+              </div>;
+            })}
+
+            {/* History table */}
+            {sortedKeys.length>1&&<div style={{...card,padding:16}}>
+              <div style={{fontSize:12,color:C.sub,marginBottom:10,fontWeight:600,letterSpacing:"0.04em"}}>歷史記錄</div>
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+                <thead><tr style={{color:C.muted}}>
+                  <td style={{paddingBottom:8}}>月份</td>
+                  <td style={{textAlign:"right"}}>資產</td>
+                  <td style={{textAlign:"right"}}>負債</td>
+                  <td style={{textAlign:"right",fontWeight:600}}>淨資產</td>
+                  <td style={{textAlign:"right"}}>增減</td>
+                </tr></thead>
+                <tbody>{sortedKeys.slice().reverse().map((k,i,arr)=>{
+                  const t=calcSnap(history[k]),pk=arr[i+1],pt=pk?calcSnap(history[pk]):null,d=pt?t.net-pt.net:null;
+                  return <tr key={k} style={{borderTop:`1px solid ${C.border}`}}>
+                    <td style={{padding:"8px 0",fontWeight:500}}>{monthLabel(k)}</td>
+                    <td style={{textAlign:"right",color:C.green}}>{maskS(t.assets)}</td>
+                    <td style={{textAlign:"right",color:C.red}}>{maskS(t.liabs)}</td>
+                    <td style={{textAlign:"right",fontWeight:700}}>{maskS(t.net)}</td>
+                    <td style={{textAlign:"right",color:d==null?C.muted:d>=0?C.green:C.red,fontWeight:500}}>
+                      {d==null?"—":(d>=0?"+":"-")+maskS(d)}
+                    </td>
+                  </tr>;
+                })}</tbody>
+              </table>
+            </div>}
+          </>
+        )}
+
+        {/* ══════════════════════════════ INPUT ══════════════════════════════ */}
+        {view==="input"&&<>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+            <span style={{color:C.sub,fontSize:13}}>更新月份</span>
+            <input type="month" value={editMonth} onChange={e=>setEditMonth(e.target.value)} style={{...inp,width:"auto"}}/>
+          </div>
+
+          {/* Exchange rate card */}
+          <div style={{...card,padding:14,marginBottom:14,background:C.amberBg,border:`1px solid ${C.amberBorder}`}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span style={{fontSize:13,color:C.amber,fontWeight:700,flex:1}}>💱 本月 USD/TWD 匯率</span>
+              <input type="number" placeholder="例：32.1" value={usdRate}
+                onChange={e=>setUsdRate(e.target.value)}
+                style={{...inp,width:120,textAlign:"right",background:"#fff",border:`1px solid ${C.amberBorder}`}}/>
+            </div>
+            <div style={{fontSize:11,color:C.amber,marginTop:6,opacity:.85}}>
+              填入後，USD 帳戶直接填美金金額，系統自動換算台幣
+            </div>
+          </div>
+
+          {["資產","負債"].map(side=>{
+            const sideCats=(side==="資產"?CATS_ASSET:CATS_LIAB).filter(c=>accounts.some(a=>a.cat===c));
+            const rate=parseFloat(usdRate)||0;
+            return <div key={side}>
+              <div style={{fontSize:11,fontWeight:700,color:side==="資產"?C.green:C.red,marginBottom:8,letterSpacing:"0.08em"}}>{side}</div>
+              {sideCats.map(cat=>{
+                const twdAccs=accounts.filter(a=>a.cat===cat&&!a.usd);
+                const usdAccs=accounts.filter(a=>a.cat===cat&&a.usd);
+                const hasBoth=twdAccs.length>0&&usdAccs.length>0;
+                return <div key={cat} style={{...card,padding:14}}>
+                  <div style={{fontSize:13,fontWeight:600,marginBottom:12}}>{CAT_ICONS[cat]} {cat}</div>
+                  {/* TWD accounts first */}
+                  {twdAccs.map(a=><div key={a.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+                    <span style={{flex:1,color:C.sub,fontSize:13}}>{a.label}</span>
+                    <input type="number" placeholder="0" value={form[a.id]||""}
+                      onChange={e=>setForm(p=>({...p,[a.id]:e.target.value}))}
+                      style={{...inp,width:150,textAlign:"right"}}/>
+                  </div>)}
+                  {/* Divider between TWD and USD */}
+                  {hasBoth&&<div style={{display:"flex",alignItems:"center",gap:8,margin:"8px 0 10px"}}>
+                    <div style={{flex:1,height:1,background:C.amberBorder}}/>
+                    <span style={{fontSize:10,color:C.amber,fontWeight:700,letterSpacing:"0.05em"}}>USD · 填美金金額</span>
+                    <div style={{flex:1,height:1,background:C.amberBorder}}/>
+                  </div>}
+                  {/* USD accounts after */}
+                  {usdAccs.map(a=>{
+                    const usdVal=parseFloat(form[a.id])||0;
+                    const twdEq=usdVal&&rate?usdVal*rate:null;
+                    return <div key={a.id} style={{marginBottom:10}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <div style={{flex:1,display:"flex",alignItems:"center",gap:6}}>
+                          <span style={{color:C.sub,fontSize:13}}>{a.label}</span>
+                          <span style={{fontSize:10,background:C.amberBg,color:C.amber,border:`1px solid ${C.amberBorder}`,padding:"1px 5px",borderRadius:5,fontWeight:600}}>USD</span>
+                        </div>
+                        <input type="number" placeholder="0" value={form[a.id]||""}
+                          onChange={e=>setForm(p=>({...p,[a.id]:e.target.value}))}
+                          style={{...inp,width:150,textAlign:"right"}}/>
+                      </div>
+                      {twdEq&&<div style={{textAlign:"right",fontSize:11,color:C.amber,marginTop:2}}>≈ TWD {fmtShort(twdEq)}</div>}
+                    </div>;
+                  })}
+                </div>;
+              })}
+            </div>;
+          })}
+
+          {(()=>{const t=calcFormPreview();return(
+            <div style={{background:C.accent,border:`1px solid ${C.border}`,borderRadius:12,padding:16,marginTop:4}}>
+              <div style={{fontSize:12,color:C.sub,marginBottom:10}}>預覽</div>
+              <div style={{display:"flex",gap:20,alignItems:"flex-end"}}>
+                <div><div style={{fontSize:11,color:C.sub}}>資產</div><div style={{color:C.green,fontWeight:600}}>{fmt(t.assets)}</div></div>
+                <div><div style={{fontSize:11,color:C.sub}}>負債</div><div style={{color:C.red,fontWeight:600}}>{fmt(t.liabs)}</div></div>
+                <div style={{marginLeft:"auto"}}><div style={{fontSize:11,color:C.sub}}>淨資產</div><div style={{fontSize:24,fontWeight:700,color:C.text}}>TWD {fmt(t.net)}</div></div>
+              </div>
+            </div>
+          );})()}
+          <button onClick={()=>{
+            const snapToSave={...form};
+            const rate=parseFloat(usdRate);
+            if(rate>0) snapToSave._rate=rate;
+            setHistory(p=>{const n={...p,[editMonth]:snapToSave};LS.set("nw_history",n);return n;});
+            setView("dashboard");
+          }} style={{width:"100%",...btnPrimary,padding:13,fontSize:15,borderRadius:10,marginTop:12}}>
+            儲存 {monthLabel(editMonth)}
+          </button>
+        </>}
+
+        {/* ══════════════════════════════ FIXED EXPENSES ══════════════════════════════ */}
+        {view==="fixed"&&(()=>{
+          const total=fixedItems.reduce((s,f)=>s+getItemTotal(f.id),0);
+          const groups=buildGroups();
+          return <>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <span style={{fontWeight:700,fontSize:15}}>📌 固定支出</span>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={()=>setShowManageCats(true)} style={{...btnSecondary,padding:"7px 12px",fontSize:12}}>🗂 管理類別</button>
+                <button onClick={()=>{setFixedForm({...fixedAmounts});setFixedInputMode(true);}} style={btnPrimary}>✏️ 更新金額</button>
+              </div>
+            </div>
+            <div style={{background:"linear-gradient(135deg, #9B7B6B 0%, #A08878 100%)",borderRadius:14,padding:"20px 24px",marginBottom:14,color:"#fff"}}>
+              <div style={{fontSize:11,opacity:.7,marginBottom:4,letterSpacing:"0.06em"}}>每月固定支出合計</div>
+              <div style={{fontSize:34,fontWeight:700,letterSpacing:"-1px"}}>{hideNums?"• • • • • •":`TWD ${fmt(total)}`}</div>
+              <div style={{fontSize:12,opacity:.5,marginTop:6}}>{fixedItems.filter(f=>getItemTotal(f.id)>0).length} 項固定支出 · {Object.keys(groups).length} 個類別</div>
+            </div>
+            {Object.entries(groups).map(([cat,items])=>{
+              const catTotal=items.reduce((s,f)=>s+getItemTotal(f.id),0);
+              const catPct=total&&catTotal?Math.round(catTotal/total*100):0;
+              const open=fixedCollapsed[cat]!==true;
+              return <div key={cat} style={card}>
+                <div onClick={()=>setFixedCollapsed(p=>({...p,[cat]:open}))} style={{display:"flex",alignItems:"center",padding:"13px 16px",cursor:"pointer",userSelect:"none"}}>
+                  <span style={{marginRight:8,fontSize:15}}>{getCatIcon(cat)}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:600,fontSize:14}}>{cat}</div>
+                    {catPct>0&&!hideNums&&<div style={{fontSize:11,color:C.muted,marginTop:1}}>佔總支出 {catPct}%</div>}
+                  </div>
+                  <span style={{fontWeight:700,fontSize:14,color:catTotal?C.text:C.muted}}>{catTotal?mask(catTotal):"未設定"}</span>
+                  <span style={{marginLeft:10,color:C.muted,fontSize:10}}>{open?"▲":"▼"}</span>
+                </div>
+                {open&&items.map((f)=>{
+                  const v=getItemTotal(f.id);
+                  const pct=catTotal?Math.round(v/catTotal*100):0;
+                  const subs=fixedSubItems.filter(s=>s.parentId===f.id);
+                  const hasSubs=subs.length>0;
+                  const itemExpanded=expandedItems[f.id]!==false;
+                  return <div key={f.id} style={{borderTop:`1px solid ${C.border}`}}>
+                    <div style={{display:"flex",alignItems:"center",padding:"10px 16px 10px 42px",cursor:hasSubs?"pointer":"default"}}
+                      onClick={()=>hasSubs&&setExpandedItems(p=>({...p,[f.id]:!itemExpanded}))}>
+                      <div style={{flex:1}}>
+                        <span style={{color:C.sub,fontSize:13}}>{f.label}</span>
+                        {hasSubs&&<span style={{marginLeft:6,fontSize:10,color:C.muted}}>({subs.length} 細項)</span>}
+                      </div>
+                      <span style={{fontWeight:600,color:v?C.text:C.muted,fontSize:13,marginRight:6}}>{v?mask(v):"未設定"}</span>
+                      <button onClick={e=>{e.stopPropagation();setAddSubParent(f);setNewSubLabel("");}}
+                        style={{background:C.accent,border:`1px solid ${C.border}`,color:C.sub,padding:"2px 7px",borderRadius:5,cursor:"pointer",fontSize:11,marginRight:6}}>＋細項</button>
+                      <button onClick={e=>{e.stopPropagation();
+                        const ni=fixedItems.filter(x=>x.id!==f.id);
+                        const subIds=fixedSubItems.filter(s=>s.parentId===f.id).map(s=>s.id);
+                        const na={...fixedAmounts};delete na[f.id];subIds.forEach(sid=>delete na[sid]);
+                        setFixedItems(ni);setFixedAmounts(na);
+                        setFixedSubItems(p=>p.filter(s=>s.parentId!==f.id));
+                      }} style={{background:C.accent,border:`1px solid ${C.border}`,color:C.red,padding:"2px 8px",borderRadius:5,cursor:"pointer",fontSize:11}}>刪除</button>
+                      {hasSubs&&<span style={{marginLeft:6,color:C.muted,fontSize:10}}>{itemExpanded?"▲":"▼"}</span>}
+                    </div>
+                    {v>0&&!hideNums&&<div style={{display:"flex",alignItems:"center",gap:8,padding:"0 16px 8px 42px"}}>
+                      <div style={{flex:1,background:C.accent,borderRadius:3,height:3}}><div style={{width:pct+"%",height:"100%",background:C.red,borderRadius:3,opacity:.6}}/></div>
+                      <span style={{fontSize:10,color:C.muted,width:26,textAlign:"right"}}>{pct}%</span>
+                    </div>}
+                    {hasSubs&&itemExpanded&&subs.map(sub=>{
+                      const sv=parseFloat(fixedAmounts[sub.id])||0;
+                      const spct=v?Math.round(sv/v*100):0;
+                      return <div key={sub.id} style={{background:C.accent,borderTop:`1px solid ${C.border}`,padding:"8px 16px 8px 58px"}}>
+                        <div style={{display:"flex",alignItems:"center"}}>
+                          <span style={{color:C.muted,marginRight:6,fontSize:11}}>└</span>
+                          <span style={{flex:1,color:C.sub,fontSize:12}}>{sub.label}</span>
+                          <span style={{fontSize:12,fontWeight:500,color:sv?C.text:C.muted,marginRight:8}}>{sv?mask(sv):"—"}</span>
+                          <button onClick={()=>{
+                            setFixedSubItems(p=>p.filter(s=>s.id!==sub.id));
+                            setFixedAmounts(p=>{const n={...p};delete n[sub.id];return n;});
+                          }} style={{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:11,padding:"1px 4px"}}>✕</button>
+                        </div>
+                        {sv>0&&!hideNums&&<div style={{display:"flex",alignItems:"center",gap:8,marginTop:4,paddingLeft:14}}>
+                          <div style={{flex:1,background:C.border,borderRadius:3,height:2}}><div style={{width:spct+"%",height:"100%",background:C.muted,borderRadius:2}}/></div>
+                          <span style={{fontSize:9,color:C.muted,width:26,textAlign:"right"}}>{spct}%</span>
+                        </div>}
+                      </div>;
+                    })}
+                  </div>;
+                })}
+              </div>;
+            })}
+            {Object.keys(groups).length>0&&<div style={{...card,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{color:C.sub,fontSize:13}}>每月合計</span>
+              <span style={{fontSize:17,fontWeight:700}}>{hideNums?"• • • •":`TWD ${fmt(total)}`}</span>
+            </div>}
+            <div style={{marginTop:10,textAlign:"center"}}>
+              <button onClick={()=>setShowAddFixed(true)} style={btnPrimary}>＋ 新增項目</button>
+            </div>
+          </>;
+        })()}
+
+        {/* ══════════════════════════════ FIXED INCOME ══════════════════════════════ */}
+        {view==="fixedincome"&&(()=>{
+          const total=fixedIncomeItems.reduce((s,f)=>s+getIncomeItemTotal(f.id),0);
+          const groups=buildIncomeGroups();
+          return <>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <span style={{fontWeight:700,fontSize:15}}>💰 固定收入</span>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={()=>setShowManageIncomeCats(true)} style={{...btnSecondary,padding:"7px 12px",fontSize:12}}>🗂 管理類別</button>
+                <button onClick={()=>{setFixedIncomeForm({...fixedIncomeAmounts});setFixedIncomeInputMode(true);}} style={{...btnPrimary,background:C.green}}>✏️ 更新金額</button>
+              </div>
+            </div>
+            <div style={{background:C.green,borderRadius:14,padding:"20px 24px",marginBottom:14,color:"#fff"}}>
+              <div style={{fontSize:11,opacity:.7,marginBottom:4,letterSpacing:"0.06em"}}>每月固定收入合計</div>
+              <div style={{fontSize:34,fontWeight:700,letterSpacing:"-1px"}}>{hideNums?"• • • • • •":`TWD ${fmt(total)}`}</div>
+              <div style={{fontSize:12,opacity:.65,marginTop:6}}>{fixedIncomeItems.filter(f=>getIncomeItemTotal(f.id)>0).length} 項固定收入 · {Object.keys(groups).length} 個類別</div>
+            </div>
+            {Object.keys(groups).length===0?(
+              <div style={{textAlign:"center",padding:48,color:C.muted,background:C.surface,borderRadius:12,border:`1px solid ${C.border}`}}>
+                <div style={{fontSize:40,marginBottom:8}}>💰</div><div>還沒有固定收入項目</div>
+              </div>
+            ):Object.entries(groups).map(([cat,items])=>{
+              const catTotal=items.reduce((s,f)=>s+getIncomeItemTotal(f.id),0);
+              const catPct=total&&catTotal?Math.round(catTotal/total*100):0;
+              const open=expandedIncomeItems["cat_"+cat]!==false;
+              return <div key={cat} style={card}>
+                <div onClick={()=>setExpandedIncomeItems(p=>({...p,["cat_"+cat]:!open}))} style={{display:"flex",alignItems:"center",padding:"13px 16px",cursor:"pointer",userSelect:"none"}}>
+                  <span style={{marginRight:8,fontSize:15}}>{getIncomeCatIcon(cat)}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:600,fontSize:14}}>{cat}</div>
+                    {catPct>0&&!hideNums&&<div style={{fontSize:11,color:C.muted,marginTop:1}}>佔總收入 {catPct}%</div>}
+                  </div>
+                  <span style={{fontWeight:700,fontSize:14,color:catTotal?C.green:C.muted,marginRight:8}}>{catTotal?mask(catTotal):"未設定"}</span>
+                  <span style={{color:C.muted,fontSize:10}}>{open?"▲":"▼"}</span>
+                </div>
+                {open&&items.map((f)=>{
+                  const v=getIncomeItemTotal(f.id);
+                  const pct=catTotal?Math.round(v/catTotal*100):0;
+                  const subs=fixedIncomeSubItems.filter(s=>s.parentId===f.id);
+                  const hasSubs=subs.length>0;
+                  const itemOpen=expandedIncomeItems[f.id]!==false;
+                  return <div key={f.id} style={{borderTop:`1px solid ${C.border}`}}>
+                    <div style={{display:"flex",alignItems:"center",padding:"10px 16px 10px 42px",cursor:hasSubs?"pointer":"default"}}
+                      onClick={()=>hasSubs&&setExpandedIncomeItems(p=>({...p,[f.id]:!itemOpen}))}>
+                      <div style={{flex:1}}>
+                        <span style={{color:C.sub,fontSize:13}}>{f.label}</span>
+                        {hasSubs&&<span style={{marginLeft:6,fontSize:10,color:C.muted}}>({subs.length} 細項)</span>}
+                      </div>
+                      <span style={{fontWeight:600,color:v?C.text:C.muted,fontSize:13,marginRight:6}}>{v?mask(v):"未設定"}</span>
+                      <button onClick={e=>{e.stopPropagation();setAddIncomeSubParent(f);setNewIncomeSubLabel("");}}
+                        style={{background:C.accent,border:`1px solid ${C.border}`,color:C.sub,padding:"2px 7px",borderRadius:5,cursor:"pointer",fontSize:11,marginRight:6}}>＋細項</button>
+                      <button onClick={e=>{e.stopPropagation();
+                        const ni=fixedIncomeItems.filter(x=>x.id!==f.id);
+                        const subIds=fixedIncomeSubItems.filter(s=>s.parentId===f.id).map(s=>s.id);
+                        const na={...fixedIncomeAmounts};delete na[f.id];subIds.forEach(sid=>delete na[sid]);
+                        setFixedIncomeItems(ni);setFixedIncomeAmounts(na);
+                        setFixedIncomeSubItems(p=>p.filter(s=>s.parentId!==f.id));
+                      }} style={{background:C.accent,border:`1px solid ${C.border}`,color:C.red,padding:"2px 8px",borderRadius:5,cursor:"pointer",fontSize:11}}>刪除</button>
+                      {hasSubs&&<span style={{marginLeft:6,color:C.muted,fontSize:10}}>{itemOpen?"▲":"▼"}</span>}
+                    </div>
+                    {v>0&&!hideNums&&<div style={{display:"flex",alignItems:"center",gap:8,padding:"0 16px 8px 42px"}}>
+                      <div style={{flex:1,background:C.accent,borderRadius:3,height:3}}><div style={{width:pct+"%",height:"100%",background:C.green,borderRadius:3}}/></div>
+                      <span style={{fontSize:10,color:C.muted,width:26,textAlign:"right"}}>{pct}%</span>
+                    </div>}
+                    {hasSubs&&itemOpen&&subs.map(sub=>{
+                      const sv=parseFloat(fixedIncomeAmounts[sub.id])||0;
+                      const spct=v?Math.round(sv/v*100):0;
+                      return <div key={sub.id} style={{background:C.accent,borderTop:`1px solid ${C.border}`,padding:"8px 16px 8px 58px"}}>
+                        <div style={{display:"flex",alignItems:"center"}}>
+                          <span style={{color:C.muted,marginRight:6,fontSize:11}}>└</span>
+                          <span style={{flex:1,color:C.sub,fontSize:12}}>{sub.label}</span>
+                          <span style={{fontSize:12,fontWeight:500,color:sv?C.text:C.muted,marginRight:8}}>{sv?mask(sv):"—"}</span>
+                          <button onClick={()=>{
+                            setFixedIncomeSubItems(p=>p.filter(s=>s.id!==sub.id));
+                            setFixedIncomeAmounts(p=>{const n={...p};delete n[sub.id];return n;});
+                          }} style={{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:11,padding:"1px 4px"}}>✕</button>
+                        </div>
+                        {sv>0&&!hideNums&&<div style={{display:"flex",alignItems:"center",gap:8,marginTop:4,paddingLeft:14}}>
+                          <div style={{flex:1,background:C.border,borderRadius:3,height:2}}><div style={{width:spct+"%",height:"100%",background:C.green,borderRadius:2}}/></div>
+                          <span style={{fontSize:9,color:C.muted,width:26,textAlign:"right"}}>{spct}%</span>
+                        </div>}
+                      </div>;
+                    })}
+                  </div>;
+                })}
+              </div>;
+            })}
+            {Object.keys(groups).length>0&&<div style={{...card,padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{color:C.sub,fontSize:13}}>每月合計</span>
+              <span style={{fontSize:17,fontWeight:700,color:C.green}}>{mask(total)}</span>
+            </div>}
+            <div style={{marginTop:10,textAlign:"center"}}>
+              <button onClick={()=>setShowAddFixedIncome(true)} style={{...btnPrimary,background:C.green}}>＋ 新增項目</button>
+            </div>
+          </>;
+        })()}
+
+        {/* ══════════════════════════════ MANAGE ══════════════════════════════ */}
+        {view==="manage"&&<>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <span style={{fontWeight:700,fontSize:15}}>⚙️ 帳戶管理</span>
+            <button onClick={()=>setShowAdd(true)} style={btnPrimary}>＋ 新增帳戶</button>
+          </div>
+          {ALL_CATS.map(cat=>{
+            const accs=accounts.filter(a=>a.cat===cat);
+            if(!accs.length) return null;
+            return <div key={cat} style={{...card,padding:14}}>
+              <div style={{fontSize:13,fontWeight:600,marginBottom:10}}>{CAT_ICONS[cat]} {cat}</div>
+              {accs.map(a=><div key={a.id} style={{display:"flex",alignItems:"center",padding:"8px 0",borderTop:`1px solid ${C.border}`}}>
+                <span style={{flex:1,color:C.sub,fontSize:13}}>{a.label}</span>
+                {a.usd&&<span style={{marginRight:8,fontSize:10,background:C.amberBg,color:C.amber,border:`1px solid ${C.amberBorder}`,padding:"1px 5px",borderRadius:5}}>USD</span>}
+                <button onClick={()=>setConfirmDel(a)} style={{background:C.accent,border:`1px solid ${C.border}`,color:C.red,padding:"3px 10px",borderRadius:6,cursor:"pointer",fontSize:12}}>刪除</button>
+              </div>)}
+            </div>;
+          })}
+        </>}
+      </div>
+
+      {/* ══════════════════════════════ MODALS ══════════════════════════════ */}
+
+      {/* Fixed expense input modal */}
+      {fixedInputMode&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:660,maxHeight:"82vh",overflowY:"auto"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <div style={{fontWeight:700,fontSize:16}}>更新固定支出金額</div>
+            <button onClick={()=>setFixedInputMode(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:C.muted}}>✕</button>
+          </div>
+          {fixedCats.map(({label:cat})=>{
+            const items=fixedItems.filter(f=>(f.cat||"其他")===cat);
+            if(!items.length) return null;
+            return <div key={cat} style={{marginBottom:18}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.sub,letterSpacing:"0.06em",marginBottom:8}}>{getCatIcon(cat)} {cat}</div>
+              {items.map(f=>{
+                const subs=fixedSubItems.filter(s=>s.parentId===f.id);
+                const hasSubs=subs.length>0;
+                return <div key={f.id} style={{marginBottom:10,paddingLeft:18}}>
+                  {!hasSubs&&<div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{flex:1,color:C.sub,fontSize:13}}>{f.label}</span>
+                    <input type="number" placeholder="0" value={fixedForm[f.id]||""} onChange={e=>setFixedForm(p=>({...p,[f.id]:e.target.value}))} style={{...inp,width:150,textAlign:"right"}}/>
+                  </div>}
+                  {hasSubs&&<div>
+                    <div style={{fontSize:12,fontWeight:600,color:C.sub,marginBottom:6}}>{f.label}</div>
+                    {subs.map(sub=><div key={sub.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,paddingLeft:14}}>
+                      <span style={{color:C.muted,fontSize:11}}>└</span>
+                      <span style={{flex:1,color:C.sub,fontSize:12}}>{sub.label}</span>
+                      <input type="number" placeholder="0" value={fixedForm[sub.id]||""} onChange={e=>setFixedForm(p=>({...p,[sub.id]:e.target.value}))} style={{...inp,width:140,textAlign:"right",fontSize:13}}/>
+                    </div>)}
+                  </div>}
+                </div>;
+              })}
+            </div>;
+          })}
+          <div style={{paddingTop:12,borderTop:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{color:C.sub,fontSize:13}}>合計：<strong style={{color:C.text}}>TWD {fmt(fixedItems.reduce((s,f)=>{
+              const subs=fixedSubItems.filter(x=>x.parentId===f.id);
+              if(subs.length) return s+subs.reduce((a,sub)=>a+(parseFloat(fixedForm[sub.id])||0),0);
+              return s+(parseFloat(fixedForm[f.id])||0);
+            },0))}</strong></span>
+            <button onClick={()=>{setFixedAmounts(p=>{const n={...p,...fixedForm};LS.set("nw_fixed_amounts",n);return n;});setFixedInputMode(false);}}
+              style={{...btnPrimary,padding:"10px 24px",fontSize:14}}>儲存</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Fixed income input modal */}
+      {fixedIncomeInputMode&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:660,maxHeight:"82vh",overflowY:"auto"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <div style={{fontWeight:700,fontSize:16}}>更新固定收入金額</div>
+            <button onClick={()=>setFixedIncomeInputMode(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:C.muted}}>✕</button>
+          </div>
+          {fixedIncomeCats.map(({label:cat})=>{
+            const items=fixedIncomeItems.filter(f=>(f.cat||"其他收入")===cat);
+            if(!items.length) return null;
+            return <div key={cat} style={{marginBottom:18}}>
+              <div style={{fontSize:11,fontWeight:700,color:C.sub,letterSpacing:"0.06em",marginBottom:8}}>{getIncomeCatIcon(cat)} {cat}</div>
+              {items.map(f=>{
+                const subs=fixedIncomeSubItems.filter(s=>s.parentId===f.id);
+                const hasSubs=subs.length>0;
+                return <div key={f.id} style={{marginBottom:10,paddingLeft:18}}>
+                  {!hasSubs&&<div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{flex:1,color:C.sub,fontSize:13}}>{f.label}</span>
+                    <input type="number" placeholder="0" value={fixedIncomeForm[f.id]||""} onChange={e=>setFixedIncomeForm(p=>({...p,[f.id]:e.target.value}))} style={{...inp,width:150,textAlign:"right"}}/>
+                  </div>}
+                  {hasSubs&&<div>
+                    <div style={{fontSize:12,fontWeight:600,color:C.sub,marginBottom:6}}>{f.label}</div>
+                    {subs.map(sub=><div key={sub.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,paddingLeft:14}}>
+                      <span style={{color:C.muted,fontSize:11}}>└</span>
+                      <span style={{flex:1,color:C.sub,fontSize:12}}>{sub.label}</span>
+                      <input type="number" placeholder="0" value={fixedIncomeForm[sub.id]||""} onChange={e=>setFixedIncomeForm(p=>({...p,[sub.id]:e.target.value}))} style={{...inp,width:140,textAlign:"right",fontSize:13}}/>
+                    </div>)}
+                  </div>}
+                </div>;
+              })}
+            </div>;
+          })}
+          <div style={{paddingTop:12,borderTop:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{color:C.sub,fontSize:13}}>合計：<strong style={{color:C.green}}>TWD {fmt(fixedIncomeItems.reduce((s,f)=>{
+              const subs=fixedIncomeSubItems.filter(x=>x.parentId===f.id);
+              if(subs.length) return s+subs.reduce((a,sub)=>a+(parseFloat(fixedIncomeForm[sub.id])||0),0);
+              return s+(parseFloat(fixedIncomeForm[f.id])||0);
+            },0))}</strong></span>
+            <button onClick={()=>{setFixedIncomeAmounts(p=>{const n={...p,...fixedIncomeForm};LS.set("nw_fixed_income_amounts",n);return n;});setFixedIncomeInputMode(false);}}
+              style={{...btnPrimary,background:C.green,padding:"10px 24px",fontSize:14}}>儲存</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Add fixed item */}
+      {showAddFixed&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:14,padding:24,width:300}}>
+          <div style={{fontWeight:700,fontSize:16,marginBottom:16}}>新增固定支出項目</div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>項目名稱</div>
+            <input autoFocus value={newFixed.label} onChange={e=>setNewFixed(p=>({...p,label:e.target.value}))}
+              placeholder="例：健身房、Netflix…" style={{...inp,width:"100%",boxSizing:"border-box"}}/>
+          </div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>金額（每月）</div>
+            <input type="number" value={newFixed.amount} onChange={e=>setNewFixed(p=>({...p,amount:e.target.value}))}
+              placeholder="0" style={{...inp,width:"100%",boxSizing:"border-box",textAlign:"right"}}/>
+          </div>
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>類別</div>
+            <select value={newFixed.cat} onChange={e=>setNewFixed(p=>({...p,cat:e.target.value}))} style={{...inp,width:"100%",cursor:"pointer"}}>
+              {fixedCats.map(c=><option key={c.id} value={c.label}>{c.icon} {c.label}</option>)}
+            </select>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setShowAddFixed(false);setNewFixed({label:"",cat:"其他",amount:""});}} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
+            <button onClick={()=>{
+              if(!newFixed.label.trim())return;
+              const id="f_"+Date.now();
+              setFixedItems(p=>[...p,{id,label:newFixed.label.trim(),cat:newFixed.cat}]);
+              if(newFixed.amount) setFixedAmounts(p=>({...p,[id]:newFixed.amount}));
+              setNewFixed({label:"",cat:"其他",amount:""});setShowAddFixed(false);
+            }} style={{...btnPrimary,flex:1,textAlign:"center"}}>新增</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Add fixed income */}
+      {showAddFixedIncome&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:14,padding:24,width:300}}>
+          <div style={{fontWeight:700,fontSize:16,marginBottom:16}}>新增固定收入項目</div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>項目名稱</div>
+            <input autoFocus value={newFixedIncome.label} onChange={e=>setNewFixedIncome(p=>({...p,label:e.target.value}))}
+              placeholder="例：薪資、房租、股息…" style={{...inp,width:"100%",boxSizing:"border-box"}}/>
+          </div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>金額（每月）</div>
+            <input type="number" value={newFixedIncome.amount} onChange={e=>setNewFixedIncome(p=>({...p,amount:e.target.value}))}
+              placeholder="0" style={{...inp,width:"100%",boxSizing:"border-box",textAlign:"right"}}/>
+          </div>
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>類別</div>
+            <select value={newFixedIncome.cat} onChange={e=>setNewFixedIncome(p=>({...p,cat:e.target.value}))} style={{...inp,width:"100%",cursor:"pointer"}}>
+              {fixedIncomeCats.map(c=><option key={c.id} value={c.label}>{c.icon} {c.label}</option>)}
+            </select>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setShowAddFixedIncome(false);setNewFixedIncome({label:"",cat:"其他收入",amount:""});}} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
+            <button onClick={()=>{
+              if(!newFixedIncome.label.trim())return;
+              const id="fi_"+Date.now();
+              setFixedIncomeItems(p=>[...p,{id,label:newFixedIncome.label.trim(),cat:newFixedIncome.cat}]);
+              if(newFixedIncome.amount) setFixedIncomeAmounts(p=>({...p,[id]:newFixedIncome.amount}));
+              setNewFixedIncome({label:"",cat:"其他收入",amount:""});setShowAddFixedIncome(false);
+            }} style={{...btnPrimary,background:C.green,flex:1,textAlign:"center"}}>新增</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Add account */}
+      {showAdd&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:14,padding:24,width:300}}>
+          <div style={{fontWeight:700,fontSize:16,marginBottom:16}}>新增帳戶</div>
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>帳戶名稱</div>
+            <input autoFocus value={newAcc.label} onChange={e=>setNewAcc(p=>({...p,label:e.target.value}))} placeholder="例：新光銀行…" style={{...inp,width:"100%",boxSizing:"border-box"}}/>
+          </div>
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:4}}>類別</div>
+            <select value={newAcc.cat} onChange={e=>setNewAcc(p=>({...p,cat:e.target.value}))} style={{...inp,width:"100%",cursor:"pointer"}}>
+              {ALL_CATS.map(c=><option key={c} value={c}>{CAT_ICONS[c]} {c}</option>)}
+            </select>
+          </div>
+          <label style={{display:"flex",alignItems:"center",gap:8,marginBottom:20,cursor:"pointer",fontSize:13,color:C.sub}}>
+            <input type="checkbox" checked={newAcc.usd||false} onChange={e=>setNewAcc(p=>({...p,usd:e.target.checked}))}/>
+            美金帳戶（填入 USD 金額）
+          </label>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>setShowAdd(false)} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
+            <button onClick={()=>{
+              if(!newAcc.label.trim())return;
+              const type=CATS_ASSET.includes(newAcc.cat)?"asset":"liability";
+              setAccounts(p=>[...p,{id:"acc_"+Date.now(),label:newAcc.label,cat:newAcc.cat,type,usd:newAcc.usd||false}]);
+              setShowAdd(false);setNewAcc({label:"",cat:"銀行",usd:false});
+            }} style={{...btnPrimary,flex:1,textAlign:"center"}}>新增</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Add fixed expense sub-item */}
+      {addSubParent&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:300}}>
+        <div style={{background:C.surface,borderRadius:14,padding:24,width:320}}>
+          <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>新增細項</div>
+          <div style={{fontSize:12,color:C.sub,marginBottom:16}}>在「{addSubParent.label}」下新增描述</div>
+          <input autoFocus value={newSubLabel} onChange={e=>setNewSubLabel(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"&&newSubLabel.trim()){
+              const id="sub_"+Date.now();
+              setFixedSubItems(p=>[...p,{id,parentId:addSubParent.id,label:newSubLabel.trim()}]);
+              setNewSubLabel("");setAddSubParent(null);
+            }}}
+            placeholder="例：兒子保險、南山醫療…" style={{...inp,width:"100%",boxSizing:"border-box",marginBottom:20}}/>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setAddSubParent(null);setNewSubLabel("");}} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
+            <button onClick={()=>{
+              if(!newSubLabel.trim())return;
+              const id="sub_"+Date.now();
+              setFixedSubItems(p=>[...p,{id,parentId:addSubParent.id,label:newSubLabel.trim()}]);
+              setNewSubLabel("");setAddSubParent(null);
+            }} style={{...btnPrimary,flex:1,textAlign:"center"}}>新增</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Add income sub-item */}
+      {addIncomeSubParent&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:300}}>
+        <div style={{background:C.surface,borderRadius:14,padding:24,width:320}}>
+          <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>新增細項</div>
+          <div style={{fontSize:12,color:C.sub,marginBottom:16}}>在「{addIncomeSubParent.label}」下新增描述</div>
+          <input autoFocus value={newIncomeSubLabel} onChange={e=>setNewIncomeSubLabel(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"&&newIncomeSubLabel.trim()){
+              const id="isub_"+Date.now();
+              setFixedIncomeSubItems(p=>[...p,{id,parentId:addIncomeSubParent.id,label:newIncomeSubLabel.trim()}]);
+              setNewIncomeSubLabel("");setAddIncomeSubParent(null);
+            }}}
+            placeholder="例：公司薪水、年終獎金…" style={{...inp,width:"100%",boxSizing:"border-box",marginBottom:20}}/>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setAddIncomeSubParent(null);setNewIncomeSubLabel("");}} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
+            <button onClick={()=>{
+              if(!newIncomeSubLabel.trim())return;
+              const id="isub_"+Date.now();
+              setFixedIncomeSubItems(p=>[...p,{id,parentId:addIncomeSubParent.id,label:newIncomeSubLabel.trim()}]);
+              setNewIncomeSubLabel("");setAddIncomeSubParent(null);
+            }} style={{...btnPrimary,background:C.green,flex:1,textAlign:"center"}}>新增</button>
+          </div>
+        </div>
+      </div>}
+
+      {/* Manage income cats */}
+      {showManageIncomeCats&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:660,maxHeight:"80vh",overflowY:"auto"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <div style={{fontWeight:700,fontSize:16}}>管理收入類別</div>
+            <button onClick={()=>setShowManageIncomeCats(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:C.muted}}>✕</button>
+          </div>
+          {fixedIncomeCats.map((c,i)=><div key={c.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderTop:i>0?`1px solid ${C.border}`:"none"}}>
+            <span style={{fontSize:18,width:28}}>{c.icon}</span>
+            <span style={{flex:1,fontWeight:500}}>{c.label}</span>
+            <span style={{fontSize:12,color:C.muted,marginRight:6}}>{fixedIncomeItems.filter(f=>(f.cat||"其他收入")===c.label).length} 項</span>
+            <button onClick={()=>{
+              const hasItems=fixedIncomeItems.some(f=>(f.cat||"其他收入")===c.label);
+              if(hasItems){alert(`「${c.label}」下還有項目，請先刪除再刪類別`);return;}
+              setFixedIncomeCats(p=>p.filter(x=>x.id!==c.id));
+            }} style={{background:C.accent,border:`1px solid ${C.border}`,color:C.red,padding:"3px 10px",borderRadius:6,cursor:"pointer",fontSize:12}}>刪除</button>
+          </div>)}
+          <div style={{marginTop:16,paddingTop:16,borderTop:`1px solid ${C.border}`}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:10,fontWeight:600}}>新增類別</div>
+            <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+              {CAT_EMOJI.map(e=><button key={e} onClick={()=>setNewIncomeCat(p=>({...p,icon:e}))}
+                style={{width:34,height:34,fontSize:18,background:newIncomeCat.icon===e?C.green:C.accent,border:`1px solid ${newIncomeCat.icon===e?C.green:C.border}`,borderRadius:8,cursor:"pointer"}}>{e}</button>)}
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <input value={newIncomeCat.label} onChange={e=>setNewIncomeCat(p=>({...p,label:e.target.value}))}
+                onKeyDown={e=>{if(e.key==="Enter"&&newIncomeCat.label.trim()){setFixedIncomeCats(p=>[...p,{id:"fic_"+Date.now(),label:newIncomeCat.label.trim(),icon:newIncomeCat.icon}]);setNewIncomeCat({label:"",icon:"💰"});}}}
+                placeholder="類別名稱" style={{...inp,flex:1}}/>
+              <button onClick={()=>{
+                if(!newIncomeCat.label.trim())return;
+                setFixedIncomeCats(p=>[...p,{id:"fic_"+Date.now(),label:newIncomeCat.label.trim(),icon:newIncomeCat.icon}]);
+                setNewIncomeCat({label:"",icon:"💰"});
+              }} style={{...btnPrimary,background:C.green,padding:"7px 16px"}}>新增</button>
+            </div>
+          </div>
+        </div>
+      </div>}
+
+      {/* Manage fixed expense cats */}
+      {showManageCats&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:"16px 16px 0 0",padding:24,width:"100%",maxWidth:660,maxHeight:"80vh",overflowY:"auto"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <div style={{fontWeight:700,fontSize:16}}>管理支出類別</div>
+            <button onClick={()=>setShowManageCats(false)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:C.muted}}>✕</button>
+          </div>
+          {fixedCats.map((c,i)=><div key={c.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderTop:i>0?`1px solid ${C.border}`:"none"}}>
+            <span style={{fontSize:18,width:28}}>{c.icon}</span>
+            <span style={{flex:1,fontWeight:500}}>{c.label}</span>
+            <span style={{fontSize:12,color:C.muted,marginRight:6}}>{fixedItems.filter(f=>(f.cat||"其他")===c.label).length} 項</span>
+            <button onClick={()=>{
+              const hasItems=fixedItems.some(f=>(f.cat||"其他")===c.label);
+              if(hasItems){alert(`「${c.label}」下還有項目，請先刪除或移動再刪類別`);return;}
+              setFixedCats(p=>p.filter(x=>x.id!==c.id));
+            }} style={{background:C.accent,border:`1px solid ${C.border}`,color:C.red,padding:"3px 10px",borderRadius:6,cursor:"pointer",fontSize:12}}>刪除</button>
+          </div>)}
+          <div style={{marginTop:16,paddingTop:16,borderTop:`1px solid ${C.border}`}}>
+            <div style={{fontSize:12,color:C.sub,marginBottom:10,fontWeight:600}}>新增類別</div>
+            <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+              {CAT_EMOJI.map(e=><button key={e} onClick={()=>setNewCat(p=>({...p,icon:e}))}
+                style={{width:34,height:34,fontSize:18,background:newCat.icon===e?C.lav:C.accent,border:`1px solid ${newCat.icon===e?C.lav:C.border}`,borderRadius:8,cursor:"pointer"}}>{e}</button>)}
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <input value={newCat.label} onChange={e=>setNewCat(p=>({...p,label:e.target.value}))}
+                onKeyDown={e=>{if(e.key==="Enter"&&newCat.label.trim()){setFixedCats(p=>[...p,{id:"fc_"+Date.now(),label:newCat.label.trim(),icon:newCat.icon}]);setNewCat({label:"",icon:"📌"});}}}
+                placeholder="類別名稱" style={{...inp,flex:1}}/>
+              <button onClick={()=>{
+                if(!newCat.label.trim())return;
+                setFixedCats(p=>[...p,{id:"fc_"+Date.now(),label:newCat.label.trim(),icon:newCat.icon}]);
+                setNewCat({label:"",icon:"📌"});
+              }} style={{...btnPrimary,padding:"7px 16px"}}>新增</button>
+            </div>
+          </div>
+        </div>
+      </div>}
+
+      {/* Delete account confirm */}
+      {confirmDel&&<div style={{position:"fixed",inset:0,background:overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}>
+        <div style={{background:C.surface,borderRadius:14,padding:24,width:280,textAlign:"center"}}>
+          <div style={{fontSize:32,marginBottom:10}}>🗑️</div>
+          <div style={{fontWeight:600,marginBottom:6}}>確定刪除「{confirmDel.label}」？</div>
+          <div style={{fontSize:12,color:C.muted,marginBottom:18}}>歷史記錄中該帳戶的數字也會消失</div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>setConfirmDel(null)} style={{...btnSecondary,flex:1,textAlign:"center"}}>取消</button>
+            <button onClick={()=>{setAccounts(p=>p.filter(a=>a.id!==confirmDel.id));setConfirmDel(null);}}
+              style={{...btnPrimary,background:C.red,flex:1,textAlign:"center"}}>刪除</button>
+          </div>
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
