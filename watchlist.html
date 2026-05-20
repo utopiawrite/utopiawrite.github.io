@@ -86,6 +86,8 @@ button,input,select,textarea{font-family:inherit}
 .btn-soft:hover{border-color:var(--mid);color:#fff}
 .btn-edit{padding:4px 10px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--dim);font-size:11px;cursor:pointer;letter-spacing:.3px;transition:.15s}
 .btn-edit:hover{color:#fff;border-color:var(--mid)}
+.btn-edit-primary{padding:5px 14px;background:transparent;border:1px solid #58a6ff66;border-radius:4px;color:#58a6ff;font-size:12px;cursor:pointer;letter-spacing:.3px;transition:.15s}
+.btn-edit-primary:hover{background:#58a6ff22;border-color:#58a6ff}
 .btn-danger{border-color:#5c2424 !important;color:#fca5a5 !important}
 .btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
 .btn-icon{background:none;border:none;cursor:pointer;color:#484f58;padding:3px 6px;font-size:12px;line-height:1;transition:.15s}
@@ -138,6 +140,7 @@ button,input,select,textarea{font-family:inherit}
   .company-bar{flex-direction:column;align-items:flex-start;gap:8px}
   .view-tabs{width:100%}
   .header-top{flex-direction:column;align-items:flex-start}
+  .assign-group{flex-direction:column}
   .score-opts{justify-content:flex-start}
   .ticker-tab{font-size:12px;padding:7px 10px}
   .ifield{flex-wrap:wrap}
@@ -153,6 +156,7 @@ button,input,select,textarea{font-family:inherit}
     <div class="header-title">財報研究筆記</div>
     <div class="header-actions">
       <button class="btn-sm" onclick="openAddStock()">+ 新增標的</button>
+      <button class="btn-sm" style="color:#f87171;border-color:#5c2020" onclick="deleteStock()">✕ 移除此標的</button>
       <button class="btn-sm" onclick="exportBackup()">↓ 備份</button>
       <label class="btn-sm" style="cursor:pointer">↑ 匯入<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
     </div>
@@ -223,15 +227,14 @@ const BUILTIN_STOCKS={
 };
 
 const SCORING_CRITERIA=[
-  // 損益表
-  {key:"eps",   label:"E — EPS 每股盈餘",   desc:"10年穩定或持續上升",        isRisk:false,isMoat:false,max:1, group:"income"},
-  {key:"margin",label:"N — 淨利率",          desc:">20%最佳，觀察10年穩定度",  isRisk:false,isMoat:false,max:1, group:"income"},
-  // 現金流量表
-  {key:"fcf",   label:"F — FCF 自由現金流",  desc:"10年為正且穩定",            isRisk:false,isMoat:false,max:1, group:"cashflow"},
-  {key:"div",   label:"D — 股息",            desc:"每年支付，逐年成長更佳",    isRisk:false,isMoat:false,max:1, group:"cashflow"},
-  // 資產負債表
-  {key:"roic",  label:"R — ROIC 資本回報率", desc:"持續>10%，理想>15%",        isRisk:false,isMoat:false,max:1, group:"balance"},
-  {key:"debt",  label:"I — IOU 負債比 D/E",  desc:"D/E<0.5佳，無負債加分",     isRisk:false,isMoat:false,max:1, group:"balance"},
+  // 健康狀況
+  {key:"eps",   label:"E — EPS 每股盈餘｜賺不賺錢",        desc:"10年穩定或持續上升",        isRisk:false,isMoat:false,max:1, group:"earn"},
+  {key:"div",   label:"D — 股息｜分不分我",               desc:"每年支付，逐年成長更佳",    isRisk:false,isMoat:false,max:1, group:"earn"},
+  {key:"fcf",   label:"F — FCF 自由現金流｜口袋有多深",   desc:"10年為正且穩定",            isRisk:false,isMoat:false,max:1, group:"pocket"},
+  {key:"margin",label:"N — 淨利率｜存下的比例",           desc:">20%最佳，觀察10年穩定度",  isRisk:false,isMoat:false,max:1, group:"pocket"},
+  // 慢性風險
+  {key:"roic",  label:"R — ROIC 資本回報率｜用錢用得聰不聰明", desc:"持續>10%，理想>15%", isRisk:false,isMoat:false,max:1, group:"chronic"},
+  {key:"debt",  label:"I — LT-Debt/Equity｜是不是在撐場面", desc:"D/E<0.5佳，無負債加分",  isRisk:false,isMoat:false,max:1, group:"chronic"},
   // 護城河
   {key:"moat",  label:"E — 護城河",          desc:"",                          isRisk:false,isMoat:true, max:4, group:"moat"},
   // 扣分
@@ -338,34 +341,44 @@ function renderContent(){
 
 // ── Basic face read/edit ──
 function renderBasicReadView(s){
-  const rows=[
-    ["本季營收",s.baseline?.revenue||"—"],
-    ["同期成長%",s.baseline?.growth||"—"],
-    ["下季業績指引",s.baseline?.guidance||s.baseline?.keyMetric||"—"],
-    ["下次財報日",s.baseline?.nextEarnings||"—"]
-  ];
+  const r4q=s.baseline?.revenue4q||["","","",""];
+  const n4q=s.baseline?.netRevenue4q||["","","",""];
+  const qLabels=["前三季","前兩季","前一季","最新季"];
+  const cellStyle="background:#1c2333;border:1px solid #30363d;border-radius:6px;padding:4px 8px;text-align:center;font-size:12px;white-space:nowrap";
+  const qRow=(arr,type,rowLabel)=>`
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="font-size:12px;color:var(--dim);min-width:72px;flex-shrink:0">${rowLabel}</span>
+      ${arr.map((v,i)=>`<div style="text-align:center"><div style="font-size:10px;color:var(--dim);margin-bottom:3px">${qLabels[i]}</div><div style="${cellStyle};color:${i===3?"#e6edf3":"var(--text)"}">${esc(v||"—")}</div></div>`).join("")}
+      <button class="btn-edit" style="margin-left:4px" onclick="promptUpdateRevenue('${type}')">+ 新季</button>
+    </div>`;
   return `
     <div class="sec-card">
       <div class="sec-head">
         <span class="sec-title" style="color:${s.accent}">基本面</span>
-        <button class="btn-edit" onclick="startBasicEdit()">編輯</button>
+        <button class="btn-edit-primary" onclick="startBasicEdit()">編輯</button>
       </div>
       <div class="sec-body">
         <div class="card" style="border-color:${s.color}44">
-          <div class="card-label">投資論點</div>
+          <div class="card-label">為什麼開始注意</div>
           <div class="thesis-text">${esc(s.thesis||"")}</div>
         </div>
         <div class="card">
-          ${rows.map(([l,v])=>`<div class="data-row"><span class="data-label">${l}</span><span class="data-val">${esc(v)}</span></div>`).join("")}
+          ${qRow(r4q,"revenue4q","近四季營收")}
+          ${qRow(n4q,"netRevenue4q","近四季淨營收")}
         </div>
-        ${s.baseline?.risk?`<div class="risk-card"><div class="card-label" style="color:#f87171">主要風險</div><div class="risk-text">${esc(s.baseline.risk)}</div></div>`:""}
-        ${s.baseline?.competitors?`<div class="info-card"><div class="card-label" style="color:#60a5fa">競爭對手</div><div class="comp-text">${esc(s.baseline.competitors)}</div></div>`:""}
-        ${(s.watchList||[]).length?`<div class="card"><div class="card-label">每季財報追蹤清單</div>${(s.watchList||[]).map((item,i)=>`<div class="watch-item"><div class="watch-num" style="background:${s.color}">${i+1}</div><div class="watch-text">${esc(item)}</div></div>`).join("")}</div>`:""}
       </div>
     </div>`;
 }
 
 function renderBasicEditForm(s){
+  const r4q=s.baseline?.revenue4q||["","","",""];
+  const n4q=s.baseline?.netRevenue4q||["","","",""];
+  const qLabels=["前三季","前兩季","前一季","本季"];
+  const q4inputs=(id,arr)=>qLabels.map((l,i)=>`
+    <div class="form-field">
+      <div class="form-label">${l}</div>
+      <input class="form-input" id="${id}_${i}" value="${esc(arr[i]||"")}">
+    </div>`).join("");
   return `
     <div class="sec-card">
       <div class="sec-head">
@@ -391,28 +404,16 @@ function renderBasicEditForm(s){
           </div>
         </div>
         <div class="form-field">
-          <div class="form-label">投資論點</div>
-          <textarea class="form-textarea" id="editThesis" rows="4">${esc(s.thesis||"")}</textarea>
+          <div class="form-label">為什麼開始注意</div>
+          <textarea class="form-textarea" id="editThesis" rows="3" placeholder="e.g. XXX新聞、XXX說、法說會、自己研究...">${esc(s.thesis||"")}</textarea>
         </div>
-        <div class="form-row">
-          <div class="form-field">
-            <div class="form-label">本季營收</div>
-            <input class="form-input" id="editRevenue" value="${esc(s.baseline?.revenue||"")}">
-          </div>
-          <div class="form-field">
-            <div class="form-label">同期成長%</div>
-            <input class="form-input" id="editGrowth" value="${esc(s.baseline?.growth||"")}">
-          </div>
+        <div class="form-field">
+          <div class="form-label">近四季營收</div>
+          <div class="form-row">${q4inputs("editR4q",r4q)}</div>
         </div>
-        <div class="form-row">
-          <div class="form-field">
-            <div class="form-label">下季業績指引</div>
-            <input class="form-input" id="editGuidance" value="${esc(s.baseline?.guidance||s.baseline?.keyMetric||"")}">
-          </div>
-          <div class="form-field">
-            <div class="form-label">下次財報日</div>
-            <input class="form-input" id="editNextEarnings" value="${esc(s.baseline?.nextEarnings||"")}">
-          </div>
+        <div class="form-field">
+          <div class="form-label">近四季淨營收</div>
+          <div class="form-row">${q4inputs("editN4q",n4q)}</div>
         </div>
         <div class="form-field">
           <div class="form-label">主要風險</div>
@@ -424,12 +425,26 @@ function renderBasicEditForm(s){
         </div>
         <div class="form-field">
           <div class="form-label">每季財報追蹤清單（一行一項）</div>
-          <textarea class="form-textarea" id="editWatchList" rows="5">${esc((s.watchList||[]).join("\n"))}</textarea>
+          <textarea class="form-textarea" id="editWatchList" rows="3">${esc((s.watchList||[]).join("\n"))}</textarea>
         </div>
       </div>
     </div>`;
 }
 
+function promptUpdateRevenue(type){
+  const label=type==="revenue4q"?"近四季營收":"近四季淨營收";
+  const val=prompt(`輸入最新季${label}數字（舊季資料將自動往左移）`);
+  if(val===null) return;
+  const s=stock();
+  const old=(s.baseline?.[type])||["—","—","—","—"];
+  const updated=[old[1],old[2],old[3],val.trim()||"—"];
+  const edited={...s,baseline:{...(s.baseline||{}), [type]:updated}};
+  if(customStocks[activeTicker]){customStocks[activeTicker]=edited;save(LS.custom,customStocks)}
+  else{stockOverrides[activeTicker]=edited;save(LS.overrides,stockOverrides)}
+  const sec=document.getElementById("basicSection");
+  if(sec) sec.innerHTML=renderBasicReadView(stock());
+  showToast("已更新");
+}
 function startBasicEdit(){
   const sec=document.getElementById("basicSection");
   if(sec) sec.innerHTML=renderBasicEditForm(stock());
@@ -440,14 +455,15 @@ function cancelBasicEdit(){
 }
 function saveBasicFace(){
   const old=stock();
+  const getQ4=(id)=>[0,1,2,3].map(i=>val(`${id}_${i}`));
   const edited={...old,
     name:val("editName")||old.name,
     theme:val("editTheme")||old.theme,
     priority:Number(val("editPriority"))||old.priority||99,
     thesis:tval("editThesis"),
     baseline:{...(old.baseline||{}),
-      revenue:val("editRevenue"),growth:val("editGrowth"),
-      guidance:val("editGuidance"),nextEarnings:val("editNextEarnings"),
+      revenue4q:getQ4("editR4q"),
+      netRevenue4q:getQ4("editN4q"),
       risk:tval("editRisk"),competitors:tval("editCompetitors")
     },
     watchList:tval("editWatchList").split("\n").map(x=>x.trim()).filter(Boolean)
@@ -456,7 +472,6 @@ function saveBasicFace(){
   else{stockOverrides[activeTicker]=edited;save(LS.overrides,stockOverrides)}
   const sec=document.getElementById("basicSection");
   if(sec) sec.innerHTML=renderBasicReadView(stock());
-  // Re-render tabs in case name/theme/priority changed
   renderTabs();renderCompanyBar();
   showToast("基本面已儲存");
 }
@@ -464,31 +479,22 @@ function saveBasicFace(){
 // ── Log page ──
 function renderLog(s){
   const se=stockEval[activeTicker]||{};
-  const sp=sellPutEval[activeTicker]||{};
-  const ac=ASSIGN_CFG[sp.assignComfort||"warn"]||ASSIGN_CFG.warn;
-  const ivpV=Number(sp.ivp||0);
-  const ivpCol=ivpV>=50?"#4ade80":ivpV>=30?"#fbbf24":ivpV>0?"#f87171":"var(--dim)";
-  const ivpHint=ivpV>=50?"IV 偏高，賣 put 有利":ivpV>=30?"IV 中等":ivpV>0?"IV 偏低，premium 薄":"";
-  const cur=sp.assignComfort||"warn";
 
   return `
   <!-- 基本面 -->
   <div id="basicSection">${renderBasicReadView(s)}</div>
 
-  <!-- 現股評估 -->
+  <!-- 股價 -->
   <div class="sec-card">
-    <div class="sec-head">
-      <span class="sec-title" style="color:${s.accent}">現股評估</span>
-    </div>
     <div class="sec-body">
+      <div style="margin-bottom:12px">
+        <span class="ilabel">更新日期</span>
+        <input class="iinput" id="seUpdatedDate" value="${esc(se.updatedDate||"")}" style="width:120px;margin-left:8px">
+      </div>
       <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
-        <div class="ifield" style="border:none;padding:0"><span class="ilabel">目前股價</span><input class="iinput" id="seCurrentPrice" value="${esc(se.currentPrice||"")}"></div>
+        <div class="ifield" style="border:none;padding:0"><span class="ilabel">現股價格</span><input class="iinput" id="seCurrentPrice" value="${esc(se.currentPrice||"")}"></div>
         <div class="ifield" style="border:none;padding:0"><span class="ilabel">支撐價</span><input class="iinput" id="seIdealBuy" value="${esc(se.idealBuy||"")}"></div>
         <div class="ifield" style="border:none;padding:0"><span class="ilabel">壓力價</span><input class="iinput" id="seMaxBuy" value="${esc(se.maxBuy||"")}"></div>
-      </div>
-      <div style="margin-top:12px">
-        <div class="form-label">筆記</div>
-        <textarea class="form-textarea" id="seNote" rows="3">${esc(se.note||"")}</textarea>
       </div>
     </div>
     <div class="sec-foot">
@@ -496,36 +502,9 @@ function renderLog(s){
     </div>
   </div>
 
-  <!-- Sell Put 評估 -->
-  <div class="sec-card">
-    <div class="sec-head">
-      <span class="sec-title" style="color:${s.accent}">Sell Put 評估</span>
-    </div>
-    <div class="sec-body">
-      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
-        <div class="ifield" style="border:none;padding:0"><span class="ilabel">Put Strike</span><input class="iinput" id="spStrike" value="${esc(sp.strike||"")}"></div>
-        <div class="ifield" style="border:none;padding:0">
-          <span class="ilabel">IVP %</span>
-          <input class="iinput" id="spIvp" value="${esc(sp.ivp||"")}" oninput="updateIvpHint(this.value)">
-          <span id="ivpHint" style="font-size:11px;color:${ivpCol};white-space:nowrap;margin-left:4px">${esc(ivpHint)}</span>
-        </div>
-        <div class="ifield" style="border:none;padding:0">
-          <span class="ilabel">Assign</span>
-          <div class="assign-group" id="assignGroup" data-selected="${esc(cur)}" style="margin-top:0">
-            ${["ok","warn","no"].map(k=>`<button class="assign-opt${cur===k?" sel-"+k:""}" onclick="selectAssign('${k}')">${k==="ok"?"可接":k==="warn"?"謹慎":"不接"}</button>`).join("")}
-          </div>
-        </div>
-      </div>
-      <div class="assign-desc-bar" id="assignDescBar" style="background:${ac.bg};border-color:${ac.border};color:${ac.color};margin-top:10px">${esc(ac.text)}</div>
-      <div style="margin-top:12px">
-        <div class="form-label">筆記</div>
-        <textarea class="form-textarea" id="spNote" rows="3">${esc(sp.note||"")}</textarea>
-      </div>
-    </div>
-    <div class="sec-foot">
-      <button class="btn-save" style="background:${s.color}" onclick="saveSellPutEval()">儲存</button>
-    </div>
-  </div>
+  <!-- 主要風險 / 競爭對手 -->
+  ${s.baseline?.risk?`<div class="sec-card"><div class="sec-head"><span class="sec-title" style="color:#f87171">主要風險</span></div><div class="sec-body"><div class="risk-text">${esc(s.baseline.risk)}</div></div></div>`:""}
+  ${s.baseline?.competitors?`<div class="sec-card"><div class="sec-head"><span class="sec-title" style="color:#60a5fa">競爭對手</span></div><div class="sec-body"><div class="comp-text">${esc(s.baseline.competitors)}</div></div></div>`:""}
 
   <!-- 日常觀察 -->
   <div class="sec-card">
@@ -538,8 +517,18 @@ function renderLog(s){
     <div class="sec-foot">
       <button class="btn-save" style="background:${s.color}" onclick="saveEntry()">記錄</button>
     </div>
-    <div id="logHistory" style="padding:0 16px 16px">${renderHistoryHtml(s)}</div>
-  </div>`;
+  </div>
+
+  <!-- 每季財報追蹤清單 -->
+  ${(s.watchList||[]).length?`
+  <div class="sec-card">
+    <div class="sec-body">
+      <div class="card"><div class="card-label">每季財報追蹤清單</div>${(s.watchList||[]).map((item,i)=>`<div class="watch-item"><div class="watch-num" style="background:${s.color}">${i+1}</div><div class="watch-text">${esc(item)}</div></div>`).join("")}</div>
+    </div>
+  </div>`:""}
+
+  <!-- 歷史記錄 -->
+  <div style="padding:0 0 16px" id="logHistory">${renderHistoryHtml(s)}</div>`;
 }
 
 function renderHistoryHtml(s){
@@ -626,10 +615,10 @@ function saveStockEval(){
     currentPrice:val("seCurrentPrice"),
     idealBuy:val("seIdealBuy"),
     maxBuy:val("seMaxBuy"),
-    note:tval("seNote")
+    updatedDate:val("seUpdatedDate")
   };
   save(LS.stockEval,stockEval);
-  showToast("現股評估已儲存");
+  showToast("已儲存");
 }
 
 function saveSellPutEval(){
@@ -706,9 +695,9 @@ function renderScoring(s){
   }
 
   const groupDef=[
-    {id:"income",   indicators:"E (EPS)、N (淨利率)",        sub:"這段期間公司有沒有賺錢", label:"損益表"},
-    {id:"cashflow", indicators:"F (FCF)、D (股息)",          sub:"口袋剩多少錢",           label:"現金流量表"},
-    {id:"balance",  indicators:"R (ROIC)、I (負債比 D/E)",  sub:"錢怎麼用的",             label:"資產負債表"},
+    {id:"earn",   indicators:"E (EPS)、D (股息)",    sub:"有沒有賺錢、會不會分給你", label:"損益表"},
+    {id:"pocket", indicators:"F (FCF)、N (淨利率)", sub:"口袋剩多少、存得下來多少", label:"損益表 / 現金流量表"},
+    {id:"chronic", indicators:"R、I",               sub:"慢性風險",                 label:"資產負債表"},
   ];
 
   const financialCards=groupDef.map(g=>{
@@ -719,8 +708,7 @@ function renderScoring(s){
           <span style="font-size:12px;font-weight:700;color:#e6edf3">${g.sub}</span>
           <span style="font-size:11px;color:#444c56">|</span>
           <span style="font-size:11px;color:var(--dim)">${g.indicators}</span>
-          <span style="font-size:11px;color:#444c56">|</span>
-          <span style="font-size:11px;color:var(--dim)">${g.label}</span>
+          ${g.label?`<span style="font-size:11px;color:#444c56">|</span><span style="font-size:11px;color:var(--dim)">${g.label}</span>`:""}
         </div>
       </div>
       <div class="sec-body">${items.map(scoreRow).join("")}</div>
@@ -866,8 +854,8 @@ function renderAddStock(){
       </div>
     </div>
     <div class="form-field">
-      <div class="form-label">投資論點（可之後補充）</div>
-      <textarea class="form-textarea" id="newThesis" rows="3"></textarea>
+      <div class="form-label">為什麼開始注意（可之後補充）</div>
+      <textarea class="form-textarea" id="newThesis" rows="3" placeholder="e.g. XXX新聞、XXX說、法說會、自己研究..."></textarea>
     </div>
     <div class="btn-row">
       <button class="btn-main" style="background:#1a5a4a;flex:1" onclick="createCustomStock()">新增</button>
@@ -887,9 +875,9 @@ function createCustomStock(){
     name:val("newName")||ticker,
     theme:val("newTheme")||"自訂標的",
     color,accent,
-    baseline:{revenue:"",growth:"",guidance:"",nextEarnings:"",risk:"",competitors:""},
+    baseline:{revenue4q:["","","",""],netRevenue4q:["","","",""],risk:"",competitors:""},
     thesis:tval("newThesis"),
-    watchList:["下次財報營收與成長率","毛利率 / 營業利潤率趨勢","管理層 guidance 變化","價格是否進入可接受區間"],
+    watchList:["下次財報日","本季是否達到業績指引"],
     bos:{total:0,scores:{eps:0,fcf:0,roic:0,debt:0,moat:0,margin:0,div:0,auth:0,sci:0,key:0},commentary:"",scoringDate:""},
     custom:true
   };

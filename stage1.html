@@ -483,22 +483,29 @@ body { padding-top: 44px; }
       <div class="row-item">
         <div class="left">👤 他有沒有賺到錢？</div>
         <div class="divider"></div>
-        <div class="right"><strong style="color:var(--coral)">EPS / 淨利率</strong>每 100 元收入留下多少</div>
+        <div class="right"><strong style="color:var(--coral)">EPS</strong>每股盈餘，有沒有逐年成長</div>
+        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--coral); opacity:.6; white-space:nowrap; align-self:center">損益表</div>
+      </div>
+      <div class="row-item">
+        <div class="left">👤 他賺了錢，會不會分給你？</div>
+        <div class="divider"></div>
+        <div class="right"><strong style="color:var(--coral)">股息</strong>賺到的錢，願意給你多少</div>
         <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--coral); opacity:.6; white-space:nowrap; align-self:center">損益表</div>
       </div>
       <div class="row-item">
         <div class="left">👤 口袋裡真正剩下多少？</div>
         <div class="divider"></div>
-        <div class="right"><strong style="color:var(--sage)">FCF 自由現金流</strong>比 EPS 更難造假</div>
+        <div class="right"><strong style="color:var(--sage)">FCF 自由現金流</strong>手上現金多不多</div>
         <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--sage); opacity:.6; white-space:nowrap; align-self:center">現金流量表</div>
       </div>
       <div class="row-item">
-        <div class="left">👤 他怎麼用他的錢？</div>
+        <div class="left">👤 他多會存錢？</div>
         <div class="divider"></div>
-        <div class="right"><strong style="color:var(--amber)">ROIC / 負債比</strong>錢用得有沒有效率</div>
-        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--amber); opacity:.6; white-space:nowrap; align-self:center">資產負債表</div>
+        <div class="right"><strong style="color:var(--amber)">淨利率</strong>賺進來能留下多少</div>
+        <div style="font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--amber); opacity:.6; white-space:nowrap; align-self:center">損益表</div>
       </div>
     </div>
+    <a href="https://www.stockboss.io/" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; margin-top:1.25rem; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">🔗 StockBoss — 我用的工具 →</a>
   </div>
 </section>
 
@@ -511,97 +518,35 @@ body { padding-top: 44px; }
   <div class="wrap">
     <div class="sec-num">03 · 公司健診評分</div>
     <div class="big sage" style="margin-top:.75rem">
-      <em>價值投資</em>這個框架<br>本來就有人用
+      <em>價值投資</em>的完整框架
     </div>
     <div class="body">今天分享的是我實際怎麼使用它。打開 watchlist 來看。點每個指標可以展開說明 👇</div>
 
-    <div class="callout sage">
-      <div class="callout-title" style="color:var(--sage)">這張表格的由來</div>
-      <div class="body" style="margin:0">我以前做國外業務，公司每天發匯率表給我們，看久了對高點低點就有感覺了，匯率 30 以下就買進，30 以上有需要就賣出，這個 30 是一直看出來的，沒有什麼複雜的公式。<br><br>後來 Google 股票盤整了一段時間，只要有人問我，我大概就知道哪裡是支撐、哪裡是壓力，因為股價跌到某個位置就停，漲到某個位置又回來，根本不用看線圖。<br><br>這就是為什麼我做了這張表，<strong>看久了，感覺就出來了。</strong></div>
-    </div>
-
     <div class="score-grid">
 
-      <!-- 財務指標 -->
+      <!-- 慢性風險指標 -->
       <div class="score-card">
-        <div class="score-head" style="background:var(--sage-lt)">
-          <div class="callout-title" style="color:var(--sage); margin-bottom:.4rem">財務指標</div>
-          <div class="score-pts" style="color:var(--sage)">6 分</div>
-          <div class="note" style="margin-top:.3rem; color:var(--sage)">4 分健康狀況 + 2 分慢性風險</div>
+        <div class="score-head" style="background:var(--amber-lt)">
+          <div class="callout-title" style="color:var(--amber); margin-bottom:.4rem">慢性風險指標</div>
+          <div class="score-pts" style="color:var(--amber)">2 分</div>
+          <div class="note" style="margin-top:.3rem; color:var(--amber)">價值投資者會看的長線指標</div>
         </div>
         <div class="score-body">
-
-          <div style="font-size:10px; font-weight:800; letter-spacing:.08em; color:var(--sage); padding:.5rem 0 .25rem; opacity:.8">健康狀況</div>
-
-          <div class="score-item">
-            <button class="score-item-btn" onclick="toggleItem(this)">
-              E — EPS 每股盈餘 <span class="arrow">▶</span>
-            </button>
-            <div class="score-expand">
-              <table class="mini-table">
-                <tr><th>個人</th><th>公司</th></tr>
-                <tr><td>今年年終 50 萬，明年 80 萬</td><td>每股股東可分到的獲利</td></tr>
-                <tr><td>年終有沒有逐年變多</td><td>10 年是否穩定成長</td></tr>
-              </table>
-            </div>
-          </div>
-
-          <div class="score-item">
-            <button class="score-item-btn" onclick="toggleItem(this)">
-              N — 淨利率 <span class="arrow">▶</span>
-            </button>
-            <div class="score-expand">
-              <table class="mini-table">
-                <tr><th>個人</th><th>公司</th></tr>
-                <tr><td>月薪 5 萬，每月能存下多少</td><td>每 100 元收入留下幾塊利潤</td></tr>
-                <tr><td>每月存 1 萬，很強</td><td>&gt;20% 是優等生</td></tr>
-              </table>
-            </div>
-          </div>
-
-          <div class="score-item">
-            <button class="score-item-btn" onclick="toggleItem(this)">
-              F — FCF 自由現金流 <span class="arrow">▶</span>
-            </button>
-            <div class="score-expand">
-              <table class="mini-table">
-                <tr><th>個人</th><th>公司</th></tr>
-                <tr><td>薪資單寫 10 萬</td><td>EPS 顯示獲利</td></tr>
-                <tr><td>匯進帳戶的 7 萬</td><td>FCF 實際現金</td></tr>
-              </table>
-            </div>
-          </div>
-
-          <div class="score-item">
-            <button class="score-item-btn" onclick="toggleItem(this)">
-              D — 股息 <span class="arrow">▶</span>
-            </button>
-            <div class="score-expand">
-              <div class="expand-note" style="margin-bottom:.5rem">EPS 是公司賺到、<em>可以</em>分的錢。股息是真的<em>願意給你</em>多少。</div>
-              <table class="mini-table">
-                <tr><th>類型</th><th>特徵</th><th>例子</th></tr>
-                <tr><td>成長股</td><td>賺的錢拿去繼續投資，股息少或沒有，正常</td><td>多數科技股</td></tr>
-                <tr><td>股息股</td><td>每年固定配息，放著收錢</td><td>中鋼、中華電、銀行股</td></tr>
-              </table>
-              <div class="expand-note">如果你對股價漲跌不敏感、打算放著不動，就要特別看股息。</div>
-            </div>
-          </div>
-
-          <div style="font-size:10px; font-weight:800; letter-spacing:.08em; color:var(--amber); padding:.75rem 0 .25rem; opacity:.8; border-top:1px dashed var(--border); margin-top:.25rem">慢性風險</div>
 
           <div class="score-item">
             <button class="score-item-btn" onclick="toggleItem(this)">
               R — ROIC 資本回報率 <span class="arrow">▶</span>
             </button>
             <div class="score-expand">
+              <div class="expand-note" style="margin-bottom:.5rem">同樣花 600 萬，一個月租金收 4 萬，另一個收 8 萬，你覺得哪個比較好？</div>
               <table class="mini-table">
                 <tr><th></th><th>套房 A</th><th>套房 B</th></tr>
-                <tr><td>買入價格</td><td>580 萬</td><td>580 萬</td></tr>
+                <tr><td>買入價格</td><td>600 萬</td><td>600 萬</td></tr>
                 <tr><td>月租金</td><td>4 萬</td><td>8 萬</td></tr>
                 <tr><td>年租金</td><td>48 萬</td><td>96 萬</td></tr>
-                <tr><td>ROIC</td><td>約 8.3%</td><td style="font-weight:700; color:var(--sage)">約 16.6%</td></tr>
+                <tr><td>ROIC</td><td>8%</td><td style="font-weight:700; color:var(--sage)">16%</td></tr>
               </table>
-              <div class="expand-note">同樣的錢，哪個值得？當然是 B。公司也一樣，持續 &gt;15% 是優等生。</div>
+              <div class="expand-note">ROIC 越高越好，10% 是基準。低於 10% 是慢性風險的訊號。</div>
             </div>
           </div>
 
@@ -622,7 +567,7 @@ body { padding-top: 44px; }
           </div>
 
           <div class="score-item" style="border-bottom:none">
-            <div style="padding:.5rem 0; font-size:11px; color:var(--muted); font-style:italic">分數越高，你對這家公司的信心就越有根據</div>
+            <div style="padding:.5rem 0; font-size:11px; color:var(--muted)">走價值投資路線的人還會看這兩個，我自己當參考用。</div>
           </div>
 
         </div>
@@ -723,9 +668,6 @@ body { padding-top: 44px; }
 
     </div>
 
-    <a href="https://www.stockboss.io/" target="_blank" style="display:inline-flex; align-items:center; gap:.5rem; margin-top:1.25rem; padding:.6rem 1.2rem; background:var(--white); border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; color:var(--ink); text-decoration:none; box-shadow:0 1px 6px rgba(44,40,32,.06)">🔗 StockBoss — 我用的工具 →</a>
-
-    <div class="body" style="margin-top:1.5rem">研究完、覺得不錯，就放在 watchlist 裡盯著。腦子記不住的，就寫下來。</div>
   </div>
 </section>
 
@@ -792,22 +734,18 @@ body { padding-top: 44px; }
     <div class="takeaway-list">
       <div class="takeaway">
         <span class="takeaway-num">01</span>
-        <span class="takeaway-text">公司財務 = 個人財務，三個問：賺不賺、口袋剩多少、錢怎麼用</span>
+        <span class="takeaway-text">公司財務 = 個人財務，四個指標：EPS、股息、FCF、淨利率</span>
       </div>
       <div class="takeaway">
         <span class="takeaway-num">02</span>
-        <span class="takeaway-text">前 6 分是核心，護城河看不懂填零，扣分是外部風險</span>
+        <span class="takeaway-text">這四個看完，就能篩掉一大半不值得買的公司</span>
       </div>
       <div class="takeaway">
         <span class="takeaway-num">03</span>
-        <span class="takeaway-text">研究完放進觀察清單，等時機到了再進場，不用靠感覺</span>
+        <span class="takeaway-text">跌了不用慌，回去看你當初的評分。基本面沒變，就是機會</span>
       </div>
       <div class="takeaway">
         <span class="takeaway-num">04</span>
-        <span class="takeaway-text">跌了不用慌，回去看你的研究。基本面沒變，就是機會</span>
-      </div>
-      <div class="takeaway">
-        <span class="takeaway-num">05</span>
         <span class="takeaway-text">進場看支撐、50日線、200日線，不用自己算，還看不懂？問 AI</span>
       </div>
     </div>
