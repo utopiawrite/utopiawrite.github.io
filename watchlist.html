@@ -233,7 +233,7 @@ const SCORING_CRITERIA=[
   {key:"fcf",   label:"F — FCF 自由現金流｜口袋有多深",   desc:"10年為正且穩定",            isRisk:false,isMoat:false,max:1, group:"pocket"},
   {key:"margin",label:"N — 淨利率｜存下的比例",           desc:">20%最佳，觀察10年穩定度",  isRisk:false,isMoat:false,max:1, group:"pocket"},
   // 慢性風險
-  {key:"roic",  label:"R — ROIC 資本回報率｜用錢用得聰不聰明", desc:"持續>10%，理想>15%", isRisk:false,isMoat:false,max:1, group:"chronic"},
+  {key:"roic",  label:"R — ROIC 資本回報率｜用錢用得聰不聰明", desc:"10% 為基準，低於此為慢性風險", isRisk:false,isMoat:false,max:1, group:"chronic"},
   {key:"debt",  label:"I — LT-Debt/Equity｜是不是在撐場面", desc:"D/E<0.5佳，無負債加分",  isRisk:false,isMoat:false,max:1, group:"chronic"},
   // 護城河
   {key:"moat",  label:"E — 護城河",          desc:"",                          isRisk:false,isMoat:true, max:4, group:"moat"},
@@ -659,27 +659,32 @@ function updateIvpHint(v){
 
 // ── Scoring page ──
 function scoreColor(v,isRisk,isMoat,max){
-  if(isRisk) return v===0?"#4ade80":v===-.5?"#fbbf24":"#f87171";
+  if(isRisk) return v===0?"#8b949e":v===-.5?"#fbbf24":"#f87171";
   if(isMoat) return v===4?"#4ade80":v===3?"#86efac":v===2?"#c9a84c":v===1?"#fbbf24":"#8b949e";
-  return v>=max?"#4ade80":v>0?"#fbbf24":"#8b949e";
+  if(v===0) return "#8b949e";
+  if(v===max) return "#4ade80";
+  return "#fbbf24";
 }
 
 function renderScoring(s){
   const bos=s.bos||{total:0,scores:{},commentary:"",scoringDate:""};
 
-  // Calculate financial sub-score (6 items max)
-  const finKeys=["eps","fcf","roic","debt","margin","div"];
+  // Calculate financial sub-score (4 core items)
+  const finKeys=["eps","div","fcf","margin"];
   const finScore=finKeys.reduce((a,k)=>a+(Number(bos.scores?.[k])||0),0);
+  const chronicScore=["roic","debt"].reduce((a,k)=>a+(Number(bos.scores?.[k])||0),0);
+  const moatScoreEarly=(["moat_intangible","moat_switching","moat_network","moat_cost"]).reduce((a,k)=>a+(Number(bos.scores?.[k])||0),0);
   const riskScore=["auth","sci","key"].reduce((a,k)=>a+(Number(bos.scores?.[k])||0),0);
   const total=Number(bos.total||0);
 
-  // Reminder logic — exactly one condition fires
-  let reminder=null;
-  if(finScore>=5&&total>=8)       reminder={text:"財務體質紮實，值得深入研究",col:"#4ade80"};
-  else if(finScore>=5&&total<8)   reminder={text:"財務強但護城河有限，留意競爭壓力",col:"#4ade80"};
-  else if(finScore>=3&&total>=7)  reminder={text:"護城河撐起總分，財務面仍需持續追蹤",col:"#fbbf24"};
-  else if(finScore>=3&&total<7)   reminder={text:"財務與競爭優勢都偏弱，需要特別理由才值得繼續看",col:"#fbbf24"};
-  else                             reminder={text:"高風險，須謹慎評估，勿因消息面而衝動，除非有強烈個人理由",col:"#f87171"};
+  // Three independent reminder segments
+  const reminders=[];
+  if(finScore>=4)          reminders.push({text:"財務體質紮實",col:"#4ade80"});
+  else if(finScore>=3)     reminders.push({text:"財務不錯，留意偏低的指標",col:"#4ade80"});
+  else                     reminders.push({text:"財務偏弱，需要特別理由才值得繼續看",col:"#f87171"});
+  if(chronicScore<2)       reminders.push({text:"慢性風險指標未滿分，長期投資者需注意",col:"#fbbf24"});
+  if(moatScoreEarly<4)     reminders.push({text:"護城河請自行評估",col:"#8b949e"});
+  const reminder=reminders[0];
 
   function scoreRow(c){
     const v=bos.scores?.[c.key]??0;
@@ -754,10 +759,12 @@ function renderScoring(s){
         </div>
         <div style="text-align:right">
           <div class="score-num" style="color:${reminder.col}">${total.toFixed(1)}</div>
-          <div style="font-size:11px;color:var(--dim);margin-top:2px">財務 ${finScore.toFixed(1)} / 6</div>
+          <div style="font-size:11px;color:var(--dim);margin-top:2px">財務 ${finScore.toFixed(1)} / 4</div>
         </div>
       </div>
-      <div style="margin-top:12px;padding:10px 12px;border-radius:6px;border:1px solid;background:${reminder.col}18;border-color:${reminder.col}44;font-size:12px;color:${reminder.col};line-height:1.5">${esc(reminder.text)}</div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+        ${reminders.map(r=>`<div style="padding:8px 12px;border-radius:6px;border:1px solid;background:${r.col}18;border-color:${r.col}44;font-size:12px;color:${r.col};line-height:1.5">${esc(r.text)}</div>`).join("")}
+      </div>
     </div>
   </div>
   ${financialCards}
