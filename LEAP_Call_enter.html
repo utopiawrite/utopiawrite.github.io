@@ -13,10 +13,10 @@
     --amber:#F08C3A; --amber-bg:rgba(240,140,58,0.10);
     --red:#F05060; --red-bg:rgba(240,80,96,0.10);
     --teal:#3DD9C0; --teal-bg:rgba(61,217,192,0.10);
-    --text:#D8DCF0; --text-dim:#6878A0; --text-bright:#F0F4FF;
+    --text:#D8DCF0; --text-dim:#8C9DC4; --text-bright:#F0F4FF;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;padding:40px 20px 60px;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:17px;line-height:1.6;min-height:100vh;padding:40px 20px 60px;}
   body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 60% 40% at 70% 10%,rgba(212,168,67,0.05) 0%,transparent 60%),linear-gradient(rgba(212,168,67,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(212,168,67,0.015) 1px,transparent 1px);background-size:100% 100%,44px 44px,44px 44px;pointer-events:none;z-index:0;}
   .container{max-width:900px;margin:0 auto;position:relative;z-index:1;}
 
@@ -25,24 +25,24 @@
   .logo-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);}
   .logo-text{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.22em;color:var(--gold);text-transform:uppercase;}
   h1{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--text-bright);margin-bottom:6px;}
-  .subtitle{font-size:14px;color:var(--text-dim);}
+  .subtitle{font-size:15px;color:var(--text-dim);}
 
   .ticker-row{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
-  .ticker-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);letter-spacing:0.10em;text-transform:uppercase;}
+  .ticker-label{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-dim);letter-spacing:0.10em;text-transform:uppercase;}
   .ticker-input{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--gold);background:transparent;border:none;border-bottom:2px solid var(--border-bright);padding:4px 2px;width:150px;outline:none;letter-spacing:0.12em;text-transform:uppercase;}
   .ticker-input:focus{border-bottom-color:var(--gold);}
   .ticker-input::placeholder{color:var(--border-bright);}
 
   .section{margin-bottom:24px;}
-  .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:12px;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:12px;}
   .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
   .inputs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
 
   .field{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;transition:border-color 0.2s;}
   .field:focus-within{border-color:var(--border-bright);}
-  .field-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
-  .field-hint{font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.5;}
+  .field-label{font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px;}
+  .field-hint{font-size:13px;color:var(--text-dim);margin-bottom:10px;line-height:1.5;}
 
   .num-input{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--text-bright);background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;padding:8px 12px;outline:none;width:100%;transition:border-color 0.2s;}
   .num-input:focus{border-color:var(--gold);}
@@ -50,11 +50,11 @@
 
   .num-row{display:flex;gap:8px;}
   .num-col{flex:1;}
-  .num-col label{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);letter-spacing:0.08em;display:block;margin-bottom:5px;text-transform:uppercase;}
-  .num-col .num-input{font-size:15px;}
+  .num-col label{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);letter-spacing:0.08em;display:block;margin-bottom:5px;text-transform:uppercase;}
+  .num-col .num-input{font-size:16px;}
 
-  .auto-judge{margin-top:10px;font-size:13px;min-height:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .judge-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:0.06em;white-space:nowrap;}
+  .auto-judge{margin-top:10px;font-size:14px;min-height:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .judge-tag{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:0.06em;white-space:nowrap;}
   .tag-good{background:var(--teal-bg);color:var(--teal);border:1px solid rgba(61,217,192,0.35);}
   .tag-mid {background:var(--amber-bg);color:var(--amber);border:1px solid rgba(240,140,58,0.35);}
   .tag-bad {background:var(--red-bg);color:var(--red);border:1px solid rgba(240,80,96,0.35);}
@@ -80,7 +80,7 @@
   .verdict-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.20em;text-transform:uppercase;margin-bottom:8px;opacity:0.65;}
   .verdict-title{font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:700;margin-bottom:6px;}
   .go .verdict-title{color:var(--teal);}.wait .verdict-title{color:var(--amber);}.stop .verdict-title{color:var(--red);}
-  .verdict-score-line{font-size:14px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;}
+  .verdict-score-line{font-size:15px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;}
   .score-bar-wrap{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
   .score-bar-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
   .go .score-bar-fill{background:var(--teal);box-shadow:0 0 10px var(--teal);}
@@ -88,18 +88,18 @@
   .stop .score-bar-fill{background:var(--red);}
 
   .breakdown{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
-  .breakdown-hdr{display:grid;grid-template-columns:180px 1fr 70px;padding:10px 20px;border-bottom:1px solid var(--border-bright);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);}
-  .breakdown-row{display:grid;grid-template-columns:180px 1fr 70px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--border);gap:10px;}
+  .breakdown-hdr{display:grid;grid-template-columns:180px 1fr 110px;padding:10px 20px;border-bottom:1px solid var(--border-bright);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);}
+  .breakdown-row{display:grid;grid-template-columns:180px 1fr 110px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--border);gap:10px;}
   .breakdown-row:last-child{border-bottom:none;}
   .breakdown-row:hover{background:var(--surface2);}
-  .bd-name{font-size:13px;font-weight:500;color:var(--text-dim);}
-  .bd-val{font-size:14px;color:var(--text);line-height:1.4;}
-  .bd-pts{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;text-align:right;}
+  .bd-name{font-size:14px;font-weight:500;color:var(--text-dim);}
+  .bd-val{font-size:15px;color:var(--text);line-height:1.4;}
+  .bd-pts{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;text-align:right;}
   .pts-good{color:var(--teal);}.pts-mid{color:var(--amber);}.pts-bad{color:var(--red);}.pts-na{color:var(--border-bright);}
 
   .suggestions{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 26px;margin-bottom:20px;}
-  .suggestions-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:18px;}
-  .sug-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .suggestions-title{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:18px;}
+  .sug-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);font-size:15px;line-height:1.7;}
   .sug-item:last-child{border-bottom:none;padding-bottom:0;}
   .sug-icon{font-size:17px;flex-shrink:0;margin-top:2px;}
 
@@ -520,6 +520,7 @@ function analyze(){
   const iv=parseFloat(document.getElementById('ivInput').value)||30;
   const resistVal=parseFloat(document.getElementById('n-resist').value);
   const supportVal=parseFloat(document.getElementById('n-support').value);
+  const priceVal=parseFloat(document.getElementById('n-price').value);
   const rStr=!isNaN(resistVal)?resistVal.toFixed(2):null;
   const sStr=!isNaN(supportVal)?supportVal.toFixed(2):null;
 
@@ -527,9 +528,9 @@ function analyze(){
 
   function sc(key,name,cases,w){
     maxPts+=w;const val=state[key];
-    if(val==null){rows.push({name,val:'未輸入',pts:'—',cls:'pts-na'});maxPts-=w;return;}
+    if(val==null){rows.push({name,val:'未輸入',pts:'—',max:w,cls:'pts-na'});maxPts-=w;return;}
     const c=cases[val]||{pts:0,label:val,cls:'pts-bad'};
-    total+=c.pts;rows.push({name,val:c.label,pts:c.pts,cls:c.cls});
+    total+=c.pts;rows.push({name,val:c.label,pts:c.pts,max:w,cls:c.cls});
   }
   sc('weeklyTrend','週線趨勢',{bullish:{pts:20,label:'多頭↑',cls:'pts-good'},neutral:{pts:10,label:'盤整→',cls:'pts-mid'},bearish:{pts:0,label:'空頭↓',cls:'pts-bad'}},20);
   sc('maAlignment','均線排列',{yes:{pts:15,label:'多頭排列',cls:'pts-good'},partial:{pts:8,label:'部分排列',cls:'pts-mid'},no:{pts:0,label:'未排列',cls:'pts-bad'}},15);
@@ -542,7 +543,7 @@ function analyze(){
   else if(rsi<40)     {rp=10;rl=`${rsi}，偏低`;    rc='pts-mid';}
   else if(rsi>70)     {rp=2; rl=`${rsi}，超買`;    rc='pts-bad';}
   else                {rp=8; rl=`${rsi}，偏高`;    rc='pts-mid';}
-  total+=rp;rows.push({name:'RSI（週線）',val:rl,pts:rp,cls:rc});
+  total+=rp;rows.push({name:'RSI（週線）',val:rl,pts:rp,max:15,cls:rc});
 
   sc('macd','MACD（週線）',{golden:{pts:10,label:'多頭 / 上升',cls:'pts-good'},neutral:{pts:5,label:'橫盤',cls:'pts-mid'},dead:{pts:0,label:'空頭 / 下降',cls:'pts-bad'}},10);
 
@@ -553,34 +554,57 @@ function analyze(){
   else if(iv<=50){ip=7; il=`${iv}%，偏高`;  ic='pts-mid';}
   else if(iv<=70){ip=2; il=`${iv}%，過高`;  ic='pts-bad';}
   else           {ip=0; il=`${iv}%，極高`;  ic='pts-bad';}
-  total+=ip;rows.push({name:'IV Percentile',val:il,pts:ip,cls:ic});
+  total+=ip;rows.push({name:'IV Percentile',val:il,pts:ip,max:20,cls:ic});
 
   sc('vix','VIX 水位',{low:{pts:10,label:'< 20 穩定',cls:'pts-good'},mid:{pts:5,label:'20–30 謹慎',cls:'pts-mid'},high:{pts:2,label:'> 30 恐慌',cls:'pts-bad'}},10);
   sc('earnings','財報狀態',{passed:{pts:15,label:'已公布 / 充裕',cls:'pts-good'},weeks:{pts:8,label:'3–6 週後',cls:'pts-mid'},soon:{pts:0,label:'21 天內',cls:'pts-bad'}},15);
 
-  // Collect weak indicators (pts-bad rows), exclude 支撐位 if resistance suggestion already shown
+  // Collect weak indicators
   const weakItems=rows.filter(r=>r.cls==='pts-bad'&&r.pts!=='—'&&!(state.atSupport==='resistance'&&r.name==='支撐位')).map(r=>r.name);
+
+  // Key warning flags — these block the ✅ even when score >= 75
+  const keyWarnings=[];
+  if(iv>35)keyWarnings.push(`IVP ${iv}% 偏高`);
+  if(state.earnings==='soon')keyWarnings.push('財報 21 天內即將公布');
+  if(state.weeklyTrend==='bearish')keyWarnings.push('週線趨勢仍偏空');
+  if(rsi>70)keyWarnings.push(`RSI ${rsi} 超買`);
 
   const pct=maxPts>0?Math.round((total/maxPts)*100):0;
   let vc,vt;
-  if(pct>=75){vc='go';vt='✦ 可考慮進場';}
+  if(pct>=75&&keyWarnings.length===0){vc='go';vt='✦ 可考慮進場';}
+  else if(pct>=75&&keyWarnings.length>0){vc='wait';vt='◈ 繼續觀望';}
   else if(pct>=50){vc='wait';vt='◈ 繼續觀望';}
   else{vc='stop';vt='✕ 暫勿進場';}
 
   const sugs=[];
+
+  // Specific warnings first
   if(iv>35)sugs.push({i:'⚠️',t:`IVP ${iv}%，超過 35% 門檻，此時買 LEAP premium 偏貴。建議等 IVP 回落到 35% 以下。`});
   if(state.earnings==='soon')sugs.push({i:'⚠️',t:'財報 21 天內即將公布，建議財報後確認方向再進場，避免買到過高 premium。'});
   if(state.weeklyTrend==='bearish')sugs.push({i:'🚫',t:'週線趨勢仍偏空，建議等趨勢確認翻多再考慮。'});
   if(state.vs200ma==='below')sugs.push({i:'🚫',t:'股價在 200MA 下方，等站穩 200MA 上方後再進場較安全。'});
   if(rsi>70)sugs.push({i:'⚡',t:`週線 RSI ${rsi}，短期超買。建議等 RSI 回落 55–60 附近再進場。`});
+
+  // Resistance position warning — with distance check
   if(state.atSupport==='resistance'){
     const resistLabel=rStr?`${rStr}（壓力位）`:'壓力位';
-    const supportLabel=sStr?`${sStr}（支撐位）`:'支撐位';
-    sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等突破 ${rStr||'壓力位'} 確認，或回測 ${supportLabel} 後進場。`});
+    const gap=(!isNaN(priceVal)&&!isNaN(supportVal)&&priceVal>0)
+      ?Math.abs((priceVal-supportVal)/priceVal)
+      :1;
+    if(gap>0.15){
+      sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等突破 ${rStr||'壓力位'} 並有效站穩後再進場。`});
+    }else{
+      const supportLabel=sStr?`${sStr}（支撐位）`:'支撐位';
+      sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等突破 ${rStr||'壓力位'} 確認，或回測 ${supportLabel} 後進場。`});
+    }
   }
-  if(pct>=75){
-    sugs.push({i:'✅',t:'整體條件良好。建議選 Delta 0.70–0.80 的 ITM Call，到期日至少 18 個月，搭配 PMCC 每月賣 short call 攤低成本。'});
+
+  // Final verdict suggestion — ✅ only when score >= 75 AND no key warnings
+  if(pct>=75&&keyWarnings.length===0){
+    sugs.push({i:'✅',t:'整體條件良好。建議選 Delta 0.70–0.80 的 ITM Call，到期日至少 18 個月。'});
     sugs.push({i:'💡',t:'倉位控制在總資金 5–10%。停損建議：LEAP 市值虧損 30–40% 時考慮出場或 roll 到更遠到期日。'});
+  }else if(pct>=75&&keyWarnings.length>0){
+    sugs.push({i:'⏳',t:`評分達標，但 ${keyWarnings.join('、')}，建議等這些條件改善後再進場。`});
   }else if(pct>=50){
     if(weakItems.length>0){
       sugs.push({i:'⏳',t:`${weakItems.slice(0,3).join('、')} 尚未到位，建議再觀察 1–2 週，等條件改善後勝率更高。`});
@@ -594,9 +618,14 @@ function analyze(){
 
   document.getElementById('verdictBox').className='verdict-box '+vc;
   document.getElementById('verdictTitle').textContent=vt;
-  document.getElementById('verdictScore').textContent=`${ticker}  ·  綜合評分 ${pct} 分（得 ${total} / 滿分 ${maxPts}）`;
+  document.getElementById('verdictScore').textContent=`${ticker}  ·  ${total} / ${maxPts}（${pct}%）`;
   setTimeout(()=>{document.getElementById('scoreBar').style.width=pct+'%';},60);
-  document.getElementById('breakdownRows').innerHTML=rows.map(r=>`<div class="breakdown-row"><span class="bd-name">${r.name}</span><span class="bd-val">${r.val}</span><span class="bd-pts ${r.cls}">${r.pts==='—'?'—':'+'+r.pts}</span></div>`).join('');
+  document.getElementById('breakdownRows').innerHTML=rows.map(r=>{
+    const ptsDisplay=r.pts==='—'
+      ?`<span style="color:var(--text-dim)">— / ${r.max}</span>`
+      :`+${r.pts}<span style="color:var(--text-dim);font-weight:400"> / ${r.max}</span>`;
+    return`<div class="breakdown-row"><span class="bd-name">${r.name}</span><span class="bd-val">${r.val}</span><span class="bd-pts ${r.cls}">${ptsDisplay}</span></div>`;
+  }).join('');
   document.getElementById('suggestionList').innerHTML=sugs.map(s=>`<div class="sug-item"><span class="sug-icon">${s.i}</span><span>${s.t}</span></div>`).join('');
   const now=new Date();
   document.getElementById('timestamp').textContent=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
