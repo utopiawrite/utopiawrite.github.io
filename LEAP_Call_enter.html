@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEAP Call 進場分析儀</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#09090f; --surface:#0f1018; --surface2:#14151f;
+    --border:#1c1e2e; --border-bright:#2e3150;
+    --gold:#D4A843; --gold-dim:#A07A28; --gold-glow:rgba(212,168,67,0.14); --gold-soft:rgba(212,168,67,0.07);
+    --amber:#F08C3A; --amber-bg:rgba(240,140,58,0.10);
+    --red:#F05060; --red-bg:rgba(240,80,96,0.10);
+    --teal:#3DD9C0; --teal-bg:rgba(61,217,192,0.10);
+    --text:#D8DCF0; --text-dim:#6878A0; --text-bright:#F0F4FF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;padding:40px 20px 60px;}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 60% 40% at 70% 10%,rgba(212,168,67,0.05) 0%,transparent 60%),linear-gradient(rgba(212,168,67,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(212,168,67,0.015) 1px,transparent 1px);background-size:100% 100%,44px 44px,44px 44px;pointer-events:none;z-index:0;}
+  .container{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+
+  .header{margin-bottom:32px;}
+  .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .logo-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);}
+  .logo-text{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.22em;color:var(--gold);text-transform:uppercase;}
+  h1{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--text-bright);margin-bottom:6px;}
+  .subtitle{font-size:14px;color:var(--text-dim);}
+
+  .ticker-row{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+  .ticker-label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);letter-spacing:0.10em;text-transform:uppercase;}
+  .ticker-input{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--gold);background:transparent;border:none;border-bottom:2px solid var(--border-bright);padding:4px 2px;width:150px;outline:none;letter-spacing:0.12em;text-transform:uppercase;}
+  .ticker-input:focus{border-bottom-color:var(--gold);}
+  .ticker-input::placeholder{color:var(--border-bright);}
+
+  .section{margin-bottom:24px;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;display:flex;align-items:center;gap:12px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  .inputs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+
+  .field{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;transition:border-color 0.2s;}
+  .field:focus-within{border-color:var(--border-bright);}
+  .field-label{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+  .field-hint{font-size:11px;color:var(--text-dim);margin-bottom:10px;line-height:1.5;}
+
+  .num-input{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--text-bright);background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;padding:8px 12px;outline:none;width:100%;transition:border-color 0.2s;}
+  .num-input:focus{border-color:var(--gold);}
+  .num-input::placeholder{color:var(--border-bright);font-size:13px;font-weight:400;}
+
+  .num-row{display:flex;gap:8px;}
+  .num-col{flex:1;}
+  .num-col label{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);letter-spacing:0.08em;display:block;margin-bottom:5px;text-transform:uppercase;}
+  .num-col .num-input{font-size:15px;}
+
+  .auto-judge{margin-top:10px;font-size:13px;min-height:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .judge-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:0.06em;white-space:nowrap;}
+  .tag-good{background:var(--teal-bg);color:var(--teal);border:1px solid rgba(61,217,192,0.35);}
+  .tag-mid {background:var(--amber-bg);color:var(--amber);border:1px solid rgba(240,140,58,0.35);}
+  .tag-bad {background:var(--red-bg);color:var(--red);border:1px solid rgba(240,80,96,0.35);}
+
+  .slider-wrap{display:flex;align-items:center;gap:12px;margin-top:4px;}
+  input[type="range"]{-webkit-appearance:none;flex:1;height:4px;background:var(--border-bright);border-radius:2px;outline:none;cursor:pointer;}
+  input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);cursor:pointer;box-shadow:0 0 8px var(--gold-dim);}
+  .slider-val{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--text-bright);min-width:52px;text-align:right;}
+
+  .ma-results{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+
+  .analyze-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;margin-top:8px;background:linear-gradient(135deg,var(--gold-soft),rgba(212,168,67,0.03));border:1px solid var(--gold-dim);border-radius:6px;color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all 0.25s ease;}
+  .analyze-btn:hover{background:var(--gold-glow);box-shadow:0 0 18px rgba(212,168,67,0.25),0 0 6px rgba(212,168,67,0.15);transform:translateX(3px);}
+
+  .result{display:none;margin-top:36px;}
+  .result.show{display:block;animation:fadeUp 0.35s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+  .verdict-box{border-radius:10px;padding:28px 32px;margin-bottom:20px;}
+  .verdict-box.go  {background:linear-gradient(135deg,rgba(61,217,192,0.07),rgba(61,217,192,0.02));border:1px solid rgba(61,217,192,0.45);}
+  .verdict-box.wait{background:linear-gradient(135deg,rgba(240,140,58,0.07),rgba(240,140,58,0.02));border:1px solid rgba(240,140,58,0.45);}
+  .verdict-box.stop{background:linear-gradient(135deg,rgba(240,80,96,0.07),rgba(240,80,96,0.02));border:1px solid rgba(240,80,96,0.45);}
+  .verdict-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.20em;text-transform:uppercase;margin-bottom:8px;opacity:0.65;}
+  .verdict-title{font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:700;margin-bottom:6px;}
+  .go .verdict-title{color:var(--teal);}.wait .verdict-title{color:var(--amber);}.stop .verdict-title{color:var(--red);}
+  .verdict-score-line{font-size:14px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;}
+  .score-bar-wrap{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .score-bar-fill{height:100%;border-radius:3px;transition:width 0.8s cubic-bezier(0.16,1,0.3,1);}
+  .go .score-bar-fill{background:var(--teal);box-shadow:0 0 10px var(--teal);}
+  .wait .score-bar-fill{background:var(--amber);}
+  .stop .score-bar-fill{background:var(--red);}
+
+  .breakdown{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+  .breakdown-hdr{display:grid;grid-template-columns:180px 1fr 70px;padding:10px 20px;border-bottom:1px solid var(--border-bright);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);}
+  .breakdown-row{display:grid;grid-template-columns:180px 1fr 70px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--border);gap:10px;}
+  .breakdown-row:last-child{border-bottom:none;}
+  .breakdown-row:hover{background:var(--surface2);}
+  .bd-name{font-size:13px;font-weight:500;color:var(--text-dim);}
+  .bd-val{font-size:14px;color:var(--text);line-height:1.4;}
+  .bd-pts{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;text-align:right;}
+  .pts-good{color:var(--teal);}.pts-mid{color:var(--amber);}.pts-bad{color:var(--red);}.pts-na{color:var(--border-bright);}
+
+  .suggestions{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 26px;margin-bottom:20px;}
+  .suggestions-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:18px;}
+  .sug-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px;line-height:1.7;}
+  .sug-item:last-child{border-bottom:none;padding-bottom:0;}
+  .sug-icon{font-size:17px;flex-shrink:0;margin-top:2px;}
+
+  .fetch-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .fetch-btn{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;padding:10px 22px;border-radius:6px;border:1px solid var(--gold-dim);background:var(--gold-soft);color:var(--gold);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .fetch-btn:hover{background:var(--gold-glow);box-shadow:0 0 16px rgba(212,168,67,0.2);}
+  .fetch-btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .fetch-status{font-size:13px;font-family:'IBM Plex Mono',monospace;color:var(--text-dim);}
+  .fetch-status.ok{color:var(--teal);}.fetch-status.err{color:var(--amber);}
+  .key-input{font-family:'IBM Plex Mono',monospace;font-size:13px;background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;color:var(--text);padding:8px 12px;outline:none;width:240px;letter-spacing:0.04em;}
+  .key-link{font-size:12px;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold-dim);white-space:nowrap;}
+  .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(212,168,67,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .bottom-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:8px;}
+  .reset-btn{background:none;border:1px solid var(--border-bright);color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.14em;padding:9px 18px;border-radius:5px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+  .reset-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+  .auto-hint{font-size:10px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;letter-spacing:0.04em;font-weight:400;text-transform:none;}
+  @media print {
+    body { background: #fff !important; color: #111 !important; padding: 20px !important; }
+    body::before { display: none !important; }
+    .container { max-width: 100% !important; }
+    .field { background: #f8f8f8 !important; border: 1px solid #ccc !important; break-inside: avoid; }
+    .num-input { background: #fff !important; border: 1px solid #bbb !important; color: #111 !important; }
+    .section-label { color: #555 !important; }
+    .section-label::after { background: #ccc !important; }
+    .field-label { color: #111 !important; }
+    .field-hint { color: #666 !important; }
+    .ticker-input { color: #111 !important; border-bottom-color: #888 !important; }
+    .logo-text { color: #888 !important; }
+    .logo-dot { background: #888 !important; box-shadow: none !important; }
+    h1 { color: #111 !important; }
+    .subtitle { color: #555 !important; }
+    .fetch-btn { display: none !important; }
+    .fetch-status { color: #333 !important; }
+    .analyze-btn { display: none !important; }
+    .reset-btn { display: none !important; }
+    .verdict-box { background: #f0f0f0 !important; border: 1px solid #aaa !important; break-inside: avoid; }
+    .verdict-box.go  { background: #e8faf6 !important; border-color: #3DD9C0 !important; }
+    .verdict-box.wait{ background: #fef5ea !important; border-color: #F08C3A !important; }
+    .verdict-box.stop{ background: #fdeaea !important; border-color: #F05060 !important; }
+    .verdict-title { color: #111 !important; }
+    .verdict-score-line { color: #444 !important; }
+    .breakdown { border: 1px solid #ccc !important; background: #fafafa !important; break-inside: avoid; }
+    .breakdown-hdr { border-bottom: 1px solid #ccc !important; color: #666 !important; background: #f0f0f0 !important; }
+    .breakdown-row { border-bottom: 1px solid #eee !important; }
+    .bd-name { color: #555 !important; }
+    .bd-val { color: #111 !important; }
+    .suggestions { border: 1px solid #ccc !important; background: #fafafa !important; break-inside: avoid; }
+    .suggestions-title { color: #555 !important; }
+    .sug-item { border-bottom: 1px solid #eee !important; color: #111 !important; }
+    .judge-tag { border: 1px solid #aaa !important; }
+    .tag-good { background: #e0faf5 !important; color: #1a9e8a !important; }
+    .tag-mid  { background: #fef3e2 !important; color: #b85e00 !important; }
+    .tag-bad  { background: #fde8ea !important; color: #c0303d !important; }
+    .ma-results div { color: #111 !important; }
+    .auto-judge span[style] { color: #111 !important; }
+    .ticker-label { color: #555 !important; }
+    .num-col label { color: #555 !important; }
+    .timestamp { color: #555 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo-row"><div class="logo-dot"></div><span class="logo-text">Options Desk — LEAP 分析</span></div>
+    <h1>LEAP Call 進場分析儀</h1>
+    <div class="subtitle">輸入股票代號自動抓取指標，IVP 和財報日期手動填入</div>
+  </div>
+
+  <div class="ticker-row">
+    <span class="ticker-label">股票代號</span>
+    <input class="ticker-input" id="ticker" type="text" placeholder="TSM" maxlength="8" onkeydown="if(event.key==='Enter')fetchData()">
+    <button class="fetch-btn" id="fetchBtn" onclick="fetchData()">⬇ 自動載入</button>
+    <span class="fetch-status" id="fetchStatus"></span>
+  </div>
+  <div style="margin-bottom:32px;">
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;line-height:1.6;">
+      使用自動載入需 Twelve Data API Key｜無 Key 者亦可手動填入欄位獲得分析
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.10em;text-transform:uppercase;white-space:nowrap;">輸入你的 API Key</span>
+      <div style="position:relative;flex:1;max-width:460px;">
+        <input type="password" id="apiKey"
+          placeholder="輸入的 Key 僅存放在你個人的本機端，他人無法使用"
+          style="font-family:'Noto Sans TC',sans-serif;font-size:12px;background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;color:var(--text);padding:8px 40px 8px 14px;outline:none;width:100%;letter-spacing:0.01em;"
+          oninput="localStorage.setItem('td_key',this.value)">
+        <button onclick="toggleKey()" id="eyeBtn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;line-height:1;display:flex;align-items:center;transition:color 0.2s;" title="顯示/隱藏 Key">
+          <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="section">
+    <div class="section-label">價格 ／ 均線</div>
+    <div class="field">
+      <div class="field-label">現價 ／ 均線 ／ 高點</div>
+      <div class="field-hint">均線從日線圖（D）讀取。20週前收盤：切週線圖（W），游標移到左邊第20根K棒。</div>
+      <div class="num-row" style="margin-bottom:10px;">
+        <div class="num-col"><label>現價</label><input class="num-input" id="n-price" type="number" step="0.01" placeholder="338.89" oninput="evalMA()"></div>
+        <div class="num-col"><label>20週前收盤</label><input class="num-input" id="n-price20w" type="number" step="0.01" placeholder="—" oninput="evalMA()"></div>
+        <div class="num-col"><label>52週高點</label><input class="num-input" id="n-high52" type="number" step="0.01" placeholder="—" oninput="evalMA()"></div>
+      </div>
+      <div class="num-row" style="margin-bottom:10px;">
+        <div class="num-col"><label>20日均線</label><input class="num-input" id="n-ma20" type="number" step="0.01" placeholder="358.69" oninput="evalMA()"></div>
+        <div class="num-col"><label>50日均線</label><input class="num-input" id="n-ma50" type="number" step="0.01" placeholder="342.63" oninput="evalMA()"></div>
+        <div class="num-col"><label>200日均線</label><input class="num-input" id="n-ma200" type="number" step="0.01" placeholder="285.29" oninput="evalMA()"></div>
+      </div>
+      <div class="num-row" style="margin-bottom:4px;">
+        <div class="num-col">
+          <label>支撐位 <span class="auto-hint" id="support-hint">預設：50MA</span></label>
+          <input class="num-input" id="n-support" type="number" step="0.01" placeholder="—" oninput="markManual('support')">
+        </div>
+        <div class="num-col">
+          <label>壓力位 <span class="auto-hint" id="resist-hint">預設：52週高點</span></label>
+          <input class="num-input" id="n-resist" type="number" step="0.01" placeholder="—" oninput="markManual('resist')">
+        </div>
+        <div class="num-col"></div>
+      </div>
+      <div class="ma-results" id="ma-results"></div>
+    </div>
+  </div>
+
+  <!-- 動能 -->
+  <div class="section">
+    <div class="section-label">動能指標（週線）</div>
+    <div class="inputs-grid">
+
+      <div class="field">
+        <div class="field-label">週線 RSI（14）</div>
+        <div class="field-hint">週線圖（W）加入 RSI 14，讀第一個數字（紫色線）</div>
+        <input class="num-input" id="rsiInput" type="number" step="0.01" min="0" max="100" placeholder="35.17" oninput="evalRSI()">
+        <div class="auto-judge" id="rsi-judge"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">週線 MACD</div>
+        <div class="field-hint">第1個數=MACD線，第2個=Signal線</div>
+        <div class="num-row">
+          <div class="num-col"><label>MACD 線</label><input class="num-input" id="n-macd" type="number" step="0.001" placeholder="28.31" oninput="evalMACD()"></div>
+          <div class="num-col"><label>Signal 線</label><input class="num-input" id="n-signal" type="number" step="0.001" placeholder="26.65" oninput="evalMACD()"></div>
+        </div>
+        <div class="auto-judge" id="macd-judge"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 波動率 -->
+  <div class="section">
+    <div class="section-label">波動率 ／ 市場環境</div>
+    <div class="inputs-grid">
+
+      <div class="field">
+        <div class="field-label">IV Percentile（%）</div>
+        <div class="field-hint">thinkorswim / TradingView 選擇權指標查詢，35% 以下可進場</div>
+        <input class="num-input" id="ivInput" type="number" step="0.1" min="0" max="100" placeholder="30" oninput="evalIV()">
+        <div class="auto-judge" id="iv-judge"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">VIX 現值</div>
+        <div class="field-hint">TradingView 搜尋 VIX 讀取現價</div>
+        <input class="num-input" id="n-vix" type="number" step="0.01" placeholder="18.00" oninput="evalVIX()">
+        <div class="auto-judge" id="vix-judge"></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">下次財報日期</div>
+        <div class="field-hint">TradingView 或 Earnings Whispers 查詢</div>
+        <input type="date" id="earningsDate" oninput="evalEarnings()"
+          style="font-family:'IBM Plex Mono',monospace;font-size:14px;background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;color:var(--text-bright);padding:8px 12px;outline:none;color-scheme:dark;width:100%;">
+        <div class="auto-judge" id="earnings-judge"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="analyze-btn" onclick="analyze()">▶ 執行進場分析</button>
+
+  <!-- Result -->
+  <div class="result" id="result">
+    <div class="verdict-box" id="verdictBox">
+      <div class="verdict-eyebrow">進場建議</div>
+      <div class="verdict-title" id="verdictTitle">—</div>
+      <div class="verdict-score-line" id="verdictScore">—</div>
+      <div class="score-bar-wrap"><div class="score-bar-fill" id="scoreBar" style="width:0%"></div></div>
+    </div>
+    <div class="breakdown">
+      <div class="breakdown-hdr"><span>指標</span><span>數值 / 判斷</span><span style="text-align:right">得分</span></div>
+      <div id="breakdownRows"></div>
+    </div>
+    <div class="suggestions">
+      <div class="suggestions-title">具體建議</div>
+      <div id="suggestionList"></div>
+    </div>
+    <div class="bottom-row">
+      <button class="reset-btn" onclick="resetForm()">↺ 重新輸入</button>
+      <span class="timestamp" id="timestamp"></span>
+    </div>
+  </div>
+  <div style="margin-top:12px;font-size:11px;color:var(--text-dim);line-height:1.8;">
+    <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--gold-dim);margin-right:6px;">免責聲明：</span>自己的工具拿出來分享的，評分僅供參考，非專業機構等級的投資建議，進場前請自行判斷，賺了別謝我，虧了也別找我 😄
+  </div>
+
+</div>
+<script>
+const state={weeklyTrend:null,maAlignment:null,vs200ma:null,atSupport:null,macd:null,vix:null,earnings:null};
+const manualOverride={resist:false,support:false};
+function markManual(key){manualOverride[key]=true;}
+function toggleKey(){
+  const inp=document.getElementById('apiKey');
+  const icon=document.getElementById('eyeIcon');
+  if(inp.type==='password'){
+    inp.type='text';
+    icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  }else{
+    inp.type='password';
+    icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+async function fetchData(){
+  const ticker=document.getElementById('ticker').value.trim().toUpperCase();
+  const key=document.getElementById('apiKey').value.trim();
+  if(key)localStorage.setItem('td_key',key);
+  if(!ticker){alert('請先輸入股票代號');return;}
+  if(!key){alert('找不到 API Key，請重新整理頁面');return;}
+
+  const btn=document.getElementById('fetchBtn');
+  const st=document.getElementById('fetchStatus');
+  btn.disabled=true;
+  st.className='fetch-status';
+  st.innerHTML='<span class="spinner"></span>載入中...';
+
+  const BASE='https://api.twelvedata.com';
+  async function td(path){
+    const sep=path.includes('?')?'&':'?';
+    const r=await fetch(`${BASE}${path}${sep}apikey=${key}`);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.status==='error')throw new Error(d.message||'API 錯誤');
+    return d;
+  }
+
+  try{
+    const q=await td(`/quote?symbol=${ticker}`);
+    const price=parseFloat(q.close||q.price);
+    if(!price||isNaN(price))throw new Error(`找不到「${ticker}」，請確認代號`);
+    document.getElementById('n-price').value=price.toFixed(2);
+
+    const [e20,e50,e200]=await Promise.all([
+      td(`/ema?symbol=${ticker}&interval=1day&time_period=20&outputsize=1`),
+      td(`/ema?symbol=${ticker}&interval=1day&time_period=50&outputsize=1`),
+      td(`/ema?symbol=${ticker}&interval=1day&time_period=200&outputsize=1`)
+    ]);
+    const ma20v=parseFloat(e20.values?.[0]?.ema);
+    const ma50v=parseFloat(e50.values?.[0]?.ema);
+    const ma200v=parseFloat(e200.values?.[0]?.ema);
+    if(ma20v)document.getElementById('n-ma20').value=ma20v.toFixed(2);
+    if(ma50v)document.getElementById('n-ma50').value=ma50v.toFixed(2);
+    if(ma200v)document.getElementById('n-ma200').value=ma200v.toFixed(2);
+
+    const ts=await td(`/time_series?symbol=${ticker}&interval=1day&outputsize=252`);
+    if(ts.values&&ts.values.length>0){
+      const highs=ts.values.map(v=>parseFloat(v.high));
+      const h52=Math.max(...highs);
+      document.getElementById('n-high52').value=h52.toFixed(2);
+      const idx=Math.min(99,ts.values.length-1);
+      const p20w=parseFloat(ts.values[idx].close);
+      document.getElementById('n-price20w').value=p20w.toFixed(2);
+    }
+
+    const rsiD=await td(`/rsi?symbol=${ticker}&interval=1week&time_period=14&outputsize=1`);
+    const rsiV=parseFloat(rsiD.values?.[0]?.rsi);
+    if(!isNaN(rsiV)){document.getElementById('rsiInput').value=rsiV.toFixed(2);evalRSI();}
+
+    const macdD=await td(`/macd?symbol=${ticker}&interval=1week&outputsize=1`);
+    const macdV=parseFloat(macdD.values?.[0]?.macd);
+    const sigV=parseFloat(macdD.values?.[0]?.macd_signal);
+    if(!isNaN(macdV)){document.getElementById('n-macd').value=macdV.toFixed(4);}
+    if(!isNaN(sigV)){document.getElementById('n-signal').value=sigV.toFixed(4);}
+
+    try{
+      const vixD=await td(`/quote?symbol=VIX&mic_code=CBOE`);
+      const vixV=parseFloat(vixD.close||vixD.price);
+      if(!isNaN(vixV)&&vixV>0){document.getElementById('n-vix').value=vixV.toFixed(2);evalVIX();}
+    }catch(e){}
+
+    evalMA();evalMACD();
+    st.className='fetch-status ok';
+    st.textContent=`✓ ${ticker} 載入完成（現價 ${price.toFixed(2)}）`;
+  }catch(e){
+    st.className='fetch-status err';
+    st.textContent='⚠ '+e.message;
+  }
+  btn.disabled=false;
+}
+
+
+function judgeTag(cls,text){return`<span class="judge-tag ${cls}">${text}</span>`;}
+function setJudge(id,cls,tag,detail){
+  const el=document.getElementById(id);
+  if(el)el.innerHTML=judgeTag(cls,tag)+`<span style="font-size:13px;color:var(--text);font-weight:400"> ${detail}</span>`;
+}
+
+function evalMA(){
+  const price=parseFloat(document.getElementById('n-price').value);
+  const p20w=parseFloat(document.getElementById('n-price20w').value);
+  const h52=parseFloat(document.getElementById('n-high52').value);
+  const ma20=parseFloat(document.getElementById('n-ma20').value);
+  const ma50=parseFloat(document.getElementById('n-ma50').value);
+  const ma200=parseFloat(document.getElementById('n-ma200').value);
+  const res=document.getElementById('ma-results');
+  res.innerHTML='';if(isNaN(price))return;
+  const items=[];
+
+  // Auto-fill resistance from 52W high
+  if(!manualOverride.resist&&!isNaN(h52)&&h52>0){
+    document.getElementById('n-resist').value=h52.toFixed(2);
+  }
+  // Auto-fill support: 50MA if price >= 50MA, else 200MA
+  if(!manualOverride.support){
+    if(!isNaN(ma50)&&ma50>0){
+      if(!isNaN(price)&&price>=ma50){
+        document.getElementById('n-support').value=ma50.toFixed(2);
+        document.getElementById('support-hint').textContent='預設：50MA';
+      }else if(!isNaN(ma200)&&ma200>0){
+        document.getElementById('n-support').value=ma200.toFixed(2);
+        document.getElementById('support-hint').textContent='預設：200MA（現價低於50MA）';
+      }
+    }
+  }
+
+  if(!isNaN(p20w)&&p20w>0){
+    const chg=((price-p20w)/p20w)*100;
+    if(chg>5)      {state.weeklyTrend='bullish';items.push({cls:'tag-good',tag:'多頭↑',d:`+${chg.toFixed(1)}%（20週）`});}
+    else if(chg<-5){state.weeklyTrend='bearish';items.push({cls:'tag-bad', tag:'空頭↓',d:`${chg.toFixed(1)}%（20週）`});}
+    else           {state.weeklyTrend='neutral'; items.push({cls:'tag-mid', tag:'盤整→',d:`${chg>0?'+':''}${chg.toFixed(1)}%（20週）`});}
+  }
+  if(!isNaN(ma20)&&!isNaN(ma50)&&!isNaN(ma200)){
+    if(ma20>ma50&&ma50>ma200)     {state.maAlignment='yes';    items.push({cls:'tag-good',tag:'均線多頭排列',d:`20(${ma20.toFixed(1)}) > 50(${ma50.toFixed(1)}) > 200(${ma200.toFixed(1)})`});}
+    else if(ma20>ma50||ma50>ma200){state.maAlignment='partial';items.push({cls:'tag-mid', tag:'均線部分排列',d:`20MA=${ma20.toFixed(1)}  50MA=${ma50.toFixed(1)}  200MA=${ma200.toFixed(1)}`});}
+    else                          {state.maAlignment='no';     items.push({cls:'tag-bad', tag:'均線未排列',  d:`20MA=${ma20.toFixed(1)} < 50MA=${ma50.toFixed(1)}`});}
+
+    const p200=((price-ma200)/ma200)*100;
+    if(Math.abs(p200)<=3){state.vs200ma='testing';items.push({cls:'tag-mid', tag:'測試200MA',d:`${p200>0?'+':''}${p200.toFixed(1)}%`});}
+    else if(p200>0)      {state.vs200ma='above';  items.push({cls:'tag-good',tag:'200MA上方', d:`+${p200.toFixed(1)}%（現價${price} | MA${ma200.toFixed(1)}）`});}
+    else                 {state.vs200ma='below';  items.push({cls:'tag-bad', tag:'200MA下方', d:`${p200.toFixed(1)}%（現價${price} | MA${ma200.toFixed(1)}）`});}
+
+    const n50=Math.abs((price-ma50)/ma50)<0.03,n200=Math.abs((price-ma200)/ma200)<0.03;
+    const nH=!isNaN(h52)&&h52>0&&Math.abs((price-h52)/h52)<0.04;
+    if(n200)    {state.atSupport='yes';        items.push({cls:'tag-good',tag:'在支撐位',d:'200MA 附近'});}
+    else if(n50){state.atSupport='yes';        items.push({cls:'tag-good',tag:'在支撐位',d:'50MA 附近'});}
+    else if(nH) {state.atSupport='resistance';items.push({cls:'tag-bad', tag:'在壓力位',d:`接近52週高點 ${h52}`});}
+    else        {state.atSupport='no';         items.push({cls:'tag-mid', tag:'中間位置',d:'非支撐非壓力'});}
+  }
+  res.innerHTML=items.map(it=>`<div style="display:flex;align-items:center;gap:7px;padding:4px 0;">${judgeTag(it.cls,it.tag)}<span style="font-size:12px;color:var(--text)">${it.d}</span></div>`).join('');
+}
+
+function evalRSI(){
+  const r=parseFloat(document.getElementById('rsiInput').value);
+  if(isNaN(r)||r<0){document.getElementById('rsi-judge').innerHTML='';return;}
+  if(r<40)      setJudge('rsi-judge','tag-mid', '偏低',   `${r}，可能超賣`);
+  else if(r<=55)setJudge('rsi-judge','tag-good','理想區間',`${r}（40–55）`);
+  else if(r<=70)setJudge('rsi-judge','tag-mid', '偏高',   `${r}，動能尚可`);
+  else          setJudge('rsi-judge','tag-bad', '超買',   `${r}，追高風險`);
+}
+
+function evalMACD(){
+  const m=parseFloat(document.getElementById('n-macd').value);
+  const s=parseFloat(document.getElementById('n-signal').value);
+  const j=document.getElementById('macd-judge');
+  if(isNaN(m)||isNaN(s)){j.innerHTML='';state.macd=null;return;}
+  const d=m-s;
+  if(d>0.001)      {state.macd='golden';setJudge('macd-judge','tag-good','多頭 / 上升',`MACD(${m}) > Signal(${s})`);}
+  else if(d<-0.001){state.macd='dead';  setJudge('macd-judge','tag-bad', '空頭 / 下降',`MACD(${m}) < Signal(${s})`);}
+  else             {state.macd='neutral';setJudge('macd-judge','tag-mid','橫盤',        `差值 ${d.toFixed(3)}`);}
+}
+
+function evalIV(){
+  const v=parseFloat(document.getElementById('ivInput').value);
+  if(isNaN(v)||v<0){document.getElementById('iv-judge').innerHTML='';return;}
+  if(v<=20)     setJudge('iv-judge','tag-good','非常低',`${v}%，買方絕佳`);
+  else if(v<=35)setJudge('iv-judge','tag-good','合理',  `${v}%，≤35% 可進場`);
+  else if(v<=50)setJudge('iv-judge','tag-mid', '偏高',  `${v}%，Premium 偏貴`);
+  else if(v<=70)setJudge('iv-judge','tag-bad', '過高',  `${v}%，等 IVP 回落`);
+  else          setJudge('iv-judge','tag-bad', '極高',  `${v}%，強烈建議等待`);
+}
+
+function evalVIX(){
+  const v=parseFloat(document.getElementById('n-vix').value);
+  if(isNaN(v)||v<=0){document.getElementById('vix-judge').innerHTML='';state.vix=null;return;}
+  if(v<20)     {state.vix='low'; setJudge('vix-judge','tag-good','穩定',`VIX ${v.toFixed(1)}，市場平靜`);}
+  else if(v<30){state.vix='mid'; setJudge('vix-judge','tag-mid', '謹慎',`VIX ${v.toFixed(1)}，波動偏大`);}
+  else         {state.vix='high';setJudge('vix-judge','tag-bad', '恐慌',`VIX ${v.toFixed(1)}，IV 偏貴`);}
+}
+
+function evalEarnings(){
+  const val=document.getElementById('earningsDate').value;
+  const j=document.getElementById('earnings-judge');
+  if(!val){j.innerHTML='';state.earnings=null;return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  const diff=Math.round((new Date(val+'T00:00:00')-today)/86400000);
+  if(diff<0)       {state.earnings='passed';j.innerHTML=judgeTag('tag-good','已公布')+` <span style="font-size:13px;color:var(--text)">${Math.abs(diff)} 天前，不確定性已消除 ✓</span>`;}
+  else if(diff<=21){state.earnings='soon';  j.innerHTML=judgeTag('tag-bad','即將公布')+` <span style="font-size:13px;color:var(--text)">還有 ${diff} 天，IV 偏高 ⚠</span>`;}
+  else if(diff<=42){state.earnings='weeks'; j.innerHTML=judgeTag('tag-mid','尚可')+` <span style="font-size:13px;color:var(--text)">還有 ${diff} 天，留意 IV 變化</span>`;}
+  else             {state.earnings='passed';j.innerHTML=judgeTag('tag-good','充裕')+` <span style="font-size:13px;color:var(--text)">還有 ${diff} 天，條件良好 ✓</span>`;}
+}
+
+function analyze(){
+  const ticker=document.getElementById('ticker').value.trim().toUpperCase()||'該標的';
+  const rsi=parseFloat(document.getElementById('rsiInput').value)||50;
+  const iv=parseFloat(document.getElementById('ivInput').value)||30;
+  const resistVal=parseFloat(document.getElementById('n-resist').value);
+  const supportVal=parseFloat(document.getElementById('n-support').value);
+  const rStr=!isNaN(resistVal)?resistVal.toFixed(2):null;
+  const sStr=!isNaN(supportVal)?supportVal.toFixed(2):null;
+
+  let total=0,maxPts=0;const rows=[];
+
+  function sc(key,name,cases,w){
+    maxPts+=w;const val=state[key];
+    if(val==null){rows.push({name,val:'未輸入',pts:'—',cls:'pts-na'});maxPts-=w;return;}
+    const c=cases[val]||{pts:0,label:val,cls:'pts-bad'};
+    total+=c.pts;rows.push({name,val:c.label,pts:c.pts,cls:c.cls});
+  }
+  sc('weeklyTrend','週線趨勢',{bullish:{pts:20,label:'多頭↑',cls:'pts-good'},neutral:{pts:10,label:'盤整→',cls:'pts-mid'},bearish:{pts:0,label:'空頭↓',cls:'pts-bad'}},20);
+  sc('maAlignment','均線排列',{yes:{pts:15,label:'多頭排列',cls:'pts-good'},partial:{pts:8,label:'部分排列',cls:'pts-mid'},no:{pts:0,label:'未排列',cls:'pts-bad'}},15);
+  sc('vs200ma','股價 vs 200MA',{above:{pts:15,label:'在上方',cls:'pts-good'},testing:{pts:8,label:'測試中',cls:'pts-mid'},below:{pts:0,label:'在下方',cls:'pts-bad'}},15);
+  sc('atSupport','支撐位',{yes:{pts:10,label:'在支撐位',cls:'pts-good'},no:{pts:5,label:'中間位置',cls:'pts-mid'},resistance:{pts:0,label:'在壓力位',cls:'pts-bad'}},10);
+
+  maxPts+=15;
+  let rp,rl,rc;
+  if(rsi>=40&&rsi<=55){rp=15;rl=`${rsi}，理想區間`;rc='pts-good';}
+  else if(rsi<40)     {rp=10;rl=`${rsi}，偏低`;    rc='pts-mid';}
+  else if(rsi>70)     {rp=2; rl=`${rsi}，超買`;    rc='pts-bad';}
+  else                {rp=8; rl=`${rsi}，偏高`;    rc='pts-mid';}
+  total+=rp;rows.push({name:'RSI（週線）',val:rl,pts:rp,cls:rc});
+
+  sc('macd','MACD（週線）',{golden:{pts:10,label:'多頭 / 上升',cls:'pts-good'},neutral:{pts:5,label:'橫盤',cls:'pts-mid'},dead:{pts:0,label:'空頭 / 下降',cls:'pts-bad'}},10);
+
+  maxPts+=20;
+  let ip,il,ic;
+  if(iv<=20)     {ip=20;il=`${iv}%，非常低`;ic='pts-good';}
+  else if(iv<=35){ip=16;il=`${iv}%，合理`;  ic='pts-good';}
+  else if(iv<=50){ip=7; il=`${iv}%，偏高`;  ic='pts-mid';}
+  else if(iv<=70){ip=2; il=`${iv}%，過高`;  ic='pts-bad';}
+  else           {ip=0; il=`${iv}%，極高`;  ic='pts-bad';}
+  total+=ip;rows.push({name:'IV Percentile',val:il,pts:ip,cls:ic});
+
+  sc('vix','VIX 水位',{low:{pts:10,label:'< 20 穩定',cls:'pts-good'},mid:{pts:5,label:'20–30 謹慎',cls:'pts-mid'},high:{pts:2,label:'> 30 恐慌',cls:'pts-bad'}},10);
+  sc('earnings','財報狀態',{passed:{pts:15,label:'已公布 / 充裕',cls:'pts-good'},weeks:{pts:8,label:'3–6 週後',cls:'pts-mid'},soon:{pts:0,label:'21 天內',cls:'pts-bad'}},15);
+
+  // Collect weak indicators (pts-bad rows), exclude 支撐位 if resistance suggestion already shown
+  const weakItems=rows.filter(r=>r.cls==='pts-bad'&&r.pts!=='—'&&!(state.atSupport==='resistance'&&r.name==='支撐位')).map(r=>r.name);
+
+  const pct=maxPts>0?Math.round((total/maxPts)*100):0;
+  let vc,vt;
+  if(pct>=75){vc='go';vt='✦ 可考慮進場';}
+  else if(pct>=50){vc='wait';vt='◈ 繼續觀望';}
+  else{vc='stop';vt='✕ 暫勿進場';}
+
+  const sugs=[];
+  if(iv>35)sugs.push({i:'⚠️',t:`IVP ${iv}%，超過 35% 門檻，此時買 LEAP premium 偏貴。建議等 IVP 回落到 35% 以下。`});
+  if(state.earnings==='soon')sugs.push({i:'⚠️',t:'財報 21 天內即將公布，建議財報後確認方向再進場，避免買到過高 premium。'});
+  if(state.weeklyTrend==='bearish')sugs.push({i:'🚫',t:'週線趨勢仍偏空，建議等趨勢確認翻多再考慮。'});
+  if(state.vs200ma==='below')sugs.push({i:'🚫',t:'股價在 200MA 下方，等站穩 200MA 上方後再進場較安全。'});
+  if(rsi>70)sugs.push({i:'⚡',t:`週線 RSI ${rsi}，短期超買。建議等 RSI 回落 55–60 附近再進場。`});
+  if(state.atSupport==='resistance'){
+    const resistLabel=rStr?`${rStr}（壓力位）`:'壓力位';
+    const supportLabel=sStr?`${sStr}（支撐位）`:'支撐位';
+    sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等突破 ${rStr||'壓力位'} 確認，或回測 ${supportLabel} 後進場。`});
+  }
+  if(pct>=75){
+    sugs.push({i:'✅',t:'整體條件良好。建議選 Delta 0.70–0.80 的 ITM Call，到期日至少 18 個月，搭配 PMCC 每月賣 short call 攤低成本。'});
+    sugs.push({i:'💡',t:'倉位控制在總資金 5–10%。停損建議：LEAP 市值虧損 30–40% 時考慮出場或 roll 到更遠到期日。'});
+  }else if(pct>=50){
+    if(weakItems.length>0){
+      sugs.push({i:'⏳',t:`${weakItems.slice(0,3).join('、')} 尚未到位，建議再觀察 1–2 週，等條件改善後勝率更高。`});
+    }else{
+      sugs.push({i:'⏳',t:'建議再觀察 1–2 週，等各項條件進一步確認後勝率更高。'});
+    }
+  }else{
+    const weakStr=weakItems.length>0?weakItems.slice(0,3).join('、')+'不符進場條件':'多個關鍵指標不符';
+    sugs.push({i:'⏳',t:`${weakStr}，此時進場風險偏高。建議等技術面和 IVP 條件改善後重新評估。`});
+  }
+
+  document.getElementById('verdictBox').className='verdict-box '+vc;
+  document.getElementById('verdictTitle').textContent=vt;
+  document.getElementById('verdictScore').textContent=`${ticker}  ·  綜合評分 ${pct} 分（得 ${total} / 滿分 ${maxPts}）`;
+  setTimeout(()=>{document.getElementById('scoreBar').style.width=pct+'%';},60);
+  document.getElementById('breakdownRows').innerHTML=rows.map(r=>`<div class="breakdown-row"><span class="bd-name">${r.name}</span><span class="bd-val">${r.val}</span><span class="bd-pts ${r.cls}">${r.pts==='—'?'—':'+'+r.pts}</span></div>`).join('');
+  document.getElementById('suggestionList').innerHTML=sugs.map(s=>`<div class="sug-item"><span class="sug-icon">${s.i}</span><span>${s.t}</span></div>`).join('');
+  const now=new Date();
+  document.getElementById('timestamp').textContent=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const el=document.getElementById('result');el.classList.add('show');
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function resetForm(){
+  document.getElementById('result').classList.remove('show');
+  Object.keys(state).forEach(k=>state[k]=null);
+  manualOverride.resist=false;
+  manualOverride.support=false;
+  ['n-price','n-price20w','n-high52','n-ma20','n-ma50','n-ma200','n-vix','n-macd','n-signal','rsiInput','ivInput','n-resist','n-support'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('support-hint').textContent='預設：50MA';
+  document.getElementById('resist-hint').textContent='預設：52週高點';
+  document.getElementById('ma-results').innerHTML='';
+  document.getElementById('rsi-judge').innerHTML='';
+  document.getElementById('iv-judge').innerHTML='';
+  document.getElementById('vix-judge').innerHTML='';document.getElementById('macd-judge').innerHTML='';
+  document.getElementById('earningsDate').value='';document.getElementById('earnings-judge').innerHTML='';
+  document.getElementById('fetchStatus').textContent='';
+  document.getElementById('ticker').value='';document.getElementById('scoreBar').style.width='0%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const savedKey=localStorage.getItem('td_key');
+if(savedKey)document.getElementById('apiKey').value=savedKey;
+</script>
+</body>
+</html>
