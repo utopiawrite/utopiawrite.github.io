@@ -591,11 +591,11 @@ function analyze(){
     const gap=(!isNaN(priceVal)&&!isNaN(supportVal)&&priceVal>0)
       ?Math.abs((priceVal-supportVal)/priceVal)
       :1;
-    if(gap>0.15){
-      sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等突破 ${rStr||'壓力位'} 並有效站穩後再進場。`});
+    if(gap>0.05){
+      sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等收盤站穩 ${rStr||'壓力位'} 上方 2 日以上後再進場。`});
     }else{
       const supportLabel=sStr?`${sStr}（支撐位）`:'支撐位';
-      sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等突破 ${rStr||'壓力位'} 確認，或回測 ${supportLabel} 後進場。`});
+      sugs.push({i:'⚡',t:`股價在 ${resistLabel}，建議等收盤站穩 ${rStr||'壓力位'} 上方 2 日以上後再進場，或回測 ${supportLabel} 後進場。`});
     }
   }
 
