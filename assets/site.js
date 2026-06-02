@@ -53,13 +53,24 @@
     });
   });
 
-  // honour incoming hash (#invest etc. or #search)
-  if(filters.length){
+  // honour incoming hash (#invest etc. or #search) — on load AND on hash change,
+  // so footer/nav category links work even when already on the articles page
+  function applyHash(){
+    if(!filters.length) return;
     const h = decodeURIComponent(location.hash.replace('#',''));
-    if(h==='search'){ if(searchBar){searchBar.style.display='block'; searchInput&&searchInput.focus();} }
-    else if(h){
+    if(h==='search'){
+      if(searchBar){ searchBar.style.display='block'; searchInput&&searchInput.focus(); }
+      return;
+    }
+    if(h){
       const match = [...filters].find(f=>f.dataset.cat===h);
-      if(match){ match.click(); }
+      if(match && !match.classList.contains('active')){ match.click(); }
+    } else {
+      // bare hash / no hash -> show everything
+      const all = [...filters].find(f=>f.dataset.cat==='all');
+      if(all && !all.classList.contains('active')){ all.click(); }
     }
   }
+  applyHash();
+  window.addEventListener('hashchange', applyHash);
 })();
