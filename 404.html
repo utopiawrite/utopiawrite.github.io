@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>頁面已搬家｜Zina Liu</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .nf{max-width:620px;margin:0 auto;padding:80px 32px 60px;text-align:center;}
+  .nf .tag{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--mute);text-transform:uppercase;}
+  .nf h1{font:700 32px/1.5 var(--sans);margin:18px 0 14px;color:var(--ink);}
+  .nf p{font-size:16px;line-height:1.9;color:var(--sub);margin:0 auto 8px;max-width:480px;}
+  .nf .redir{font-family:var(--mono);font-size:13px;color:var(--accent-deep);margin-top:22px;display:none;}
+  .nf .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:34px;}
+  .nf .acts a{font-size:15px;font-weight:500;padding:13px 24px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--ink);transition:all .15s;}
+  .nf .acts a.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .nf .acts a:hover{border-color:var(--accent);}
+  .nf .acts a.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
+  .nf .path{font-family:var(--mono);font-size:12.5px;color:var(--mute);margin-top:30px;word-break:break-all;}
+</style>
+</head><body>
+<header class="wrap"><nav class="nav"><a class="brand" href="/index.html"><span class="logo">Z</span><span>Zina&nbsp;Liu</span></a></nav></header>
+<main class="wrap">
+  <section class="nf">
+    <div class="tag">404 · Page Moved</div>
+    <h1 id="nf-title">這個頁面搬家了</h1>
+    <p id="nf-msg">網站改版後文章換了新網址。我們正幫你找對應的新頁面…</p>
+    <div class="redir" id="nf-redir"></div>
+    <div class="acts">
+      <a class="primary" href="/articles.html">瀏覽所有文章</a>
+      <a href="/index.html">回首頁</a>
+    </div>
+    <div class="path" id="nf-path"></div>
+  </section>
+</main>
+<script>
+(function(){
+  // 新站所有文章 slug（= posts/<slug>.html）
+  var KNOWN = ["2025-goals","3-steps-to-reduce-investment-risk","3-tips-to-personal-finance","before-investing","chasing-the-carrot","content-marketing","dealing-with-negative-emotion","house-location-vs-stock-picking","how-to-get-rich-netflix-show","how-to-make-a-vision-board","how-to-manifest-money","how-to-start-online-marketing","how-to-write-a-landing-page","investing-tips","investment-goals","investment-plan","investment-priorities","leap-call-exit-strategy","manage-money","money-chart","reasons-why-investment-fail","richman-definition","website-builder","win-lottery-with-law-of-attraction"];
+
+  // 舊「文章」檔名 → 新 slug 對照（只放改過名的文章；目前無）
+  var ALIASES = {
+  };
+
+  // 自製工具：以前在根目錄，現在搬進 /tools/（保留大小寫，GitHub Pages 區分大小寫）
+  var TOOLS = ["asset-track","enter-monitor","hyperscaler_capex_beneficiaries","leap","LEAP_Call_enter","option101","stage1","value-investing","watchlist"];
+
+  // 根目錄就有的頁面（非文章）
+  var ROOT_PAGES = {"about":"/about.html","articles":"/articles.html","index":"/index.html","feed":"/feed.xml"};
+
+  var raw = location.pathname || "";
+  document.getElementById("nf-path").textContent = "你要找的：" + raw;
+
+  // 原始 slug：去頭尾斜線、去 .html（保留大小寫，給工具用）
+  var rawSlug = raw.replace(/^\/+|\/+$/g, "").replace(/\.html?$/i, "");
+  // 小寫版、去開頭 posts/（給文章用）
+  var slug = rawSlug.replace(/^posts\//i, "").toLowerCase();
+
+  var dest = null;
+  if (ALIASES[slug]) dest = "/posts/" + ALIASES[slug] + ".html";
+  else if (KNOWN.indexOf(slug) !== -1) dest = "/posts/" + slug + ".html";
+  else if (TOOLS.indexOf(rawSlug) !== -1) dest = "/tools/" + rawSlug + ".html";
+  else if (ROOT_PAGES[slug]) dest = ROOT_PAGES[slug];
+
+  if (dest) {
+    var box = document.getElementById("nf-redir");
+    box.style.display = "block";
+    box.textContent = "已找到新位置，正在跳轉…";
+    document.getElementById("nf-title").textContent = "找到了！正在帶你過去";
+    document.getElementById("nf-msg").textContent = "這篇文章的新網址是 " + dest;
+    setTimeout(function(){ location.replace(dest); }, 1200);
+  } else {
+    document.getElementById("nf-title").textContent = "找不到這個頁面";
+    document.getElementById("nf-msg").textContent = "網站改版後這個網址可能已經失效。你可以從下面瀏覽所有文章，或回首頁逛逛。";
+  }
+})();
+</script>
+</body></html>
