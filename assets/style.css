@@ -135,7 +135,13 @@ a{color:inherit;text-decoration:none;}
 .art-head{margin-bottom:38px;}
 .art-head .chip{margin-bottom:20px;}
 .art-head h1{font:800 40px/1.45 var(--sans);letter-spacing:.01em;text-wrap:balance;margin-bottom:18px;}
-.art-head .meta{font-size:14px;color:var(--mute);font-family:var(--mono);display:flex;gap:14px;align-items:center;}
+.art-head .meta{font-size:14px;color:var(--mute);font-family:var(--mono);display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.art-head .meta .views{display:inline-flex;align-items:center;gap:5px;}
+.art-head .meta .views svg{width:14px;height:14px;opacity:.8;}
+.art-head .meta .views.loading{opacity:.55;}
+.art-head .byline{display:flex;align-items:center;gap:8px;margin-top:18px;font-size:15px;color:var(--sub);font-family:var(--sans);}
+.art-head .byline .pen{font-size:16px;line-height:1;}
+.art-head .byline .by-name{font-weight:700;color:var(--accent-deep);}
 .art-body{font-size:17.5px;line-height:2.05;color:#3A352F;}
 .art-body p{margin:0 0 1.5em;}
 .art-body h2{font:700 26px/1.5 var(--sans);margin:1.6em 0 .7em;}

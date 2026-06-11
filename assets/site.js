@@ -73,4 +73,66 @@
   }
   applyHash();
   window.addEventListener('hashchange', applyHash);
+
+  /* ===== article pages: author byline + view counter (auto-injected) ===== */
+  (function(){
+    const head = document.querySelector('.article .art-head');
+    if(!head) return;
+
+    const AUTHOR = 'Zina';
+    const meta = head.querySelector('.meta');
+
+    // --- author byline (below the title / meta row) ---
+    if(meta && !head.querySelector('.byline')){
+      const by = document.createElement('div');
+      by.className = 'byline';
+      by.innerHTML = '<span>作者：<span class="by-name"></span></span>';
+      by.querySelector('.by-name').textContent = AUTHOR; // textContent avoids any injection
+      meta.insertAdjacentElement('afterend', by);
+    }
+
+    // --- view counter (beside the date, inside .meta) ---
+    if(meta && !meta.querySelector('.views')){
+      const slug = (location.pathname.split('/').pop() || 'index')
+        .replace(/\.html?$/i,'').replace(/[^a-zA-Z0-9_-]/g,'-') || 'home';
+
+      const dot = document.createElement('span'); dot.textContent = '·';
+      const views = document.createElement('span');
+      views.className = 'views loading';
+      views.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="views-num">…</span>';
+      meta.appendChild(dot);
+      meta.appendChild(views);
+
+      const numEl = views.querySelector('.views-num');
+      const NS = 'zinaliu-blog';
+
+      function show(n){
+        views.classList.remove('loading');
+        numEl.textContent = (n==null ? '—' : Number(n).toLocaleString('en-US')) + ' 次瀏覽';
+      }
+      function localFallback(){
+        const k = 'views:'+slug;
+        let n = parseInt(localStorage.getItem(k)||'0',10) || 0;
+        // count once per browser session to avoid refresh inflation
+        if(!sessionStorage.getItem('vseen:'+slug)){ n += 1; localStorage.setItem(k,String(n)); sessionStorage.setItem('vseen:'+slug,'1'); }
+        show(n);
+      }
+
+      // Abacus: free, no-account anonymous hit counter (CORS-enabled).
+      // /hit increments; /get just reads. Increment only once per session.
+      const firstThisSession = !sessionStorage.getItem('vseen:'+slug);
+      const verb = firstThisSession ? 'hit' : 'get';
+      const url = 'https://abacus.jasoncameron.dev/'+verb+'/'+encodeURIComponent(NS)+'/'+encodeURIComponent(slug);
+
+      fetch(url, {cache:'no-store'})
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(d => {
+          if(d && typeof d.value === 'number'){
+            if(firstThisSession) sessionStorage.setItem('vseen:'+slug,'1');
+            show(d.value);
+          } else { localFallback(); }
+        })
+        .catch(() => localFallback());
+    }
+  })();
 })();
