@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>防區反推目標價計算工具</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  body { margin: 0; background:#020617; }
+  .font-display { font-family: 'Space Grotesk', sans-serif; }
+  .font-data { font-family: 'IBM Plex Mono', monospace; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  // 本機儲存版本的 storage API,取代 Claude Artifact 內建的 window.storage
+  window.storage = {
+    async get(key) {
+      const v = localStorage.getItem(key);
+      if (v === null) throw new Error('key not found');
+      return { key, value: v };
+    },
+    async set(key, value) {
+      localStorage.setItem(key, value);
+      return { key, value };
+    },
+    async delete(key) {
+      localStorage.removeItem(key);
+      return { key, deleted: true };
+    },
+    async list(prefix) {
+      const keys = Object.keys(localStorage).filter((k) => k.startsWith(prefix || ''));
+      return { keys };
+    },
+  };
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+const FIB_RATIOS = [0.382, 0.5, 0.618, 0.786];
+const RATIO_NOTES = {
+  0.382: '淺回撤・動能強',
+  0.5: '中性・折衷位',
+  0.618: '標準回撤・最常用',
+  0.786: '深回撤・動能弱',
+};
+const WEEK_LABELS = ['本週', '次週', '下下週', '第四週', '第五週'];
+
+const defaultWeeks = [
+  { settleDate: '2026/8/28', upper: '231.42', lower: '205.2' },
+  { settleDate: '2026/9/4', upper: '230.16', lower: '206.75' },
+  { settleDate: '2026/9/11', upper: '222.5', lower: '207.7' },
+  { settleDate: '2026/9/18', upper: '241.83', lower: '188.23' },
+  { settleDate: '2026/9/25', upper: '242.3', lower: '187.78' },
+];
+
+function num(v) {
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function RangeBar({ lower, upper, current, bullTarget, bearTarget }) {
+  const span = upper - lower;
+  const pct = (v) => {
+    if (span <= 0) return 50;
+    return Math.min(100, Math.max(0, ((v - lower) / span) * 100));
+  };
+  const curPct = pct(current);
+  const bullPct = pct(bullTarget);
+  const bearPct = pct(bearTarget);
+
+  return (
+    <div className="relative mt-5 mb-6">
+      <div className="h-1.5 rounded-full bg-gradient-to-r from-rose-500/40 via-slate-700 to-emerald-500/40" />
+      <div className="absolute top-0 h-1.5" style={{ left: bearPct + '%' }}>
+        <div className="w-0.5 h-3 -mt-0.5 bg-rose-400" />
+      </div>
+      <div className="absolute top-0 h-1.5" style={{ left: bullPct + '%' }}>
+        <div className="w-0.5 h-3 -mt-0.5 bg-emerald-400" />
+      </div>
+      <div className="absolute -top-1.5" style={{ left: curPct + '%', transform: 'translateX(-50%)' }}>
+        <div className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-slate-950" />
+      </div>
+      <div className="flex justify-between mt-2 font-data text-xs text-slate-400">
+        <span>{lower.toFixed(2)}</span>
+        <span>{upper.toFixed(2)}</span>
+      </div>
+    </div>
+  );
+}
+
+function WeekCard({ label, week, current, ratio, showAllRatios }) {
+  const upper = num(week.upper);
+  const lower = num(week.lower);
+  const hasData = current !== null && upper !== null && lower !== null && upper > lower;
+
+  if (!hasData) {
+    return (
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+        <div className="font-display text-sm text-slate-400">{label} · {week.settleDate || '未設定日期'}</div>
+        <div className="mt-2 text-xs text-slate-500 font-data">請填入上標與下標</div>
+      </div>
+    );
+  }
+
+  const distUp = upper - current;
+  const distDown = current - lower;
+  const bullTarget = current + distUp * ratio;
+  const bearTarget = current - distDown * ratio;
+
+  return (
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+      <div className="flex items-baseline justify-between">
+        <div className="font-display text-sm font-semibold text-slate-200">{label}</div>
+        <div className="font-data text-xs text-slate-400">{week.settleDate}</div>
+      </div>
+
+      <RangeBar lower={lower} upper={upper} current={current} bullTarget={bullTarget} bearTarget={bearTarget} />
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/20 p-3">
+          <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-display font-semibold">
+            <span>↑</span> 看漲目標
+          </div>
+          <div className="font-data text-lg text-emerald-300 mt-1">{bullTarget.toFixed(2)}</div>
+          <div className="font-data text-xs text-slate-400 mt-0.5">距現價 +{(bullTarget - current).toFixed(2)}</div>
+        </div>
+        <div className="rounded-xl bg-rose-500/5 border border-rose-500/20 p-3">
+          <div className="flex items-center gap-1.5 text-rose-400 text-xs font-display font-semibold">
+            <span>↓</span> 看跌目標
+          </div>
+          <div className="font-data text-lg text-rose-300 mt-1">{bearTarget.toFixed(2)}</div>
+          <div className="font-data text-xs text-slate-400 mt-0.5">距現價 −{(current - bearTarget).toFixed(2)}</div>
+        </div>
+      </div>
+
+      {showAllRatios && (
+        <div className="mt-3 pt-3 border-t border-slate-800 grid grid-cols-4 gap-2">
+          {FIB_RATIOS.map((r) => (
+            <div key={r} className={"text-center rounded-lg py-1.5 px-0.5 " + (r === ratio ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-slate-800/40')}>
+              <div className="font-data text-xs text-slate-300 font-semibold">{r}</div>
+              <div className="text-[11px] text-slate-400 leading-tight mb-1">{RATIO_NOTES[r]}</div>
+              <div className="font-data text-sm text-emerald-400 mt-0.5">{(current + distUp * r).toFixed(1)}</div>
+              <div className="font-data text-sm text-rose-400">{(current - distDown * r).toFixed(1)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FibTargetTool() {
+  const [symbol, setSymbol] = useState('NVDA');
+  const [current, setCurrent] = useState('213.05');
+  const [weeks, setWeeks] = useState(defaultWeeks);
+  const [ratio, setRatio] = useState(0.618);
+  const [showAllRatios, setShowAllRatios] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState('');
+
+  useEffect(() => { loadHistory(); }, []);
+
+  async function loadHistory() {
+    setLoadingHistory(true);
+    try {
+      const res = await window.storage.list('batch:');
+      const keys = (res && res.keys) || [];
+      const items = [];
+      for (const k of keys) {
+        try {
+          const r = await window.storage.get(k);
+          if (r && r.value) items.push({ key: k, data: JSON.parse(r.value) });
+        } catch (e) {}
+      }
+      items.sort((a, b) => (b.data.savedAt || 0) - (a.data.savedAt || 0));
+      setHistory(items);
+    } catch (e) {
+      console.error('讀取歷史記錄失敗', e);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }
+
+  function updateWeek(i, field, value) {
+    setWeeks((w) => w.map((wk, idx) => (idx === i ? { ...wk, [field]: value } : wk)));
+  }
+
+  async function saveBatch() {
+    setSaving(true);
+    setSaveMsg('');
+    try {
+      const record = { symbol, current: num(current), weeks, savedAt: Date.now() };
+      const key = 'batch:' + symbol + ':' + Date.now();
+      await window.storage.set(key, JSON.stringify(record));
+      setSaveMsg('已儲存');
+      loadHistory();
+    } catch (e) {
+      setSaveMsg('儲存失敗,請再試一次');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setSaveMsg(''), 2200);
+    }
+  }
+
+  async function deleteBatch(key) {
+    try {
+      await window.storage.delete(key);
+      loadHistory();
+    } catch (e) {
+      console.error('刪除失敗', e);
+    }
+  }
+
+  function loadBatch(item) {
+    setSymbol(item.data.symbol);
+    setCurrent(String(item.data.current == null ? '' : item.data.current));
+    setWeeks(item.data.weeks);
+    setHistoryOpen(false);
+  }
+
+  const cur = num(current);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8 sm:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-8">
+          <div className="font-data text-xs text-amber-400 tracking-widest uppercase">Fibonacci Target Calculator</div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold mt-1">防區反推目標價</h1>
+          <p className="text-slate-300 text-sm mt-2 leading-relaxed">
+            輸入現價與每週上下標,依費波那契比例反推出比滿檔區間更保守的目標價。
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label className="text-xs text-slate-300 font-display">股票代號</label>
+              <input
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-data text-sm focus:outline-none focus:border-amber-500/50"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-300 font-display">目前股價</label>
+              <input
+                value={current}
+                onChange={(e) => setCurrent(e.target.value)}
+                inputMode="decimal"
+                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 font-data text-sm focus:outline-none focus:border-amber-500/50"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {weeks.map((wk, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1.2fr_1fr_1fr] gap-2 items-center">
+                <div className="text-xs text-slate-300 font-display">{WEEK_LABELS[i]}</div>
+                <input
+                  value={wk.settleDate}
+                  onChange={(e) => updateWeek(i, 'settleDate', e.target.value)}
+                  placeholder="結算日"
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 font-data text-xs focus:outline-none focus:border-amber-500/50"
+                />
+                <input
+                  value={wk.upper}
+                  onChange={(e) => updateWeek(i, 'upper', e.target.value)}
+                  placeholder="上標"
+                  inputMode="decimal"
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 font-data text-xs text-emerald-300 focus:outline-none focus:border-amber-500/50"
+                />
+                <input
+                  value={wk.lower}
+                  onChange={(e) => updateWeek(i, 'lower', e.target.value)}
+                  placeholder="下標"
+                  inputMode="decimal"
+                  className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 font-data text-xs text-rose-300 focus:outline-none focus:border-amber-500/50"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-800">
+            <button
+              onClick={saveBatch}
+              disabled={saving}
+              className="flex items-center gap-1.5 text-xs font-display font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-lg px-3 py-2 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+            >
+              {saving ? '儲存中…' : '💾 儲存這次資料'}
+            </button>
+            {saveMsg && <span className="text-xs text-slate-300 font-data">{saveMsg}</span>}
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2 mb-2 flex-wrap">
+          {FIB_RATIOS.map((r) => (
+            <button
+              key={r}
+              onClick={() => setRatio(r)}
+              className={"text-center px-3 py-1.5 rounded-xl border transition-colors " + (ratio === r ? 'bg-amber-500/15 border-amber-500/50 text-amber-300' : 'border-slate-800 text-slate-400 hover:text-slate-200')}
+            >
+              <div className="font-data text-sm font-semibold">{r}</div>
+              <div className="text-xs mt-0.5 text-slate-300">{RATIO_NOTES[r]}</div>
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-end mb-5">
+          <button
+            onClick={() => setShowAllRatios((s) => !s)}
+            className="flex items-center gap-1 text-xs text-slate-300 hover:text-amber-300 font-display"
+          >
+            比較全部倍率 {showAllRatios ? '▴' : '▾'}
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {weeks.map((wk, i) => (
+            <WeekCard
+              key={i}
+              label={WEEK_LABELS[i]}
+              week={wk}
+              current={cur}
+              ratio={ratio}
+              showAllRatios={showAllRatios}
+            />
+          ))}
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
+          <button
+            onClick={() => setHistoryOpen((s) => !s)}
+            className="w-full flex items-center justify-between font-display text-sm font-semibold text-slate-300"
+          >
+            <span>歷史記錄 {history.length > 0 ? '(' + history.length + ')' : ''}</span>
+            <span>{historyOpen ? '▴' : '▾'}</span>
+          </button>
+
+          {historyOpen && (
+            <div className="mt-4 space-y-2">
+              {loadingHistory && <div className="text-xs text-slate-300 font-data">讀取中…</div>}
+              {!loadingHistory && history.length === 0 && (
+                <div className="text-xs text-slate-300 font-data">還沒有儲存過任何資料</div>
+              )}
+              {history.map((item) => (
+                <div key={item.key} className="flex items-center justify-between rounded-lg bg-slate-950 border border-slate-800 px-3 py-2">
+                  <button onClick={() => loadBatch(item)} className="text-left flex-1">
+                    <div className="font-data text-sm text-slate-200">{item.data.symbol} <span className="text-slate-400">@ {item.data.current}</span></div>
+                    <div className="text-xs text-slate-400 font-data">{new Date(item.data.savedAt).toLocaleString('zh-TW')}</div>
+                  </button>
+                  <button onClick={() => deleteBatch(item.key)} className="text-slate-500 hover:text-rose-400 p-1.5">
+                    🗑
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<FibTargetTool />);
+</script>
+</body>
+</html>
