@@ -21,7 +21,7 @@ a{color:inherit;text-decoration:none;}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
 
 /* category colours */
-.cat-ai{--c:#8C7BC4;} .cat-invest{--c:#E8A33D;} .cat-sales{--c:#5B8BB5;}
+.cat-ai{--c:#8C7BC4;} .cat-invest{--c:#E8A33D;} .cat-sales{--c:#5B8BB5;} .cat-drama{--c:#B9697E;}
 .cat-spirit{--c:#7C9C7E;} .cat-meditation{--c:#C98AA8;} .cat-share{--c:#D77A56;}
 .cat-marketing{--c:#5B8BB5;} .cat-newsletter{--c:#C98AA8;} .cat-uncategorized{--c:#8A8179;}
 
