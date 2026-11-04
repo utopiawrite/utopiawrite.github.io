@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="居家訓練">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f6f2ec">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+
+<title>30 天居家線條計畫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f2ec; --paper:#fffdf9; --ink:#2b2622; --muted:#7a6f66; --line:#e6ddd2;
+  --legs:#c86b4a; --back:#3f7a72; --mix:#8a6bb0; --gym:#b08a3e; --rest:#a69c92;
+  --accent:#2b2622;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 60px}
+h1{font-family:"Noto Serif TC",serif;font-size:30px;margin:0 0 6px;letter-spacing:.02em}
+h2{font-family:"Noto Serif TC",serif;font-size:21px;margin:36px 0 12px}
+.sub{color:var(--muted);margin:0 0 18px;font-size:15px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+label.f{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:4px}
+input[type=date],select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:10px}
+.week label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.week select{font-size:13px;padding:4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:12px 0 0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.progress{margin-top:14px;font-size:14px}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ink);width:0;transition:width .3s}
+
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line);background:var(--paper);border-radius:12px;overflow:hidden}
+.dow{font-size:14px;color:var(--muted);text-align:center;padding:10px 0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper)}
+.dow.we,.day.we{background:#f3ece3}
+.day{background:var(--paper);border:none;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px;min-height:110px;cursor:pointer;text-align:left;font:inherit;color:inherit;display:flex;flex-direction:column;gap:5px}
+.day.out{background:#f8f4ef;cursor:default}
+.day.sel{background:#f7ead6}
+.day .d{font-size:16px;color:var(--ink)}
+.day.out .d{color:#c4b9ad}
+.pill{display:block;font-size:13px;line-height:1.4;padding:5px 8px;border-radius:6px;color:var(--ink)}
+.pill.legs{background:#f4ddd2}.pill.legs b{color:#9a4a2e}
+.pill.back{background:#d9e8e4}.pill.back b{color:#2d5d57}
+.pill.mix{background:#e7def0}.pill.mix b{color:#634a86}
+.pill.gym{background:#efe3c8}.pill.gym b{color:#7d6026}
+.pill b{font-weight:700}
+
+.detail{margin-top:16px}
+.detail h3{margin:0 0 2px;font-size:19px}
+.detail .meta{color:var(--muted);font-size:14px;margin-bottom:12px}
+.step{display:grid;grid-template-columns:62px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px dashed var(--line)}
+.step:first-of-type{border-top:none}
+.step .min{font-size:13px;color:var(--muted);text-align:center;background:#f3ede5;border-radius:8px;padding:6px 0}
+.step .ti{font-weight:500}
+.step .ch{font-size:13px;color:var(--muted)}
+.step .nt{font-size:13px;color:#5d544c;margin-top:2px}
+a.yt{display:inline-block;font-size:13px;padding:6px 10px;border-radius:8px;background:var(--ink);color:#fff;text-decoration:none;white-space:nowrap}
+a.yt:hover{opacity:.85}
+.btn{font:inherit;font-size:14px;border:1px solid var(--ink);background:transparent;color:var(--ink);padding:7px 14px;border-radius:9px;cursor:pointer}
+.btn.on{background:var(--ink);color:#fff}
+.focus{background:#f3ede5;border-radius:10px;padding:10px 12px;font-size:14px;margin:10px 0 4px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);padding:5px 12px;border-radius:999px;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.vc{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.vc .top{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:1px 8px;border-radius:999px;background:#f0e9df;color:#5d544c}
+.tag.legs{background:#f6e2d9;color:#8a4329}.tag.back{background:#dcebe8;color:#2b5a54}.tag.arms{background:#e8e0f1;color:#5c4280}
+.tag.warm{background:#f4ecd6;color:#7a5f22}.tag.stretch{background:#e6eee0;color:#4a6337}.tag.full{background:#ece6e0;color:#5d544c}
+.vc .ti{font-weight:500;line-height:1.4}
+.vc .ch{font-size:13px;color:var(--muted)}
+.vc .bt{margin-top:auto;padding-top:6px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.tips .card h4{margin:0 0 6px;font-size:15px}
+.tips .card p{margin:0;font-size:14px;color:#4a423b}
+.note{font-size:13px;color:var(--muted);margin-top:10px}
+@media (max-width:640px){
+  .day{min-height:78px;padding:4px}.pill{font-size:11px;padding:3px 4px}.pill span{display:none}.day .d{font-size:13px}
+  .week{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .step{grid-template-columns:52px 1fr;align-items:start}.step .min{grid-row:span 2}.step a.yt{grid-column:2;justify-self:start}.pill{text-align:center}
+  h1{font-size:25px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>30 天居家線條計畫</h1>
+  <p class="sub">每週健身房 2 次，居家 3 次，每次約 60 分鐘。目標是腿、後背、手臂的線條。器材：啞鈴、彈力繩、瑜伽磚、瑜伽墊。</p>
+
+  <div class="card">
+    <div class="row">
+      <label class="f">開始日期<input type="date" id="start"></label>
+      <button class="btn" id="todayBtn" type="button">跳到今天</button>
+    </div>
+    <div class="week" id="week"></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--legs)"></i>居家 A 腿臀</span>
+      <span><i class="dot" style="background:var(--back)"></i>居家 B 背與手臂</span>
+      <span><i class="dot" style="background:var(--mix)"></i>居家 C 混合</span>
+      <span><i class="dot" style="background:var(--gym)"></i>健身房</span>
+      <span><i class="dot" style="background:var(--rest)"></i>休息</span>
+    </div>
+    <div class="progress"><span id="progTxt"></span><div class="bar"><i id="progBar"></i></div></div>
+  </div>
+
+  <h2>30 天行事曆</h2>
+  <div class="cal" id="cal"></div>
+  <div class="card detail" id="detail"></div>
+
+  <h2>影片庫</h2>
+  <p class="sub" style="margin-top:-6px">全部是 YouTube 上免費、可以跟著做的影片。按「YouTube」會打開以影片標題搜尋的結果，通常第一支就是。</p>
+  <div class="chips" id="chips"></div>
+  <div class="lib" id="lib"></div>
+
+  <h2>幾個做之前先知道的事</h2>
+  <div class="tips">
+    <div class="card"><h4>重量怎麼選</h4><p>每組最後 2 到 3 下要覺得吃力，但動作還能做標準。太輕就換重一點的啞鈴，或把彈力繩握短一點。</p></div>
+    <div class="card"><h4>逐週加量</h4><p>第 1 週先熟悉動作，第 2 到 4 週影片變長、強度變高。第 5 週那兩堂是第 1 週的回測，用更重的重量再做一次，最能感覺到進步。</p></div>
+    <div class="card"><h4>跟健身房錯開</h4><p>預設週二、週四去健身房，週一、週三、週六在家，週五和週日休息。週一到週四連續四天會動到，所以居家日刻意分成腿、背手臂、混合三種。可以跟教練說居家這三天練什麼，請他把健身房菜單錯開。</p></div>
+    <div class="card"><h4>線條需要時間</h4><p>肌肉線條看得出來，靠的是肌肉量加上體脂下降。30 天比較像是把習慣建立起來，外觀變化通常要 8 到 12 週才明顯。蛋白質和睡眠跟訓練一樣重要。</p></div>
+    <div class="card"><h4>瑜伽磚的用處</h4><p>伸展時腿後側太緊，手可以撐在瑜伽磚上；臀橋時夾在膝蓋中間，可以多練到大腿內側。</p></div>
+    <div class="card"><h4>哪裡不舒服就停</h4><p>關節痛和肌肉痠不一樣。膝蓋、下背或肩膀有刺痛感時先停下，問教練再繼續。</p></div>
+  </div>
+  <p class="note">影片時間為約略值，含影片本身的暖身或伸展時，實際總長可能多幾分鐘。打勾紀錄只存在這台裝置的瀏覽器。</p>
+</div>
+
+<script>
+// ---------- 影片資料 ----------
+const V = {
+  // 暖身
+  zoeyWarm:{t:"5分鐘快速熱身運動｜運動前必做｜全身簡易無工具", q:"周六野 5分钟快速热身运动 运动前必做 全身简易无工具", ch:"周六野 Zoey", m:5, c:"warm", lang:"zh", eq:"徒手"},
+  cgWarm5:{t:"5 Min Full Body Warm Up", q:"Caroline Girvan 5 Min Full Body Warm Up", ch:"Caroline Girvan", m:5, c:"warm", lang:"en", eq:"徒手"},
+  cgWarm10:{t:"10 Minute Full Body Low Impact Warm Up", q:"Caroline Girvan 10 Minute Full Body Low Impact Warm Up", ch:"Caroline Girvan", m:11, c:"warm", lang:"en", eq:"徒手"},
+  hrLegWarm:{t:"Leg Day // Warm Up Routine", q:"Heather Robertson Leg Day Warm Up Routine", ch:"Heather Robertson", m:8, c:"warm", lang:"en", eq:"徒手"},
+  // 腿臀
+  cgIron1:{t:"IRON Series 30 Min Leg Workout · Dumbbell Leg Day | 1", q:"Caroline Girvan IRON Series 30 Min Leg Workout Dumbbell Leg Day 1", ch:"Caroline Girvan", m:36, c:"legs", lang:"en", eq:"啞鈴", note:"節奏慢、動作清楚，很適合當第一堂腿日"},
+  cgIron8:{t:"IRON Series 30 Min Glutes & Hamstrings · Hip Thrusts / RDL | 8", q:"Caroline Girvan IRON Series 30 Min Glutes Hamstrings Hip Thrusts RDL 8", ch:"Caroline Girvan", m:36, c:"legs", lang:"en", eq:"啞鈴", note:"臀部和大腿後側，腿型線條的關鍵"},
+  cgFuel21:{t:"FUEL Series 30 Min Dumbbell LEG DAY CIRCUITS | Day 21", q:"Caroline Girvan FUEL Series 30 Min Dumbbell LEG DAY CIRCUITS Day 21", ch:"Caroline Girvan", m:35, c:"legs", lang:"en", eq:"啞鈴"},
+  cgLeg20:{t:"20 Min DUMBBELL LEG WORKOUT | Step Ups, Lunges, Squats", q:"Caroline Girvan 20 Min DUMBBELL LEG WORKOUT Step Ups Lunges Squats", ch:"Caroline Girvan", m:25, c:"legs", lang:"en", eq:"啞鈴、椅子或台階"},
+  cgHam15:{t:"15 Minute Hardworking Hamstrings / RDL Dumbbell Workout", q:"Caroline Girvan 15 Minute Hardworking Hamstrings RDL Dumbbell Workout", ch:"Caroline Girvan", m:17, c:"legs", lang:"en", eq:"啞鈴"},
+  hrKiller:{t:"Killer Leg Day // Lower Body Strength Workout", q:"Heather Robertson Killer Leg Day Lower Body Strength Workout", ch:"Heather Robertson", m:41, c:"legs", lang:"en", eq:"啞鈴、毛巾", note:"含暖身與伸展；臀橋時啞鈴下墊毛巾"},
+  hrLean:{t:"Extreme Lean Legs Bootcamp // Strength & Toning", q:"Heather Robertson Extreme Lean Legs Bootcamp Strength Toning", ch:"Heather Robertson", m:37, c:"legs", lang:"en", eq:"啞鈴", note:"含暖身與伸展"},
+  hrNoRepeatLeg:{t:"No Repeat Leg Workout // with Dumbbells", q:"Heather Robertson No Repeat Leg Workout with Dumbbells", ch:"Heather Robertson", m:35, c:"legs", lang:"en", eq:"啞鈴"},
+  hrD10Thighs:{t:"THE DAILY10 Day 25: 10 Min Toned Thighs & Glutes", q:"Heather Robertson 10 Min Toned Thighs Glutes Workout Daily10 Day 25", ch:"Heather Robertson", m:11, c:"legs", lang:"en", eq:"啞鈴"},
+  zoeyGlute10:{t:"10分鐘翹臀瘦腿運動！針對大腿外側，改善臀凹陷，更顯腿長", q:"周六野 10分钟翘臀瘦腿运动 针对大腿外侧 改善臀凹陷", ch:"周六野 Zoey", m:12, c:"legs", lang:"zh", eq:"瑜伽墊"},
+  zoeyThigh15:{t:"15分鐘瘦大腿內外側｜無跳動膝蓋友好", q:"周六野 15分钟瘦大腿内外侧 7天瘦身计划 无跳动膝盖友好", ch:"周六野 Zoey", m:18, c:"legs", lang:"zh", eq:"瑜伽墊", note:"瑜伽磚可以夾在膝蓋間加強內側"},
+  zoeyBandGlute:{t:"10分鐘進階翹臀瘦大腿｜阻力帶", q:"周六野 10分钟进阶翘臀瘦大腿 阻力带 沙漏身材", ch:"周六野 Zoey", m:13, c:"legs", lang:"zh", eq:"彈力圈（環狀彈力帶）", note:"影片用環狀阻力帶；若家裡是長條彈力繩，打結成圈也可以"},
+  // 背
+  cgRow:{t:"It's Row Time! 45 Min Back Workout with Dumbbells | EPIC II Day 23", q:"Caroline Girvan It's Row Time 45 Min Back Workout with Dumbbells EPIC II Day 23", ch:"Caroline Girvan", m:45, c:"back", lang:"en", eq:"啞鈴", note:"整堂都是划船類動作，後背線條的主力課"},
+  hrSexyBack:{t:"Sexy Back // Resistance Band Workout", q:"Heather Robertson Sexy Back Resistance Band Workout", ch:"Heather Robertson", m:13, c:"back", lang:"en", eq:"彈力繩（有握把）", note:"單手划船、下拉、反向飛鳥，全部用彈力繩"},
+  bjBack:{t:"20 Minute Back Workout with Resistance Bands", q:"BullyJuice 20 MINUTE BACK WORKOUT WITH RESISTANCE BANDS", ch:"BullyJuice", m:20, c:"back", lang:"en", eq:"大彈力圈"},
+  zoeyBackPilates:{t:"20分鐘美胸美背普拉提｜改善含胸下垂、駝背圓肩", q:"周六野 20分钟美胸美背普拉提 改善含胸下垂 驼背圆肩", ch:"周六野 Zoey", m:20, c:"back", lang:"zh", eq:"瑜伽墊"},
+  hrBackFat:{t:"Back Fat Blaster!!! // Upper Body Workout w/ Weights", q:"Heather Robertson Back Fat Blaster Upper Body Workout w Weights", ch:"Heather Robertson", m:30, c:"back", lang:"en", eq:"啞鈴"},
+  // 手臂與上半身
+  hrTight:{t:"Tight + Toned // Back & Triceps Workout", q:"Heather Robertson Tight Toned Back Triceps Workout", ch:"Heather Robertson", m:37, c:"arms", lang:"en", eq:"啞鈴", note:"背和手臂後側一次練到，拜拜肉的位置"},
+  hrUpper40:{t:"40MIN Upper Body Workout // Chest & Back", q:"Heather Robertson 40MIN Upper Body Workout Chest Back", ch:"Heather Robertson", m:45, c:"arms", lang:"en", eq:"啞鈴"},
+  hrArmTone:{t:"Arm Toning & Strength // Dumbbell Only Workout", q:"Heather Robertson Arm Toning Strength Dumbbell Only Workout", ch:"Heather Robertson", m:25, c:"arms", lang:"en", eq:"啞鈴"},
+  hrNoEqArms:{t:"No Equipment ARMS Workout // TONE + DEFINITION", q:"Heather Robertson No Equipment ARMS Workout TONE DEFINITION", ch:"Heather Robertson", m:20, c:"arms", lang:"en", eq:"徒手"},
+  cgArms15:{t:"15 Min DUMBBELL ARMS & SHOULDER WORKOUT at Home | No Repeat", q:"Caroline Girvan 15 Min DUMBBELL ARMS SHOULDER WORKOUT at Home No Repeat", ch:"Caroline Girvan", m:17, c:"arms", lang:"en", eq:"啞鈴"},
+  cgFuel22:{t:"FUEL Series 30 Min Cluster Sets Upper Body Workout | Day 22", q:"Caroline Girvan FUEL Series 30 Min Cluster Sets Upper Body Workout Day 22", ch:"Caroline Girvan", m:35, c:"arms", lang:"en", eq:"啞鈴"},
+  cgShoulder:{t:"SHOULDERS OF STEEL Dumbbell Shoulder Workout | EPIC Endgame Day 36", q:"Caroline Girvan SHOULDERS OF STEEL Dumbbell Shoulder Workout EPIC Endgame Day 36", ch:"Caroline Girvan", m:40, c:"arms", lang:"en", eq:"啞鈴"},
+  madUpperBand:{t:"12 min UPPER BODY RESISTANCE BAND Workout (At Home)", q:"MadFit 12 min UPPER BODY RESISTANCE BAND Workout At Home", ch:"MadFit", m:14, c:"arms", lang:"en", eq:"彈力繩", pop:"約 290 萬次觀看"},
+  // 全身
+  jtBand30:{t:"30 Minute Resistance Band Strength Workout (With Modifications)", q:"Juice and Toya 30 Minute Resistance Band Strength Workout With Modifications", ch:"Juice & Toya", m:33, c:"full", lang:"en", eq:"彈力繩", note:"有簡易版示範，第一週用剛好"},
+  cgBand15:{t:"15 Min Full Body Resistance Band Workout at Home", q:"Caroline Girvan 15 Min Full Body Resistance Band Workout at Home", ch:"Caroline Girvan", m:19, c:"full", lang:"en", eq:"彈力繩"},
+  // 伸展
+  madStretch:{t:"12 MIN DAILY STRETCH (full body)", q:"MadFit 12 MIN DAILY STRETCH full body tight muscles mobility flexibility", ch:"MadFit", m:14, c:"stretch", lang:"en", eq:"瑜伽墊", pop:"約 530 萬次觀看"},
+  cgUnwind:{t:"UNWIND 20 Min Full Body Stretch Routine", q:"Caroline Girvan UNWIND 20 Min Full Body Stretch Routine", ch:"Caroline Girvan", m:20, c:"stretch", lang:"en", eq:"瑜伽墊", pop:"約 360 萬次觀看"},
+  kcStretch:{t:"15 minute POST WORKOUT STRETCH for Injury Prevention & Flexibility", q:"Kaleigh Cohen 15-minute POST-WORKOUT STRETCH Injury Prevention Flexibility", ch:"Kaleigh Cohen Strength", m:16, c:"stretch", lang:"en", eq:"瑜伽墊", pop:"約 250 萬次觀看"},
+  ywaTight:{t:"Yoga For Tight Hamstrings & Lower Back", q:"Yoga With Adriene Yoga For Tight Hamstrings Lower Back", ch:"Yoga With Adriene", m:10, c:"stretch", lang:"en", eq:"瑜伽墊、瑜伽磚"},
+  ywaLowBack:{t:"Yoga For Low Back and Hamstrings", q:"Yoga With Adriene Yoga For Low Back and Hamstrings", ch:"Yoga With Adriene", m:30, c:"stretch", lang:"en", eq:"瑜伽墊、瑜伽磚"},
+  zoeyNeck:{t:"10分鐘改善斜方肌粗大、溜肩圓肩富貴包、肩頸背疼痛", q:"周六野 10分钟改善斜方肌粗大 溜肩圆肩富贵包 肩颈背疼痛 高低肩", ch:"周六野 Zoey", m:10, c:"stretch", lang:"zh", eq:"瑜伽墊", pop:"B站播放超過 4,800 萬次"},
+  zoeyLegStretch:{t:"10分鐘美腿拉伸運動，變直變長，改善腿型", q:"周六野 10分钟美腿拉伸运动 变直变长 改善腿型", ch:"周六野 Zoey", m:15, c:"stretch", lang:"zh", eq:"瑜伽墊、瑜伽磚"},
+  coffeeStretch:{t:"20分鐘早晨全身拉筋", q:"Coffee 林芊妤 20分鐘早晨全身拉筋", ch:"Coffee 林芊妤", m:20, c:"stretch", lang:"zh", eq:"瑜伽墊"},
+};
+
+const CAT = {warm:"暖身", legs:"腿臀", back:"後背", arms:"手臂與上半身", full:"全身", stretch:"伸展放鬆"};
+
+// ---------- 15 堂居家課（依序排入居家日） ----------
+const PHASE = ["第 1 週・適應", "第 2 週・建立", "第 3 週・加量", "第 4 週・進階", "第 5 週・回測"];
+const S = [
+  {k:"legs", n:"A1 腿臀入門", p:0, f:"先把深蹲、硬舉、弓箭步的動作做穩，重量選能輕鬆做 15 下的。", v:["zoeyWarm","cgIron1","zoeyGlute10","madStretch"]},
+  {k:"back", n:"B1 背與手臂後側", p:0, f:"划船時想像用手肘往後帶，肩膀往下壓，不要聳肩。", v:["cgWarm5","hrTight","hrSexyBack","zoeyNeck"]},
+  {k:"mix",  n:"C1 彈力繩全身", p:0, f:"用彈力繩熟悉全身動作，最後加一段大腿臀部。", v:["zoeyWarm","jtBand30","hrD10Thighs","ywaTight"]},
+  {k:"legs", n:"A2 修長腿線", p:1, f:"影片變長，中間休息照影片節奏，不要自己拉長。", v:["cgWarm10","hrLean","cgHam15"]},
+  {k:"back", n:"B2 上半身集組", p:1, f:"手臂和背一起練，彈力繩段落專注在動作頂點停一秒。", v:["cgWarm5","cgFuel22","madUpperBand","zoeyNeck"]},
+  {k:"mix",  n:"C2 大腿內外側與背", p:1, f:"瑜伽磚夾膝蓋的動作可以加進來，背的部分換成彈力圈。", v:["zoeyWarm","zoeyThigh15","bjBack","cgUnwind"]},
+  {k:"legs", n:"A3 腿日加量", p:2, f:"這週開始換重一點的啞鈴，或在最後一組放慢下放速度。", v:["cgWarm10","hrKiller","zoeyBandGlute"]},
+  {k:"back", n:"B3 划船專場", p:2, f:"45 分鐘都在練背，是這個月最直接練後背線條的一堂。", v:["cgWarm5","cgRow","zoeyNeck"]},
+  {k:"mix",  n:"C3 臀腿後側加手臂", p:2, f:"前半練臀和大腿後側，後半手臂肩膀，最後用瑜伽伸展收。", v:["cgWarm5","cgIron8","cgArms15","ywaTight"]},
+  {k:"legs", n:"A4 腿日循環", p:3, f:"循環訓練心跳會比較高，可以多準備一瓶水。", v:["cgWarm10","cgFuel21","zoeyLegStretch"]},
+  {k:"back", n:"B4 胸背與上半身", p:3, f:"上半身完整的一堂，最後再用彈力繩把背補滿。", v:["cgWarm5","hrUpper40","hrSexyBack"]},
+  {k:"mix",  n:"C4 台階腿與手臂", p:3, f:"台階可以用穩固的椅子或樓梯第一階。", v:["zoeyWarm","cgLeg20","hrArmTone","madStretch"]},
+  {k:"legs", n:"A5 回測：腿臀", p:4, f:"跟 A1 同一套。換更重的重量再做一次，比較一下跟第一週的差別。", v:["zoeyWarm","cgIron1","zoeyGlute10","madStretch"]},
+  {k:"back", n:"B5 回測：背與手臂", p:4, f:"跟 B1 同一套，用更重的重量。", v:["cgWarm5","hrTight","hrSexyBack","zoeyNeck"]},
+  {k:"mix",  n:"C5 恢復與柔軟度", p:4, f:"一個月的收尾，用一堂長的瑜伽和伸展讓身體放鬆。", v:["ywaLowBack","cgUnwind","zoeyNeck"]},
+];
+
+const REST_TIP = {t:"休息日", v:["zoeyNeck"], f:"休息也是訓練的一部分。想動的話，做 10 分鐘肩頸伸展或出門散步就好。"};
+const GYM_TIP = {t:"健身房", f:"照教練的菜單。可以跟教練說這週居家日練了哪些部位，避免重複。"};
+
+// ---------- 狀態 ----------
+const DOW = ["日","一","二","三","四","五","六"];
+const DEFAULT_PATTERN = {0:"rest",1:"home",2:"gym",3:"home",4:"gym",5:"rest",6:"home"};
+const store = {
+  get(k,d){try{const v=localStorage.getItem("hw30_"+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("hw30_"+k,JSON.stringify(v))}catch(e){}}
+};
+function todayStr(){const d=new Date();return fmt(d)}
+function fmt(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function parse(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+
+let start = store.get("start", todayStr());
+let pattern = store.get("pattern2", DEFAULT_PATTERN);
+let done = store.get("done", {});
+let selected = null;
+let filter = "all";
+
+function yt(q){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)}
+
+function buildDays(){
+  const s = parse(start); const days=[]; let hi=0;
+  for(let i=0;i<30;i++){
+    const d=new Date(s); d.setDate(s.getDate()+i);
+    const type = pattern[d.getDay()] || "rest";
+    let sess=null;
+    if(type==="home"){ sess = S[Math.min(hi,S.length-1)]; sess = Object.assign({idx:hi}, sess); hi++; }
+    days.push({i, date:d, key:fmt(d), type, sess});
+  }
+  return days;
+}
+
+function renderWeek(){
+  const w=document.getElementById("week"); w.innerHTML="";
+  [1,2,3,4,5,6,0].forEach(k=>{
+    const l=document.createElement("label");
+    l.innerHTML="週"+DOW[k];
+    const sel=document.createElement("select");
+    [["home","居家"],["gym","健身房"],["rest","休息"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;if(pattern[k]===v)o.selected=true;sel.appendChild(o)});
+    sel.onchange=()=>{pattern[k]=sel.value;store.set("pattern2",pattern);render()};
+    l.appendChild(sel); w.appendChild(l);
+  });
+}
+
+function totalMin(v){return v.reduce((a,id)=>a+(V[id]?V[id].m:0),0)}
+
+function render(){
+  const days=buildDays();
+  const cal=document.getElementById("cal"); cal.innerHTML="";
+  DOW.forEach((d,k)=>{const e=document.createElement("div");e.className="dow"+(k===0||k===6?" we":"");e.textContent=d;cal.appendChild(e)});
+  const dateLabel=(d,first)=> (first||d.getDate()===1) ? `${d.getMonth()+1}/${d.getDate()}` : `${d.getDate()}`;
+  const pad=days[0].date.getDay();
+  for(let i=pad;i>0;i--){
+    const d=new Date(days[0].date); d.setDate(d.getDate()-i);
+    const b=document.createElement("div"); b.className="day out"; b.innerHTML=`<span class="d">${d.getDate()}</span>`; cal.appendChild(b);
+  }
+  days.forEach((day,n)=>{
+    const b=document.createElement("button"); b.type="button";
+    const wd=day.date.getDay();
+    let cls="day"+(wd===0||wd===6?" we":"");
+    if(selected===day.key) cls+=" sel";
+    b.className=cls;
+    const ok=done[day.key]?"✓ ":"";
+    let pill="";
+    if(day.type==="home"){const [code,...rest]=day.sess.n.split(" ");pill=`<span class="pill ${day.sess.k}"><b>${ok}${code}</b><span>：${rest.join(" ")}</span></span>`}
+    else if(day.type==="gym"){pill=`<span class="pill gym"><b>${ok}健身房</b></span>`}
+    b.innerHTML=`<span class="d">${dateLabel(day.date,n===0)}</span>${pill}`;
+    b.onclick=()=>{selected=day.key;render();document.getElementById("detail").scrollIntoView({behavior:"smooth",block:"nearest"})};
+    cal.appendChild(b);
+  });
+  const tail=(7-(pad+days.length)%7)%7;
+  for(let i=1;i<=tail;i++){
+    const d=new Date(days[days.length-1].date); d.setDate(d.getDate()+i);
+    const b=document.createElement("div"); b.className="day out"; b.innerHTML=`<span class="d">${d.getDate()}</span>`; cal.appendChild(b);
+  }
+  if(!selected || !days.find(d=>d.key===selected)){
+    const t=todayStr(); selected = days.find(d=>d.key===t) ? t : days[0].key;
+    return render();
+  }
+  renderDetail(days.find(d=>d.key===selected));
+  // progress
+  const active=days.filter(d=>d.type!=="rest");
+  const n=active.filter(d=>done[d.key]).length;
+  const homeN=days.filter(d=>d.type==="home").length, homeDone=days.filter(d=>d.type==="home"&&done[d.key]).length;
+  document.getElementById("progTxt").textContent=`已完成 ${n} / ${active.length} 個訓練日（居家 ${homeDone} / ${homeN}）`;
+  document.getElementById("progBar").style.width=(active.length?n/active.length*100:0)+"%";
+}
+
+function stepHTML(id){
+  const x=V[id]; if(!x) return "";
+  return `<div class="step"><div class="min">${x.m} 分</div><div><div class="ti">${x.t}</div><div class="ch">${x.ch}・${CAT[x.c]}・${x.eq}</div>${x.note?`<div class="nt">${x.note}</div>`:""}</div><a class="yt" href="${yt(x.q)}" target="_blank" rel="noopener">YouTube</a></div>`;
+}
+
+function renderDetail(day){
+  const el=document.getElementById("detail");
+  const dstr=`${day.date.getMonth()+1} 月 ${day.date.getDate()} 日（週${DOW[day.date.getDay()]}）・第 ${day.i+1} 天`;
+  const isDone=!!done[day.key];
+  let html="";
+  if(day.type==="home"){
+    const s=day.sess;
+    html=`<h3>${s.n}</h3><div class="meta">${dstr}・${PHASE[s.p]}・合計約 ${totalMin(s.v)} 分鐘</div><div class="focus">${s.f}</div>${s.v.map(stepHTML).join("")}`;
+  } else if(day.type==="gym"){
+    html=`<h3>${GYM_TIP.t}</h3><div class="meta">${dstr}</div><div class="focus">${GYM_TIP.f}</div>`;
+  } else {
+    html=`<h3>${REST_TIP.t}</h3><div class="meta">${dstr}</div><div class="focus">${REST_TIP.f}</div>${REST_TIP.v.map(stepHTML).join("")}`;
+  }
+  if(day.type!=="rest") html+=`<div style="margin-top:14px"><button type="button" class="btn ${isDone?"on":""}" id="doneBtn">${isDone?"已完成 ✓":"標記完成"}</button></div>`;
+  el.innerHTML=html;
+  const b=document.getElementById("doneBtn");
+  if(b) b.onclick=()=>{ if(done[day.key]) delete done[day.key]; else done[day.key]=1; store.set("done",done); render(); };
+}
+
+function renderLib(){
+  const chips=document.getElementById("chips"); chips.innerHTML="";
+  const opts=[["all","全部"],...Object.entries(CAT),["zh","中文影片"],["en","英文影片"]];
+  opts.forEach(([k,t])=>{const c=document.createElement("button");c.type="button";c.className="chip"+(filter===k?" on":"");c.textContent=t;c.onclick=()=>{filter=k;renderLib()};chips.appendChild(c)});
+  const lib=document.getElementById("lib"); lib.innerHTML="";
+  Object.entries(V).filter(([id,x])=>filter==="all"||x.c===filter||x.lang===filter).forEach(([id,x])=>{
+    const used=S.filter(s=>s.v.includes(id)).map(s=>s.n.split(" ")[0]);
+    const d=document.createElement("div"); d.className="vc";
+    d.innerHTML=`<div class="top"><span class="tag ${x.c}">${CAT[x.c]}</span><span class="tag">${x.lang==="zh"?"中文":"英文"}</span><span class="tag">${x.eq}</span></div>
+      <div class="ti">${x.t}</div><div class="ch">${x.ch}${x.pop?"・"+x.pop:""}</div>
+      ${x.note?`<div class="ch" style="color:#5d544c">${x.note}</div>`:""}
+      <div class="bt"><span>約 ${x.m} 分${used.length?"・用在 "+[...new Set(used)].join("、"):""}</span><a class="yt" href="${yt(x.q)}" target="_blank" rel="noopener">YouTube</a></div>`;
+    lib.appendChild(d);
+  });
+}
+
+const startEl=document.getElementById("start");
+startEl.value=start;
+startEl.onchange=()=>{ if(startEl.value){start=startEl.value;store.set("start",start);selected=null;render()} };
+document.getElementById("todayBtn").onclick=()=>{selected=todayStr();render()};
+renderWeek(); render(); renderLib();
+</script>
+</body>
+</html>
