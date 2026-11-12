@@ -109,7 +109,7 @@ textarea.inp{padding:12px 16px;min-height:70px}
 </div></nav>
 
 <div class="sheet" id="sheet"><div class="panel" id="panel"></div></div>
-<input type="file" id="importFile" accept="application/json,.json" class="hide">
+<input type="file" id="importFile" class="hide">
 <div class="toast" id="toast"></div>
 
 <script>
@@ -437,8 +437,13 @@ function closeSheet(){ $('#sheet').classList.remove('show'); }
 $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
 
 let draft = null;
+function defaultExp(){
+  const d = new Date(); d.setDate(d.getDate() + 28);
+  while (d.getDay() !== 5) d.setDate(d.getDate() + 1);
+  return ymd(d);
+}
 function addSheet(edit){
-  const t = edit || { acct: acct === 'IBKR' ? 'IBKR' : 'TD', type:'SP', sym:'', strike:'', prem:'', qty:1, open:today(), exp:'', fee:'', note:'' };
+  const t = edit || { acct: acct === 'IBKR' ? 'IBKR' : 'TD', type:'SP', sym:'', strike:'', prem:'', qty:1, open:today(), exp:defaultExp(), fee:'', note:'' };
   draft = Object.assign({}, t);
   if (!edit && draft.acct === 'IBKR') draft.type = 'LC';
   drawAdd(!!edit);
