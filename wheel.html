@@ -384,6 +384,18 @@ function viewStats(){
   const rank = Object.entries(bySym).sort((a,b) => b[1].pnl - a[1].pnl);
   const assignBySym = {};
   sp.forEach(e => { const o = (assignBySym[e.sym] ||= { a:0, n:0 }); o.n++; if (e.t.status === 'assigned') o.a++; });
+  // collateral
+  const openSP = db.trades.filter(t => t.status === 'open' && t.type === 'SP' && (acct === 'ALL' || t.acct === acct));
+  const coll = {}; openSP.forEach(t => coll[t.sym] = (coll[t.sym] || 0) + t.strike * 100 * t.qty);
+  const collTotal = Object.values(coll).reduce((a, b) => a + b, 0);
+  const collRows = Object.entries(coll).sort((a,b) => b[1] - a[1]).map(([s,v]) => `<div class="item"><div class="sym" style="flex:1;font-size:16px">${esc(s)}</div><div class="sub num" style="width:52px;text-align:right">${Math.round(v/collTotal*100)}%</div><div class="num" style="font-weight:700;width:96px;text-align:right">${money(v,0)}</div></div>`).join('');
+  // avg win / loss
+  const winE = nonAssigned.filter(e => e.pnl > 0), lossE = nonAssigned.filter(e => e.pnl < 0);
+  const avgW = winE.length ? sum(winE) / winE.length : 0, avgL = lossE.length ? sum(lossE) / lossE.length : 0;
+  // close efficiency (sell side, closed or expired)
+  const effT = opt.filter(e => e.t.type !== 'LC' && e.t.status !== 'assigned' && e.t.prem > 0).map(e => (e.t.prem - (e.t.status === 'closed' ? +e.t.closePx : 0)) / e.t.prem);
+  const effAvg = effT.length ? effT.reduce((a, b) => a + b, 0) / effT.length : null;
+  const effHit = effT.filter(x => x >= 0.5).length;
   return `${header('分析')}
   <div class="grid2">
     <div class="card stat"><div class="sub">收租勝率</div><div class="v pos">${nonAssigned.length ? (wins/nonAssigned.length*100).toFixed(1)+'%' : '尚無'}</div><div class="small">${nonAssigned.length} 筆，不含接貨</div></div>
@@ -391,6 +403,16 @@ function viewStats(){
     <div class="card stat"><div class="sub">選擇權損益</div><div class="v ${cls(optSum)}">${money(optSum,0)}</div><div class="small">已扣手續費</div></div>
     <div class="card stat"><div class="sub">股票價差</div><div class="v ${cls(stockSum)}">${money(stockSum,0)}</div><div class="small">接股後賣出</div></div>
   </div>
+  <div class="card"><div class="between"><h2>Sell Put 擔保金</h2><div class="num" style="font-size:20px;font-weight:700">${money(collTotal,0)}</div></div>
+    <div class="small" style="margin-top:4px">${openSP.length} 口全數接貨需準備</div>
+    <div class="list" style="margin-top:6px">${collRows || '<div class="empty">目前沒有進行中的 Sell Put</div>'}</div>
+  </div>
+  <div class="grid2">
+    <div class="card stat"><div class="sub">平均賺</div><div class="v pos">${winE.length ? money(avgW,0) : '尚無'}</div><div class="small">${winE.length} 筆獲利單</div></div>
+    <div class="card stat"><div class="sub">平均賠</div><div class="v neg">${lossE.length ? money(avgL,0) : '尚無'}</div><div class="small">${lossE.length} 筆虧損單${winE.length && lossE.length ? `，賺賠比 ${(avgW/Math.abs(avgL)).toFixed(1)}` : ''}</div></div>
+  </div>
+  <div class="card stat"><div class="sub">平倉效率</div><div class="v">${effAvg === null ? '尚無' : (effAvg*100).toFixed(0) + '%'}</div>
+    <div class="small">平倉或到期時平均拿到權利金的比例，不含被指派${effT.length ? `。${effT.length} 筆中 ${effHit} 筆達 50% 以上` : ''}</div></div>
   <div class="card"><h2>標的表現</h2><div class="small" style="margin-top:4px">含已結算選擇權與股票價差</div>
     <div class="list" style="margin-top:6px">${rank.length ? rank.map(([s,o],i) => {
       const a = assignBySym[s];
