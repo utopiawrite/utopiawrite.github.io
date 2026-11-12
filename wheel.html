@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="收租">
+<meta name="theme-color" content="#0B0B0C">
+<title>選擇權收租</title>
+<style>
+:root{
+  --bg:#0B0B0C; --card:#18181B; --card2:#1F1F23; --line:#2A2A2E; --cell:#26262B;
+  --text:#F4F4F5; --sub:#A1A1AA; --dim:#8A8A93;
+  --accent:#FF2E88; --accentDim:#3A1A2A; --accentBg:#2E1420; --loss:#7CC4FF; --warn:#FFB020;
+  --num:"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif}
+body{padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 120px)}
+.wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button,input,select,textarea{font-family:inherit;font-size:16px}
+button{cursor:pointer}
+h1{margin:0;font-size:30px;font-weight:700;letter-spacing:1px}
+h2{margin:0;font-size:17px;font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card{background:var(--card);border-radius:24px;padding:18px}
+.sub{color:var(--sub);font-size:13px}
+.small{font-size:12px;color:var(--sub)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+.pos{color:var(--accent)} .neg{color:var(--loss)}
+.seg{display:flex;background:var(--card);border-radius:999px;padding:4px;gap:2px}
+.seg button{flex:1;min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:#C4C4CA;font-size:14px;white-space:nowrap}
+.seg button.on{background:var(--accent);color:#0B0B0C;font-weight:700}
+.btn{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--accent);color:#0B0B0C;font-weight:700;font-size:15px}
+.btn.ghost{background:var(--card2);color:var(--text);font-weight:500}
+.btn.danger{background:#3A1E22;color:#FF9AA8}
+.btn.block{width:100%;min-height:52px;font-size:16px}
+.hero{background:var(--accent);color:#0B0B0C;border-radius:30px;padding:22px 22px 20px}
+.hero .tag{font-size:12px;letter-spacing:3px;font-weight:600}
+.hero .big{font-family:var(--num);font-size:52px;font-weight:700;line-height:1;letter-spacing:-1px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat .v{font-family:var(--num);font-size:28px;font-weight:700;margin-top:6px}
+.banner{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 12px 12px 16px}
+.dot{width:10px;height:10px;border-radius:999px;background:var(--accent);flex:none}
+.dot.warn{background:var(--warn)} .dot.red{background:#FF5A6E}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin-top:10px}
+.cal .h{font-size:11px;color:var(--sub);text-align:center}
+.cal .d{aspect-ratio:1;border-radius:999px;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:12px;background:var(--cell);color:var(--dim)}
+.cal .d.e{background:transparent}
+.cal .d.today{background:transparent;border:2px solid var(--text);color:var(--text);font-weight:700}
+.cal .d.exp{background:var(--accent);color:#0B0B0C;font-weight:700}
+.list{display:flex;flex-direction:column}
+.item{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;width:100%}
+.item:first-child{border-top:0}
+.sym{font-family:var(--num);font-weight:700;font-size:18px}
+.pill{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;border:1px solid #4A4A52;font-size:11px;color:#C4C4CA;font-family:var(--num)}
+.pill.a{border-color:var(--accent);color:var(--accent)}
+.empty{text-align:center;color:var(--sub);padding:28px 8px;font-size:14px;line-height:1.7}
+.bars{display:flex;align-items:flex-end;justify-content:space-around;height:150px;border-bottom:1px solid var(--line);margin-top:14px}
+.bars .b{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;flex:1}
+.bars .bar{width:28px;border-radius:9px 9px 0 0;min-height:3px}
+.bars .lbl{font-size:10px;font-family:var(--num)}
+.mlabels{display:flex;justify-content:space-around;margin-top:6px;font-size:11px;color:var(--sub)}
+.mlabels div{flex:1;text-align:center}
+nav.tab{position:fixed;left:0;right:0;bottom:0;padding:0 14px calc(env(safe-area-inset-bottom) + 12px);display:flex;justify-content:center;pointer-events:none}
+nav.tab .in{max-width:480px;width:100%;display:flex;gap:10px;align-items:center;pointer-events:auto}
+nav.tab .bar4{flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:rgba(31,31,35,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:999px;padding:5px}
+nav.tab .bar4 button{border:0;background:transparent;color:#C4C4CA;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;border-radius:999px;font-size:11px}
+nav.tab .bar4 button.on{background:var(--accentBg);color:var(--accent);font-weight:700}
+.fab{width:62px;height:62px;flex:none;border:0;border-radius:999px;background:var(--accent);color:#0B0B0C;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.sheet.show{display:flex}
+.sheet .panel{background:#111113;width:100%;max-width:520px;max-height:92vh;overflow:auto;border-radius:28px 28px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom) + 20px);display:flex;flex-direction:column;gap:14px}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--sub)}
+.inp{width:100%;min-height:50px;border:0;border-radius:16px;background:var(--card2);color:var(--text);padding:0 16px;font-size:17px;outline:none}
+textarea.inp{padding:12px 16px;min-height:70px}
+.inp:focus{box-shadow:0 0 0 2px var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font-family:var(--num);font-size:14px}
+.chip.b{color:#C4C4CA}
+.chip.on{background:var(--accent);color:#0B0B0C;border-color:var(--accent);font-weight:700}
+.stepper{display:flex;gap:10px;align-items:center}
+.stepper button{width:50px;height:50px;border-radius:999px;border:0;background:var(--card2);color:var(--text);font-size:24px}
+.stepper .inp{text-align:center;font-family:var(--num);font-weight:700}
+.checks{display:flex;flex-direction:column;gap:6px;background:var(--card);border-radius:16px;padding:12px 14px;font-size:13px}
+.checks .ok{color:var(--accent)} .checks .w{color:var(--warn)} .checks .x{color:#FF5A6E}
+.swatches{display:flex;gap:10px}
+.sw{width:40px;height:40px;border-radius:999px;border:2px solid transparent}
+.sw.on{border-color:var(--text)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:10px 16px;border-radius:999px;font-size:14px;z-index:30;display:none}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<nav class="tab" aria-label="主選單"><div class="in">
+  <div class="bar4" id="tabs">
+    <button data-tab="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2.5"/><rect x="13" y="3" width="8" height="8" rx="2.5"/><rect x="3" y="13" width="8" height="8" rx="2.5"/><rect x="13" y="13" width="8" height="8" rx="2.5"/></svg>總覽</button>
+    <button data-tab="pos"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg>部位</button>
+    <button data-tab="stats"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg>分析</button>
+    <button data-tab="set"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>設定</button>
+  </div>
+  <button class="fab" id="fab" aria-label="新增交易"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</div></nav>
+
+<div class="sheet" id="sheet"><div class="panel" id="panel"></div></div>
+<input type="file" id="importFile" accept="application/json,.json" class="hide">
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const KEY = 'zinaWheel_v1';
+const COLORS = ['#FF2E88','#FF3EC8','#FF6B1A','#B967FF'];
+const TYPES = { SP:'Sell Put', CC:'Covered Call', LC:'LEAPS Call' };
+const TYPE_TAG = { SP:'P', CC:'C', LC:'LC' };
+
+/* ---------- storage ---------- */
+function blank(){
+  return { trades:[], holdings:[], sales:[], wishes:[], wishDone:[],
+    settings:{ feeTD:0.67, feeIBKR:1.10, accent:COLORS[0],
+      listA:'TSM, AVGO, AAPL, GOOGL, AMZN, ANET, NVDA, MSFT', listB:'AMD, MRVL, DELL, META',
+      wishStart:null, lastBackup:null } };
+}
+let db;
+function load(){
+  try { db = JSON.parse(localStorage.getItem(KEY)) || blank(); } catch(e){ db = blank(); }
+  const b = blank();
+  for (const k in b) if (db[k] === undefined) db[k] = b[k];
+  db.settings = Object.assign(b.settings, db.settings || {});
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('無法儲存，請先匯出備份'); } }
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+const today = () => ymd(new Date());
+const parseD = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const daysBetween = (a, b) => Math.round((parseD(b) - parseD(a)) / 86400000);
+const md = s => { const d = parseD(s); return (d.getMonth()+1) + '/' + d.getDate(); };
+function money(n, dec = 2){
+  const neg = n < 0; const v = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  return (neg ? '−$' : '$') + v;
+}
+const cls = n => n > 0 ? 'pos' : n < 0 ? 'neg' : '';
+const listA = () => db.settings.listA.toUpperCase().split(/[\s,，]+/).filter(Boolean);
+const listB = () => db.settings.listB.toUpperCase().split(/[\s,，]+/).filter(Boolean);
+const layer = sym => listA().includes(sym) ? 'A' : listB().includes(sym) ? 'B' : '';
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 2200); }
+function applyAccent(){
+  const c = db.settings.accent || COLORS[0];
+  const r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
+  const mix = (a, f) => Math.round(a * f + 11 * (1 - f));
+  document.documentElement.style.setProperty('--accent', c);
+  document.documentElement.style.setProperty('--accentDim', `rgb(${mix(r,.22)},${mix(g,.22)},${mix(b,.22)})`);
+  document.documentElement.style.setProperty('--accentBg', `rgb(${mix(r,.16)},${mix(g,.16)},${mix(b,.16)})`);
+}
+
+/* ---------- P&L ---------- */
+function feeRate(acct){ return acct === 'IBKR' ? +db.settings.feeIBKR : +db.settings.feeTD; }
+function optionPnl(t){
+  if (t.status === 'open') return 0;
+  const close = t.status === 'closed' ? +t.closePx : 0;
+  const gross = t.type === 'LC' ? (close - t.prem) * 100 * t.qty : (t.prem - close) * 100 * t.qty;
+  return gross - (+t.fee || 0) - (+t.closeFee || 0);
+}
+function events(acct){
+  const ev = [];
+  for (const t of db.trades) {
+    if (t.status === 'open') continue;
+    if (acct !== 'ALL' && t.acct !== acct) continue;
+    ev.push({ date:t.closeDate, pnl:optionPnl(t), sym:t.sym, kind:'opt', t });
+  }
+  for (const s of db.sales) {
+    if (acct !== 'ALL' && s.acct !== acct) continue;
+    ev.push({ date:s.date, pnl:s.pnl, sym:s.sym, kind:'stock', s });
+  }
+  return ev;
+}
+const sum = arr => arr.reduce((a, e) => a + e.pnl, 0);
+
+/* ---------- state ---------- */
+let tab = 'home', acct = 'ALL', posSeg = 'open';
+
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const v = { home:viewHome, pos:viewPos, stats:viewStats, set:viewSet }[tab]();
+  $('#app').innerHTML = v;
+  window.scrollTo(0, 0);
+}
+function acctSeg(){
+  return `<div class="seg" role="group" aria-label="帳戶" style="flex:none">
+    ${['ALL','TD','IBKR'].map(a => `<button data-act="acct" data-v="${a}" class="${acct===a?'on':''}">${a==='ALL'?'全部':a}</button>`).join('')}
+  </div>`;
+}
+function header(title){ return `<div class="between"><h1>${title}</h1>${acctSeg()}</div>`; }
+
+/* ---------- home ---------- */
+function viewHome(){
+  const now = new Date(), ym = ymd(now).slice(0,7), y = ym.slice(0,4);
+  const ev = events(acct);
+  const mEv = ev.filter(e => e.date.slice(0,7) === ym);
+  const yEv = ev.filter(e => e.date.slice(0,4) === y);
+  const open = db.trades.filter(t => t.status === 'open' && (acct === 'ALL' || t.acct === acct));
+  const openPrem = open.filter(t => t.type !== 'LC').reduce((a, t) => a + t.prem * 100 * t.qty, 0);
+  const monthNames = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+
+  // backup banner
+  const lb = db.settings.lastBackup;
+  const since = lb ? daysBetween(lb.slice(0,10), today()) : null;
+  const needBackup = (db.trades.length || db.holdings.length) && (since === null || since >= 7);
+  const banner = needBackup ? `<div class="banner"><div class="dot warn"></div>
+      <div style="flex:1;font-size:13px;color:#C4C4CA;line-height:1.5">${since === null ? '還沒有備份過' : `已 ${since} 天未備份`}</div>
+      <button class="btn" data-act="export">匯出備份</button></div>` : '';
+
+  // status
+  const td = today();
+  const overdue = open.filter(t => t.exp < td);
+  const soon = open.filter(t => t.exp >= td && daysBetween(td, t.exp) <= 7);
+  const nearest = open.slice().sort((a,b) => a.exp.localeCompare(b.exp))[0];
+  let stDot = '', stTitle = '部位正常', stSub = open.length ? `最近一筆 ${daysBetween(td, nearest.exp)} 天後到期` : '目前沒有進行中的部位';
+  if (overdue.length) { stDot = 'red'; stTitle = `${overdue.length} 筆已過到期日`; stSub = '到部位頁結算'; }
+  else if (soon.length) { stDot = 'warn'; stTitle = `${soon.length} 筆 7 天內到期`; stSub = soon.map(t => `${t.sym} ${md(t.exp)}`).join('、'); }
+
+  // calendar
+  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+  const dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const expDays = new Set(open.filter(t => t.exp.slice(0,7) === ym).map(t => +t.exp.slice(8)));
+  let cal = ['日','一','二','三','四','五','六'].map(h => `<div class="h">${h}</div>`).join('');
+  for (let i = 0; i < first.getDay(); i++) cal += '<div class="d e"></div>';
+  for (let d = 1; d <= dim; d++) cal += `<div class="d ${expDays.has(d)?'exp':''} ${d===now.getDate()&&!expDays.has(d)?'today':''}">${d}</div>`;
+  const openList = open.slice().sort((a,b) => a.exp.localeCompare(b.exp)).map(t => `
+    <div class="row" style="padding:6px 0"><div class="dot"></div>
+      <div style="flex:1;font-size:14px"><span class="num" style="font-weight:700">${esc(t.sym)} ${t.strike}${TYPE_TAG[t.type]}</span><span class="sub"> · ${md(t.exp)}${acct==='ALL'?' · '+t.acct:''}</span></div>
+      <div class="sub">${daysBetween(td, t.exp)} 天</div></div>`).join('');
+
+  // monthly bars, last 6 months
+  const months = [];
+  for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth()-i, 1); months.push(ymd(d).slice(0,7)); }
+  const mv = months.map(m => sum(ev.filter(e => e.date.slice(0,7) === m)));
+  const mx = Math.max(1, ...mv.map(Math.abs));
+  const bars = mv.map(v => `<div class="b"><div class="lbl num ${cls(v)}">${v ? Math.round(v) : ''}</div>
+      <div class="bar" style="height:${Math.max(2, Math.abs(v)/mx*110)}px;background:${v<0?'var(--loss)':v>0?'var(--accent)':'var(--line)'}"></div></div>`).join('');
+
+  return `${header('總覽')}${banner}
+  <div class="hero">
+    <div class="tag">${now.getFullYear()} ${monthNames[now.getMonth()]} · ${acct==='ALL'?'ALL':acct}</div>
+    <div style="margin-top:30px;font-size:15px;font-weight:700">本月已實現損益</div>
+    <div class="big">${money(sum(mEv))}</div>
+    <div style="margin-top:10px;font-size:13px;font-weight:500">${mEv.length} 筆已結算</div>
+  </div>
+  <div class="grid2">
+    <div class="card stat"><div class="sub">年度累計</div><div class="v ${cls(sum(yEv))}">${money(sum(yEv),0)}</div><div class="small">已結算損益</div></div>
+    <div class="card stat"><div class="sub">進行中租金</div><div class="v">${money(openPrem,0)}</div><div class="small">未實現，不計入本月</div></div>
+  </div>
+  <div class="card row"><div class="dot ${stDot}"></div>
+    <div style="flex:1"><div style="font-weight:700">${stTitle}</div><div class="small" style="margin-top:2px">${esc(stSub)}</div></div>
+    <div class="small">${open.length} 筆進行中</div></div>
+  <div class="card"><div class="between"><h2>到期行事曆</h2><div class="sub">${now.getMonth()+1} 月</div></div>
+    <div class="cal">${cal}</div>
+    ${open.length ? `<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--line)">${openList}</div>` : ''}
+  </div>
+  ${wishCard()}
+  <div class="card"><div class="between"><h2>每月淨利</h2>
+    <div class="small row" style="gap:12px"><span><span class="dot" style="display:inline-block;width:8px;height:8px;margin-right:4px"></span>獲利</span><span><span class="dot" style="display:inline-block;width:8px;height:8px;margin-right:4px;background:var(--loss)"></span>虧損</span></div></div>
+    <div class="bars">${bars}</div>
+    <div class="mlabels">${months.map(m => `<div>${+m.slice(5)} 月</div>`).join('')}</div>
+  </div>`;
+}
+
+/* ---------- wishes ---------- */
+function wishState(){
+  const start = db.settings.wishStart;
+  let total = start ? sum(events('ALL').filter(e => e.date >= start)) : 0;
+  total -= db.wishDone.reduce((a, w) => a + w.price, 0);
+  return Math.max(0, total);
+}
+function settleWishes(){
+  let pool = wishState(), changed = false;
+  while (db.wishes.length && pool >= db.wishes[0].price) {
+    const w = db.wishes.shift(); pool -= w.price; w.doneDate = today(); db.wishDone.push(w); changed = true;
+    toast(`願望達成：${w.name}`);
+  }
+  if (changed) save();
+}
+function wishCard(){
+  if (!db.wishes.length && !db.wishDone.length) {
+    return `<div class="card"><div class="between"><h2>願望清單</h2></div>
+      <div class="empty">收租的錢可以換成想要的東西<br><button class="btn" style="margin-top:10px" data-act="wishAdd">新增願望</button></div></div>`;
+  }
+  const w = db.wishes[0];
+  if (!w) return `<div class="card"><div class="between"><h2>願望清單</h2><div class="sub">已實現 ${db.wishDone.length} 個</div></div>
+      <div class="empty">全部達成了<br><button class="btn" style="margin-top:10px" data-act="wishAdd">再加一個</button></div></div>`;
+  const have = Math.min(wishState(), w.price), pct = w.price ? have / w.price : 0;
+  const C = 2 * Math.PI * 44;
+  const next = db.wishes.slice(1, 3).map(x => esc(x.name)).join('、');
+  return `<div class="card"><div class="between"><h2>願望清單</h2><div class="sub">已實現 ${db.wishDone.length} 個</div></div>
+    <div class="row" style="gap:18px;margin-top:14px">
+      <div style="position:relative;width:112px;height:112px;flex:none">
+        <svg width="112" height="112" viewBox="0 0 112 112" role="img" aria-label="進度 ${Math.floor(pct*100)}%">
+          <circle cx="56" cy="56" r="44" fill="none" stroke="var(--accentDim)" stroke-width="14"/>
+          <circle cx="56" cy="56" r="44" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 56 56)"/>
+        </svg>
+        <div class="num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">${Math.floor(pct*100)}%</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
+        <div style="font-size:20px;font-weight:700">${esc(w.name)}</div>
+        <div class="num" style="font-size:20px;font-weight:700">${money(have,0)} <span class="sub" style="font-size:15px">/ ${money(w.price,0)}</span></div>
+        <div class="small">${next ? '接下來：' + next : '滿了自動換下一個'}</div>
+      </div>
+    </div></div>`;
+}
+
+/* ---------- positions ---------- */
+function viewPos(){
+  const segs = [['open','進行中'],['done','已結算'],['hold','持股']];
+  let body = '';
+  const td = today();
+  if (posSeg === 'open') {
+    const open = db.trades.filter(t => t.status === 'open' && (acct === 'ALL' || t.acct === acct)).sort((a,b) => a.exp.localeCompare(b.exp));
+    body = open.length ? `<div class="card list">${open.map(t => {
+      const dl = daysBetween(td, t.exp);
+      return `<button class="item" data-act="tradeMenu" data-id="${t.id}">
+        <div style="flex:1;min-width:0">
+          <div class="row" style="gap:8px"><span class="sym">${esc(t.sym)}</span><span class="num sub" style="font-size:16px">${t.strike}</span><span class="pill ${layer(t.sym)==='A'?'a':''}">${TYPE_TAG[t.type]}</span>${acct==='ALL'?`<span class="small">${t.acct}</span>`:''}</div>
+          <div class="small" style="margin-top:4px">到期 ${md(t.exp)}　${t.qty} 口　權利金 ${money(t.prem*100*t.qty)}</div>
+        </div>
+        <div class="num" style="font-size:24px;font-weight:700;${dl<0?'color:#FF5A6E':''}">${dl}<span class="small"> 天</span></div>
+      </button>`; }).join('')}</div>` : `<div class="card empty">沒有進行中的部位<br><button class="btn" style="margin-top:10px" data-act="add">新增交易</button></div>`;
+  } else if (posSeg === 'done') {
+    const ev = events(acct).sort((a,b) => b.date.localeCompare(a.date));
+    if (!ev.length) body = `<div class="card empty">還沒有結算紀錄</div>`;
+    else {
+      const byM = {};
+      ev.forEach(e => (byM[e.date.slice(0,7)] ||= []).push(e));
+      body = Object.keys(byM).sort().reverse().map(m => `<div class="card">
+        <div class="between"><h2 class="num">${m.slice(0,4)} 年 ${+m.slice(5)} 月</h2><div class="num ${cls(sum(byM[m]))}" style="font-size:20px;font-weight:700">${money(sum(byM[m]))}</div></div>
+        <div class="list" style="margin-top:6px">${byM[m].map(e => {
+          if (e.kind === 'stock') return `<button class="item" data-act="saleMenu" data-id="${e.s.id}"><div style="flex:1"><span class="sym" style="font-size:16px">${esc(e.sym)}</span> <span class="small">股票賣出 ${e.s.shares} 股 · ${md(e.date)}</span></div><div class="num ${cls(e.pnl)}">${money(e.pnl)}</div></button>`;
+          const t = e.t, how = { closed:'平倉', expired:'到期歸零', assigned:'被指派' }[t.status];
+          return `<button class="item" data-act="tradeMenu" data-id="${t.id}"><div style="flex:1"><span class="sym" style="font-size:16px">${esc(t.sym)} ${t.strike}${TYPE_TAG[t.type]}</span> <span class="small">${how} · ${md(e.date)}</span></div><div class="num ${cls(e.pnl)}">${money(e.pnl)}</div></button>`;
+        }).join('')}</div></div>`).join('');
+    }
+  } else {
+    const hs = db.holdings.filter(h => h.shares > 0 && (acct === 'ALL' || h.acct === acct));
+    body = hs.length ? `<div class="card list">${hs.map(h => {
+      const cc = db.trades.filter(t => t.status === 'open' && t.type === 'CC' && t.sym === h.sym && t.acct === h.acct);
+      return `<button class="item" data-act="holdMenu" data-id="${h.id}"><div style="flex:1">
+        <div class="row" style="gap:8px"><span class="sym">${esc(h.sym)}</span><span class="small">${h.acct}</span></div>
+        <div class="small" style="margin-top:4px">${h.shares} 股　成本 ${money(h.cost)}${cc.length ? '　CC ' + cc.map(t => t.strike + ' ' + md(t.exp)).join('、') : '　尚未賣 CC'}</div></div>
+        <div class="num" style="font-weight:700">${money(h.cost*h.shares,0)}</div></button>`; }).join('')}</div>`
+      : `<div class="card empty">尚無持股<br>Sell Put 被指派後會自動建立<br><button class="btn ghost" style="margin-top:10px" data-act="holdAdd">手動新增持股</button></div>`;
+    if (hs.length) body += `<button class="btn ghost block" data-act="holdAdd">手動新增持股</button>`;
+  }
+  return `${header('部位')}<div class="seg">${segs.map(([k,l]) => `<button data-act="posSeg" data-v="${k}" class="${posSeg===k?'on':''}">${l}</button>`).join('')}</div>${body}`;
+}
+
+/* ---------- stats ---------- */
+function viewStats(){
+  const ev = events(acct);
+  const opt = ev.filter(e => e.kind === 'opt');
+  const nonAssigned = opt.filter(e => e.t.status !== 'assigned');
+  const wins = nonAssigned.filter(e => e.pnl > 0).length;
+  const sp = opt.filter(e => e.t.type === 'SP');
+  const assigned = sp.filter(e => e.t.status === 'assigned').length;
+  const optSum = sum(opt), stockSum = sum(ev.filter(e => e.kind === 'stock'));
+  const bySym = {};
+  ev.forEach(e => { (bySym[e.sym] ||= { pnl:0, n:0 }); bySym[e.sym].pnl += e.pnl; bySym[e.sym].n++; });
+  const rank = Object.entries(bySym).sort((a,b) => b[1].pnl - a[1].pnl);
+  const assignBySym = {};
+  sp.forEach(e => { const o = (assignBySym[e.sym] ||= { a:0, n:0 }); o.n++; if (e.t.status === 'assigned') o.a++; });
+  return `${header('分析')}
+  <div class="grid2">
+    <div class="card stat"><div class="sub">收租勝率</div><div class="v pos">${nonAssigned.length ? (wins/nonAssigned.length*100).toFixed(1)+'%' : '尚無'}</div><div class="small">${nonAssigned.length} 筆，不含接貨</div></div>
+    <div class="card stat"><div class="sub">接貨率</div><div class="v">${sp.length ? (assigned/sp.length*100).toFixed(1)+'%' : '尚無'}</div><div class="small">Sell Put ${sp.length} 筆中 ${assigned} 筆</div></div>
+    <div class="card stat"><div class="sub">選擇權損益</div><div class="v ${cls(optSum)}">${money(optSum,0)}</div><div class="small">已扣手續費</div></div>
+    <div class="card stat"><div class="sub">股票價差</div><div class="v ${cls(stockSum)}">${money(stockSum,0)}</div><div class="small">接股後賣出</div></div>
+  </div>
+  <div class="card"><h2>標的表現</h2><div class="small" style="margin-top:4px">含已結算選擇權與股票價差</div>
+    <div class="list" style="margin-top:6px">${rank.length ? rank.map(([s,o],i) => {
+      const a = assignBySym[s];
+      return `<div class="item"><div class="num sub" style="width:20px">${i+1}</div><div style="flex:1"><div class="sym" style="font-size:16px">${esc(s)} ${layer(s)?`<span class="pill ${layer(s)==='A'?'a':''}">${layer(s)}</span>`:''}</div>
+        <div class="small">${o.n} 筆${a ? `　接貨 ${a.a}/${a.n}` : ''}</div></div><div class="num ${cls(o.pnl)}" style="font-weight:700">${money(o.pnl)}</div></div>`; }).join('') : '<div class="empty">還沒有資料</div>'}</div>
+  </div>`;
+}
+
+/* ---------- settings ---------- */
+function viewSet(){
+  const s = db.settings;
+  return `<div class="between"><h1>設定</h1></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px"><h2>主色</h2>
+    <div class="swatches">${COLORS.map(c => `<button class="sw ${s.accent===c?'on':''}" style="background:${c}" data-act="color" data-v="${c}" aria-label="主色 ${c}"></button>`).join('')}</div>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px"><h2>手續費（每口）</h2>
+    <div class="grid2">
+      <label class="f">TD<input class="inp num" inputmode="decimal" data-set="feeTD" value="${s.feeTD}"></label>
+      <label class="f">IBKR<input class="inp num" inputmode="decimal" data-set="feeIBKR" value="${s.feeIBKR}"></label>
+    </div>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:14px"><h2>標的清單</h2>
+    <label class="f">A 層<input class="inp" data-set="listA" value="${esc(s.listA)}" autocapitalize="characters"></label>
+    <label class="f">B 層<input class="inp" data-set="listB" value="${esc(s.listB)}" autocapitalize="characters"></label>
+    <div class="small">新增交易時會變成快速按鈕</div>
+  </div>
+  <div class="card"><div class="between"><h2>願望清單</h2><button class="btn" data-act="wishAdd">新增</button></div>
+    <div class="small" style="margin-top:6px">${s.wishStart ? `從 ${s.wishStart} 起的已結算損益，照順序填` : '新增第一個願望後開始累積'}</div>
+    <div class="list" style="margin-top:6px">${db.wishes.map((w,i) => `<div class="item"><div style="flex:1">${i===0?'<span class="pill a">進行中</span> ':''}${esc(w.name)}<div class="small num">${money(w.price,0)}</div></div>
+      ${i>0?`<button class="btn ghost" style="min-height:40px;padding:0 12px" data-act="wishUp" data-i="${i}" aria-label="往前">↑</button>`:''}
+      <button class="btn danger" style="min-height:40px;padding:0 12px" data-act="wishDel" data-i="${i}">刪除</button></div>`).join('')}
+      ${db.wishDone.length ? `<div class="item"><div class="small">已實現：${db.wishDone.map(w => esc(w.name)).join('、')}</div></div>` : ''}</div>
+  </div>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><h2>資料</h2>
+    <div class="small">資料只存在這支手機的瀏覽器裡。${s.lastBackup ? '上次備份 ' + s.lastBackup.slice(0,10) : '還沒有備份過'}</div>
+    <button class="btn block" data-act="export">匯出備份</button>
+    <button class="btn ghost block" data-act="import">從備份還原（會覆蓋現在的資料）</button>
+  </div>`;
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html){ $('#panel').innerHTML = html; $('#sheet').classList.add('show'); }
+function closeSheet(){ $('#sheet').classList.remove('show'); }
+$('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') closeSheet(); });
+
+let draft = null;
+function addSheet(edit){
+  const t = edit || { acct: acct === 'IBKR' ? 'IBKR' : 'TD', type:'SP', sym:'', strike:'', prem:'', qty:1, open:today(), exp:'', fee:'', note:'' };
+  draft = Object.assign({}, t);
+  if (!edit && draft.acct === 'IBKR') draft.type = 'LC';
+  drawAdd(!!edit);
+}
+function drawAdd(isEdit){
+  const d = draft;
+  const recent = [...new Set(db.trades.slice().reverse().map(t => t.sym))].slice(0, 6);
+  const chipsA = listA().map(s => `<button class="chip ${d.sym===s?'on':''}" data-act="pickSym" data-v="${s}">${s}</button>`).join('');
+  const chipsB = listB().map(s => `<button class="chip b ${d.sym===s?'on':''}" data-act="pickSym" data-v="${s}">${s}</button>`).join('');
+  const others = recent.filter(s => !listA().includes(s) && !listB().includes(s)).map(s => `<button class="chip b ${d.sym===s?'on':''}" data-act="pickSym" data-v="${s}">${s}</button>`).join('');
+  openSheet(`
+    <div class="between"><h1 style="font-size:24px">${isEdit?'編輯交易':'新增交易'}</h1><button class="btn ghost" data-act="close">取消</button></div>
+    <div class="seg">${['TD','IBKR'].map(a => `<button data-act="dAcct" data-v="${a}" class="${d.acct===a?'on':''}">${a}</button>`).join('')}</div>
+    <div class="seg">${Object.entries(TYPES).map(([k,l]) => `<button data-act="dType" data-v="${k}" class="${d.type===k?'on':''}">${l}</button>`).join('')}</div>
+    <label class="f">標的代碼<input class="inp num" id="fSym" value="${esc(d.sym)}" autocapitalize="characters" autocomplete="off" placeholder="NVDA"></label>
+    <div class="chips">${chipsA}${chipsB}${others}</div>
+    <div class="grid2">
+      <label class="f">履約價 Strike<input class="inp num" id="fStrike" inputmode="decimal" value="${d.strike}" placeholder="200"></label>
+      <label class="f">${d.type==='LC'?'每股成本':'每股權利金'}<input class="inp num" id="fPrem" inputmode="decimal" value="${d.prem}" placeholder="2.97"></label>
+    </div>
+    <label class="f">口數<div class="stepper"><button data-act="qty" data-v="-1" aria-label="減一口">−</button><input class="inp" id="fQty" inputmode="numeric" value="${d.qty}"><button data-act="qty" data-v="1" aria-label="加一口">+</button></div></label>
+    <div class="grid2">
+      <label class="f">開倉日<input class="inp num" type="date" id="fOpen" value="${d.open}"></label>
+      <label class="f">到期日<input class="inp num" type="date" id="fExp" value="${d.exp}"></label>
+    </div>
+    <label class="f">手續費（空白就用每口 ${feeRate(d.acct)} 計）<input class="inp num" id="fFee" inputmode="decimal" value="${d.fee}"></label>
+    <label class="f">備註<textarea class="inp" id="fNote" placeholder="交易理由、技術面燈號">${esc(d.note)}</textarea></label>
+    <div class="checks" id="checks"></div>
+    <button class="btn block" data-act="saveTrade">${isEdit?'儲存':'確認新增'}</button>
+  `);
+  ['fSym','fStrike','fPrem','fQty','fOpen','fExp','fFee','fNote'].forEach(id => $('#'+id).addEventListener('input', () => { readDraft(); drawChecks(); }));
+  drawChecks();
+}
+function readDraft(){
+  draft.sym = $('#fSym').value.trim().toUpperCase();
+  draft.strike = $('#fStrike').value.trim();
+  draft.prem = $('#fPrem').value.trim();
+  draft.qty = Math.max(1, parseInt($('#fQty').value) || 1);
+  draft.open = $('#fOpen').value; draft.exp = $('#fExp').value;
+  draft.fee = $('#fFee').value.trim(); draft.note = $('#fNote').value;
+}
+function drawChecks(){
+  const d = draft, K = +d.strike, P = +d.prem, el = $('#checks');
+  if (!el) return;
+  const lines = [];
+  if (d.open && d.exp) {
+    const dte = daysBetween(d.open, d.exp);
+    if (d.type === 'SP') lines.push(dte >= 21 && dte <= 45 ? `<span class="ok">✓</span> 天期 ${dte} 天` : `<span class="w">!</span> 天期 ${dte} 天，規則是 21 至 45 天`);
+    else lines.push(`<span class="ok">·</span> 天期 ${dte} 天`);
+    if (K && P && dte > 0 && d.type !== 'LC') {
+      const r30 = P / K / dte * 30 * 100, ann = P / K / dte * 365 * 100;
+      const lay = layer(d.sym);
+      let mark = r30 <= 3 ? '<span class="ok">✓</span>' : (lay === 'A' ? '<span class="w">!</span>' : '<span class="x">✕</span>');
+      lines.push(`${mark} 30 天收益 ${r30.toFixed(2)}%，年化 ${ann.toFixed(1)}%`);
+    }
+  }
+  if (d.type === 'SP' && K) lines.push(`<span class="ok">·</span> 義務 ${money(K*100*d.qty,0)}`);
+  if (d.sym && d.acct === 'TD' && d.type !== 'LC') {
+    const lay = layer(d.sym);
+    lines.push(lay ? `<span class="ok">✓</span> ${lay} 層標的` : `<span class="x">✕</span> 不在 A、B 清單，先決定分層`);
+  }
+  if (K && P) lines.push(`<span class="ok">·</span> ${d.type==='LC'?'成本':'權利金'} ${money(P*100*d.qty)}`);
+  el.innerHTML = lines.length ? lines.join('<br>') : '<span class="small">填完會在這裡顯示檢查</span>';
+}
+function saveTrade(){
+  readDraft();
+  const d = draft;
+  if (!d.sym || !(+d.strike > 0) || !(+d.prem >= 0) || d.prem === '' || !d.open || !d.exp) { toast('標的、履約價、權利金、日期都要填'); return; }
+  const t = { id:d.id || uid(), acct:d.acct, type:d.type, sym:d.sym, strike:+d.strike, prem:+d.prem, qty:d.qty,
+    open:d.open, exp:d.exp, fee: d.fee === '' ? +(feeRate(d.acct) * d.qty).toFixed(2) : +d.fee, note:d.note.trim(),
+    status:d.status || 'open', closePx:d.closePx, closeDate:d.closeDate, closeFee:d.closeFee };
+  const i = db.trades.findIndex(x => x.id === t.id);
+  if (i >= 0) db.trades[i] = t; else db.trades.push(t);
+  save(); closeSheet(); toast(i >= 0 ? '已儲存' : '已新增');
+  if (i < 0) { tab = 'pos'; posSeg = 'open'; }
+  render();
+}
+
+function tradeMenu(id){
+  const t = db.trades.find(x => x.id === id); if (!t) return;
+  const isOpen = t.status === 'open';
+  const dte = daysBetween(t.open, t.exp);
+  openSheet(`
+    <div class="between"><div><div class="sym" style="font-size:24px">${esc(t.sym)} ${t.strike}${TYPE_TAG[t.type]}</div><div class="small">${t.acct} · ${TYPES[t.type]} · ${t.qty} 口 · ${md(t.open)} 至 ${md(t.exp)}（${dte} 天）</div></div><button class="btn ghost" data-act="close">關閉</button></div>
+    <div class="card" style="padding:14px"><div class="between"><span class="sub">${t.type==='LC'?'成本':'權利金'}</span><span class="num">${money(t.prem*100*t.qty)}</span></div>
+      ${!isOpen ? `<div class="between" style="margin-top:6px"><span class="sub">已實現損益</span><span class="num ${cls(optionPnl(t))}">${money(optionPnl(t))}</span></div>` : ''}
+      ${t.note ? `<div class="small" style="margin-top:8px;white-space:pre-line">${esc(t.note)}</div>` : ''}</div>
+    ${isOpen ? `
+      <label class="f">${t.type==='LC'?'賣出價（每股）':'買回價（每股）'}<input class="inp num" id="cPx" inputmode="decimal" placeholder="0.80"></label>
+      <label class="f">結算日<input class="inp num" type="date" id="cDate" value="${today() > t.exp ? t.exp : today()}"></label>
+      <button class="btn block" data-act="closeTrade" data-id="${t.id}" data-how="closed">${t.type==='LC'?'賣出平倉':'買回平倉'}</button>
+      <div class="grid2">
+        <button class="btn ghost" data-act="closeTrade" data-id="${t.id}" data-how="expired">到期歸零</button>
+        ${t.type!=='LC' ? `<button class="btn ghost" data-act="closeTrade" data-id="${t.id}" data-how="assigned">被指派</button>` : '<span></span>'}
+      </div>` : `<button class="btn ghost block" data-act="reopen" data-id="${t.id}">取消結算，改回進行中</button>`}
+    <div class="grid2"><button class="btn ghost" data-act="edit" data-id="${t.id}">編輯</button><button class="btn danger" data-act="del" data-id="${t.id}">刪除</button></div>
+  `);
+}
+function closeTrade(id, how){
+  const t = db.trades.find(x => x.id === id); if (!t) return;
+  const date = $('#cDate').value || today();
+  if (how === 'closed') {
+    const px = $('#cPx').value.trim();
+    if (px === '' || isNaN(+px)) { toast('請填成交價'); return; }
+    t.closePx = +px; t.closeFee = +(feeRate(t.acct) * t.qty).toFixed(2);
+  } else { t.closePx = 0; t.closeFee = 0; }
+  if (how === 'assigned' && !confirm(t.type === 'SP' ? `以 ${t.strike} 接 ${t.qty*100} 股 ${t.sym}？` : `${t.sym} 以 ${t.strike} 被買走 ${t.qty*100} 股？`)) return;
+  t.status = how; t.closeDate = date;
+  if (how === 'assigned') {
+    const shares = t.qty * 100;
+    if (t.type === 'SP') {
+      const h = db.holdings.find(x => x.acct === t.acct && x.sym === t.sym && x.shares > 0);
+      if (h) { h.cost = (h.cost * h.shares + t.strike * shares) / (h.shares + shares); h.shares += shares; }
+      else db.holdings.push({ id:uid(), acct:t.acct, sym:t.sym, shares, cost:t.strike, date, from:t.id });
+      t.linked = 'hold';
+    } else {
+      const h = db.holdings.find(x => x.acct === t.acct && x.sym === t.sym && x.shares > 0);
+      const cost = h ? h.cost : t.strike;
+      if (h) h.shares = Math.max(0, h.shares - shares);
+      const s = { id:uid(), acct:t.acct, sym:t.sym, shares, px:t.strike, cost, date, pnl:(t.strike - cost) * shares, from:t.id };
+      db.sales.push(s); t.linked = s.id;
+    }
+  }
+  save(); settleWishes(); closeSheet(); toast('已結算'); render();
+}
+function reopen(id){
+  const t = db.trades.find(x => x.id === id); if (!t) return;
+  if (t.status === 'assigned') { toast('被指派的交易請刪除後重記，持股要手動調整'); return; }
+  t.status = 'open'; delete t.closePx; delete t.closeDate; delete t.closeFee;
+  save(); closeSheet(); render();
+}
+
+function holdSheet(h){
+  h = h || { acct: acct === 'IBKR' ? 'IBKR' : 'TD', sym:'', shares:100, cost:'' };
+  openSheet(`
+    <div class="between"><h1 style="font-size:24px">${h.id?'持股':'新增持股'}</h1><button class="btn ghost" data-act="close">關閉</button></div>
+    ${h.id ? '' : `<div class="seg">${['TD','IBKR'].map(a => `<button data-act="hAcct" data-v="${a}" class="${h.acct===a?'on':''}">${a}</button>`).join('')}</div>`}
+    <input type="hidden" id="hAcctV" value="${h.acct}">
+    <label class="f">標的<input class="inp num" id="hSym" value="${esc(h.sym)}" autocapitalize="characters" ${h.id?'readonly':''}></label>
+    <div class="grid2">
+      <label class="f">股數<input class="inp num" id="hShares" inputmode="numeric" value="${h.shares}"></label>
+      <label class="f">每股成本<input class="inp num" id="hCost" inputmode="decimal" value="${h.cost}"></label>
+    </div>
+    <button class="btn block" data-act="saveHold" data-id="${h.id||''}">儲存</button>
+    ${h.id ? `
+      <div style="height:1px;background:var(--line)"></div>
+      <h2>賣出股票</h2>
+      <div class="grid2">
+        <label class="f">賣出股數<input class="inp num" id="sShares" inputmode="numeric" value="${h.shares}"></label>
+        <label class="f">每股賣價<input class="inp num" id="sPx" inputmode="decimal"></label>
+      </div>
+      <label class="f">日期<input class="inp num" type="date" id="sDate" value="${today()}"></label>
+      <button class="btn ghost block" data-act="sellHold" data-id="${h.id}">記錄賣出</button>
+      <button class="btn ghost block" data-act="ccFrom" data-id="${h.id}">用這筆持股賣 Covered Call</button>
+      <button class="btn danger block" data-act="delHold" data-id="${h.id}">刪除持股</button>` : ''}
+  `);
+}
+function saleMenu(id){
+  const s = db.sales.find(x => x.id === id); if (!s) return;
+  openSheet(`<div class="between"><h1 style="font-size:22px">${esc(s.sym)} 股票賣出</h1><button class="btn ghost" data-act="close">關閉</button></div>
+    <div class="card" style="padding:14px"><div class="small">${s.shares} 股 · 成本 ${money(s.cost)} · 賣價 ${money(s.px)} · ${s.date}</div>
+    <div class="num ${cls(s.pnl)}" style="font-size:24px;font-weight:700;margin-top:6px">${money(s.pnl)}</div></div>
+    ${s.from ? '<div class="small">這筆是 Covered Call 被指派自動產生的，要改請到該筆交易</div>' : `<button class="btn danger block" data-act="delSale" data-id="${s.id}">刪除這筆紀錄（股數加回持股）</button>`}`);
+}
+
+/* ---------- backup ---------- */
+async function exportData(){
+  const stamp = new Date().toISOString();
+  const text = JSON.stringify({ app:'zina-wheel', v:1, exportedAt:stamp, data:Object.assign({}, db, { settings:Object.assign({}, db.settings, { lastBackup:stamp }) }) }, null, 1);
+  const filename = `選擇權收租_備份_${today()}.json`;
+  let dl = null;
+  try { if (window.claude && window.claude.use) dl = await window.claude.use('downloads'); } catch(e) { dl = null; }
+  if (dl) {
+    try { await dl.save({ filename, data:text }); } catch(e) { toast('沒有匯出'); return; }
+  } else {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type:'application/json' })); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  db.settings.lastBackup = stamp; save();
+  toast('已匯出，記得存到 OneDrive'); render();
+}
+$('#importFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const j = JSON.parse(r.result);
+      if (j.app !== 'zina-wheel' || !j.data) throw new Error();
+      if (!confirm(`還原 ${j.exportedAt ? j.exportedAt.slice(0,10) : ''} 的備份？現在的資料會被覆蓋`)) return;
+      localStorage.setItem(KEY, JSON.stringify(j.data)); load(); applyAccent(); toast('已還原'); render();
+    } catch(err) { toast('這不是本工具的備份檔'); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+});
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act],[data-tab]'); if (!b) return;
+  if (b.dataset.tab) { tab = b.dataset.tab; render(); return; }
+  const a = b.dataset.act, v = b.dataset.v, id = b.dataset.id;
+  switch (a) {
+    case 'acct': acct = v; render(); break;
+    case 'posSeg': posSeg = v; render(); break;
+    case 'add': addSheet(); break;
+    case 'close': closeSheet(); break;
+    case 'export': exportData(); break;
+    case 'import': $('#importFile').click(); break;
+    case 'dAcct': readDraft(); draft.acct = v; if (v === 'IBKR' && draft.type === 'SP') draft.type = 'LC'; drawAdd(!!draft.id); break;
+    case 'dType': readDraft(); draft.type = v; drawAdd(!!draft.id); break;
+    case 'pickSym': readDraft(); draft.sym = v; drawAdd(!!draft.id); break;
+    case 'qty': readDraft(); draft.qty = Math.max(1, draft.qty + (+v)); drawAdd(!!draft.id); break;
+    case 'saveTrade': saveTrade(); break;
+    case 'tradeMenu': tradeMenu(id); break;
+    case 'closeTrade': closeTrade(id, b.dataset.how); break;
+    case 'reopen': reopen(id); break;
+    case 'edit': { const t = db.trades.find(x => x.id === id); addSheet(Object.assign({}, t, { fee:t.fee })); break; }
+    case 'del': {
+      const t = db.trades.find(x => x.id === id);
+      if (t && t.status === 'assigned' && !confirm('這筆被指派產生的持股或股票紀錄不會自動刪除，要手動調整。確定刪除？')) break;
+      if (t && t.status !== 'assigned' && !confirm('刪除這筆交易？')) break;
+      db.trades = db.trades.filter(x => x.id !== id); save(); closeSheet(); render(); break; }
+    case 'holdMenu': holdSheet(db.holdings.find(x => x.id === id)); break;
+    case 'holdAdd': holdSheet(); break;
+    case 'hAcct': $('#hAcctV').value = v; b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); break;
+    case 'saveHold': {
+      const sym = $('#hSym').value.trim().toUpperCase(), sh = parseInt($('#hShares').value), cost = +$('#hCost').value;
+      if (!sym || !(sh > 0) || !(cost > 0)) { toast('標的、股數、成本都要填'); break; }
+      if (id) Object.assign(db.holdings.find(x => x.id === id), { shares:sh, cost });
+      else db.holdings.push({ id:uid(), acct:$('#hAcctV').value, sym, shares:sh, cost, date:today() });
+      save(); closeSheet(); render(); break; }
+    case 'sellHold': {
+      const h = db.holdings.find(x => x.id === id), sh = parseInt($('#sShares').value), px = +$('#sPx').value;
+      if (!(sh > 0) || sh > h.shares || !(px > 0)) { toast('股數或賣價有誤'); break; }
+      const fee = +(feeRate(h.acct)).toFixed(2);
+      db.sales.push({ id:uid(), acct:h.acct, sym:h.sym, shares:sh, px, cost:h.cost, date:$('#sDate').value || today(), pnl:(px - h.cost) * sh - fee });
+      h.shares -= sh; save(); settleWishes(); closeSheet(); toast('已記錄'); render(); break; }
+    case 'ccFrom': { const h = db.holdings.find(x => x.id === id); closeSheet();
+      addSheet(); draft.acct = h.acct; draft.type = 'CC'; draft.sym = h.sym; draft.qty = Math.max(1, Math.floor(h.shares / 100)); draft.id = undefined; drawAdd(false); break; }
+    case 'delHold': if (confirm('刪除這筆持股？')) { db.holdings = db.holdings.filter(x => x.id !== id); save(); closeSheet(); render(); } break;
+    case 'saleMenu': saleMenu(id); break;
+    case 'delSale': {
+      const s = db.sales.find(x => x.id === id);
+      if (!confirm('刪除這筆賣出紀錄？')) break;
+      const h = db.holdings.find(x => x.acct === s.acct && x.sym === s.sym);
+      if (h) h.shares += s.shares; else db.holdings.push({ id:uid(), acct:s.acct, sym:s.sym, shares:s.shares, cost:s.cost, date:s.date });
+      db.sales = db.sales.filter(x => x.id !== id); save(); closeSheet(); render(); break; }
+    case 'color': db.settings.accent = v; save(); applyAccent(); render(); break;
+    case 'wishAdd': openSheet(`
+      <div class="between"><h1 style="font-size:24px">新增願望</h1><button class="btn ghost" data-act="close">取消</button></div>
+      <label class="f">想要的東西<input class="inp" id="wName" placeholder="咖啡機"></label>
+      <label class="f">金額（美金）<input class="inp num" id="wPrice" inputmode="decimal" placeholder="2000"></label>
+      <button class="btn block" data-act="wishSave">加入清單</button>`); break;
+    case 'wishSave': {
+      const name = $('#wName').value.trim(), price = +$('#wPrice').value;
+      if (!name || !(price > 0)) { toast('名稱和金額都要填'); break; }
+      if (!db.settings.wishStart) db.settings.wishStart = today();
+      db.wishes.push({ id:uid(), name, price }); save(); settleWishes(); closeSheet(); render(); break; }
+    case 'wishUp': { const i = +b.dataset.i; [db.wishes[i-1], db.wishes[i]] = [db.wishes[i], db.wishes[i-1]]; save(); settleWishes(); render(); break; }
+    case 'wishDel': if (confirm('刪除這個願望？')) { db.wishes.splice(+b.dataset.i, 1); save(); render(); } break;
+  }
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.set; if (!k) return;
+  db.settings[k] = (k === 'feeTD' || k === 'feeIBKR') ? (+e.target.value || 0) : e.target.value;
+  save(); toast('已更新');
+});
+$('#fab').addEventListener('click', () => addSheet());
+
+load(); applyAccent(); settleWishes(); render();
+</script>
+</body>
+</html>
