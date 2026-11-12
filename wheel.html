@@ -216,10 +216,10 @@ function viewHome(){
   const lb = db.settings.lastBackup;
   const since = lb ? daysBetween(lb.slice(0,10), today()) : null;
   const changed = !lb || (db.settings.lastChange && db.settings.lastChange > lb);
-  const needBackup = (db.trades.length || db.holdings.length) && (changed || since >= 7);
-  const banner = needBackup ? `<div class="banner"><div class="dot warn"></div>
-      <div style="flex:1;font-size:13px;color:#C4C4CA;line-height:1.5">${since === null ? '還沒有備份過' : changed ? '有新的變動還沒備份' : `已 ${since} 天未備份`}</div>
-      <button class="btn" data-act="export">匯出備份</button></div>` : '';
+  const bText = since === null ? '還沒有備份過' : (since === 0 ? '今天已備份' : `上次備份 ${since} 天前`) + (changed ? '，之後有新的變動' : '');
+  const banner = `<div class="banner"><div class="dot ${changed ? 'warn' : ''}"></div>
+      <div style="flex:1;font-size:13px;color:#C4C4CA;line-height:1.5">${bText}</div>
+      <button class="btn" data-act="export">匯出備份</button></div>`;
 
   // status
   const td = today();
