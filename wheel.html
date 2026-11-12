@@ -298,22 +298,29 @@ function wishCard(){
   const w = db.wishes[0];
   if (!w) return `<div class="card"><div class="between"><h2>願望清單</h2><div class="sub">已實現 ${db.wishDone.length} 個</div></div>
       <div class="empty">全部達成了<br><button class="btn" style="margin-top:10px" data-act="wishAdd">再加一個</button></div></div>`;
-  const have = Math.min(wishState(), w.price), pct = w.price ? have / w.price : 0;
+  const have = Math.min(wishState(), w.price);
+  const pendAll = db.trades.filter(t => t.status === 'open' && t.type !== 'LC').reduce((a, t) => a + t.prem * 100 * t.qty - (+t.fee || 0), 0);
+  const pend = Math.max(0, Math.min(pendAll, w.price - have));
+  const pct = w.price ? have / w.price : 0, pPct = w.price ? pend / w.price : 0;
+  const shown = Math.floor((pct + pPct) * 100);
   const C = 2 * Math.PI * 44;
   const next = db.wishes.slice(1, 3).map(x => esc(x.name)).join('、');
+  const arc = (from, len, op) => len > 0.001 ? `<circle cx="56" cy="56" r="44" fill="none" stroke="var(--accent)" stroke-opacity="${op}" stroke-width="14" stroke-dasharray="${(C*len).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-C*from).toFixed(1)}" transform="rotate(-90 56 56)"/>` : '';
+  const note = have + pend >= w.price && pend > 0 ? '收租中的部位到期就夠了' : (next ? '接下來：' + next : '滿了自動換下一個');
   return `<div class="card"><div class="between"><h2>願望清單</h2><div class="sub">已實現 ${db.wishDone.length} 個</div></div>
     <div class="row" style="gap:18px;margin-top:14px">
       <div style="position:relative;width:112px;height:112px;flex:none">
-        <svg width="112" height="112" viewBox="0 0 112 112" role="img" aria-label="進度 ${Math.floor(pct*100)}%">
+        <svg width="112" height="112" viewBox="0 0 112 112" role="img" aria-label="已入袋 ${Math.floor(pct*100)}%，含收租中 ${shown}%">
           <circle cx="56" cy="56" r="44" fill="none" stroke="var(--accentDim)" stroke-width="14"/>
-          <circle cx="56" cy="56" r="44" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 56 56)"/>
+          ${arc(pct, pPct, 0.4)}${arc(0, pct, 1)}
         </svg>
-        <div class="num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">${Math.floor(pct*100)}%</div>
+        <div class="num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">${shown}%</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:5px;min-width:0">
         <div style="font-size:20px;font-weight:700">${esc(w.name)}</div>
-        <div class="num" style="font-size:20px;font-weight:700">${money(have,0)} <span class="sub" style="font-size:15px">/ ${money(w.price,0)}</span></div>
-        <div class="small">${next ? '接下來：' + next : '滿了自動換下一個'}</div>
+        <div class="num" style="font-size:20px;font-weight:700">${money(have + pend,0)} <span class="sub" style="font-size:15px">/ ${money(w.price,0)}</span></div>
+        <div class="small"><span style="color:var(--accent)">●</span> 已入袋 ${money(have,0)}　<span style="color:var(--accent);opacity:.4">●</span> 收租中 ${money(pend,0)}</div>
+        <div class="small">${note}</div>
       </div>
     </div></div>`;
 }
