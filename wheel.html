@@ -612,14 +612,26 @@ async function exportData(){
   try { if (window.claude && window.claude.use) dl = await window.claude.use('downloads'); } catch(e) { dl = null; }
   if (dl) {
     try { await dl.save({ filename, data:text }); } catch(e) { toast('沒有匯出'); return; }
+  } else if (navigator.canShare && navigator.share) {
+    const file = new File([text], filename, { type:'application/json' });
+    if (!navigator.canShare({ files:[file] })) return fallbackDownload(text, filename, stamp);
+    try { await navigator.share({ files:[file] }); }
+    catch(e) { if (e && e.name === 'AbortError') { toast('沒有匯出'); return; } return fallbackDownload(text, filename, stamp); }
   } else {
+    return fallbackDownload(text, filename, stamp);
+  }
+  db.settings.lastBackup = stamp; save();
+  toast('已匯出'); render();
+}
+function fallbackDownload(text, filename, stamp){
+  {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([text], { type:'application/json' })); a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
   db.settings.lastBackup = stamp; save();
-  toast('已匯出，記得存到 OneDrive'); render();
+  toast('已下載，到「更多」選儲存到檔案'); render();
 }
 $('#importFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
