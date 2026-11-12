@@ -133,7 +133,7 @@ function load(){
   for (const k in b) if (db[k] === undefined) db[k] = b[k];
   db.settings = Object.assign(b.settings, db.settings || {});
 }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('無法儲存，請先匯出備份'); } }
+function save(keep){ if (!keep) db.settings.lastChange = new Date().toISOString(); try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){ toast('無法儲存，請先匯出備份'); } }
 
 /* ---------- utils ---------- */
 const $ = s => document.querySelector(s);
@@ -215,9 +215,10 @@ function viewHome(){
   // backup banner
   const lb = db.settings.lastBackup;
   const since = lb ? daysBetween(lb.slice(0,10), today()) : null;
-  const needBackup = (db.trades.length || db.holdings.length) && (since === null || since >= 7);
+  const changed = !lb || (db.settings.lastChange && db.settings.lastChange > lb);
+  const needBackup = (db.trades.length || db.holdings.length) && (changed || since >= 7);
   const banner = needBackup ? `<div class="banner"><div class="dot warn"></div>
-      <div style="flex:1;font-size:13px;color:#C4C4CA;line-height:1.5">${since === null ? '還沒有備份過' : `已 ${since} 天未備份`}</div>
+      <div style="flex:1;font-size:13px;color:#C4C4CA;line-height:1.5">${since === null ? '還沒有備份過' : changed ? '有新的變動還沒備份' : `已 ${since} 天未備份`}</div>
       <button class="btn" data-act="export">匯出備份</button></div>` : '';
 
   // status
@@ -527,7 +528,7 @@ function tradeMenu(id){
       ${t.note ? `<div class="small" style="margin-top:8px;white-space:pre-line">${esc(t.note)}</div>` : ''}</div>
     ${isOpen ? `
       <label class="f">${t.type==='LC'?'賣出價（每股）':'買回價（每股）'}<input class="inp num" id="cPx" inputmode="decimal" placeholder="0.80"></label>
-      <label class="f">結算日<input class="inp num" type="date" id="cDate" value="${today() > t.exp ? t.exp : today()}"></label>
+      <label class="f">結算日<input class="inp num" type="date" id="cDate" max="${today()}" value="${today() > t.exp ? t.exp : today()}"></label>
       <button class="btn block" data-act="closeTrade" data-id="${t.id}" data-how="closed">${t.type==='LC'?'賣出平倉':'買回平倉'}</button>
       <div class="grid2">
         <button class="btn ghost" data-act="closeTrade" data-id="${t.id}" data-how="expired">到期歸零</button>
@@ -539,6 +540,7 @@ function tradeMenu(id){
 function closeTrade(id, how){
   const t = db.trades.find(x => x.id === id); if (!t) return;
   const date = $('#cDate').value || today();
+  if (date > today()) { toast('結算日不能是未來的日期'); return; }
   if (how === 'closed') {
     const px = $('#cPx').value.trim();
     if (px === '' || isNaN(+px)) { toast('請填成交價'); return; }
@@ -620,7 +622,7 @@ async function exportData(){
   } else {
     return fallbackDownload(text, filename, stamp);
   }
-  db.settings.lastBackup = stamp; save();
+  db.settings.lastBackup = stamp; save(true);
   toast('已匯出'); render();
 }
 function fallbackDownload(text, filename, stamp){
@@ -630,7 +632,7 @@ function fallbackDownload(text, filename, stamp){
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
-  db.settings.lastBackup = stamp; save();
+  db.settings.lastBackup = stamp; save(true);
   toast('已下載，到「更多」選儲存到檔案'); render();
 }
 $('#importFile').addEventListener('change', e => {
