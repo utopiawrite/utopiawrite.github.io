@@ -404,7 +404,7 @@ function viewStats(){
     <div class="card stat"><div class="sub">股票價差</div><div class="v ${cls(stockSum)}">${money(stockSum,0)}</div><div class="small">接股後賣出</div></div>
   </div>
   <div class="card"><div class="between"><h2>Sell Put 擔保金</h2><div class="num" style="font-size:20px;font-weight:700">${money(collTotal,0)}</div></div>
-    <div class="small" style="margin-top:4px">${openSP.length} 口全數接貨需準備</div>
+    <div class="small" style="margin-top:4px">${openSP.reduce((a, t) => a + t.qty, 0)} 口全數接貨需準備</div>
     <div class="list" style="margin-top:6px">${collRows || '<div class="empty">目前沒有進行中的 Sell Put</div>'}</div>
   </div>
   <div class="grid2">
